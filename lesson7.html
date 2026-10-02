@@ -1,0 +1,2961 @@
+<!DOCTYPE html>
+<!--
+  © 2026 Naruemon Rintha. All rights reserved.
+  Original educational work created by Naruemon Rintha (Kroo Apple).
+  Unauthorized reproduction, modification, or redistribution is prohibited.
+
+  ---------------------------------------------------------------------------
+  LESSON 7 — ONLINE REVIEW PAGE
+  Standalone single-file review page. Drop it in a folder together with:
+
+    IMAGES
+    somchai.png, achara.png, david.png, mali.png,
+    video_call.png, lesson_7_01.jpg
+
+    AUDIO (simple players)
+    lesson_7_00.mp3, lesson_7_01.mp3, lesson_7_02.mp3, lesson_7_03.mp3,
+    lesson_7_04A.mp3, lesson_7_04B.mp3, lesson_7_05.mp3,
+    lesson_7_06.mp3, lesson_7_07.mp3, lesson_7_08.mp3,
+    lesson_7_09.mp3, lesson_7_10.mp3, lesson_7_11.mp3
+
+    AUDIO (waveform "listen and repeat" vocabulary tracks, Part 9)
+    lesson_7_vocab_1.mp3, lesson_7_vocab_2.mp3, lesson_7_vocab_3.mp3
+
+    AUDIO (homework listening exercises, Part 10)
+    homework_7_01.mp3 … homework_7_10.mp3
+
+  Missing images and audio fail quietly: the page hides the image and shows a
+  small "Audio not added yet" note on the player instead of breaking.
+  ---------------------------------------------------------------------------
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!-- No maximum-scale here (unlike the app shell): this is a reading page, so
+     pinch-zoom must stay available. -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Thai Beginner Course — Lesson 7 review: negative sentences, the future tense with jà, talking about emotions, and vocabulary.">
+<meta name="author" content="Naruemon Rintha (Kroo Apple)">
+<meta name="copyright" content="© 2026 Naruemon Rintha. All rights reserved.">
+<meta name="theme-color" content="#fffaf0" id="meta-theme-color">
+<meta name="robots" content="noindex, nofollow">
+<title>Lesson 7 · Review — Thai Beginner Course</title>
+<script>
+  /* Defined before the images so a fast/cached failure is still caught.
+     Removes the illustration and collapses its grid column, so a missing
+     image leaves no empty gutter. Part 2 shows two people in one figure, so
+     only the missing one is dropped — the column collapses when nothing is
+     left to show. */
+  function lessonImgFail(img) {
+    var fig = img.closest('figure');
+    var holder = img.parentElement;
+    img.remove();
+    if (holder && holder !== fig && !holder.querySelector('img')) holder.remove();
+    if (fig && !fig.querySelector('img')) {
+      var parent = fig.parentElement;
+      fig.remove();
+      if (parent) parent.classList.add('no-figure');
+    }
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     THEMES — the same token names and values as the main app, so
+     students who later unlock the app land on a familiar surface.
+     Three themes only (Warm / Paper / Dark) rather than all six.
+     ============================================================ */
+  :root {
+    --bg: #f5ecd9;
+    --bg-2: #ebe0c4;
+    --panel: #fffaf0;
+    --ink: #2b2418;
+    --ink-soft: #6b5d44;
+    --accent: #b8893a;
+    --accent-2: #8a6420;
+    --rom: #7a5a1e;
+    --shadow: rgba(80, 60, 20, 0.18);
+    --shadow-strong: rgba(80, 60, 20, 0.3);
+    --button-bg: #fffaf0;
+    --button-hover: #f5ecd9;
+    --topbar-bg: #fffaf0;
+    --hairline: var(--shadow);
+
+    /* Text-size multiplier driven by the A—A slider. */
+    --tx: 1;
+    /* Shared layout width. One number governs every block on the page. */
+    --measure: 860px;
+    --radius: 10px;
+  }
+
+  [data-theme="paper"] {
+    --bg: #dee2e6;
+    --bg-2: #d6dbe1;
+    --panel: #fbfcfd;
+    --ink: #1f2225;
+    --ink-soft: #56606b;
+    --accent: #5a6b80;
+    --accent-2: #3f5266;
+    --rom: #3f6b78;
+    --shadow: rgba(30, 35, 45, 0.16);
+    --shadow-strong: rgba(30, 35, 45, 0.28);
+    --button-bg: #fbfcfd;
+    --button-hover: #e9edf1;
+    --topbar-bg: #eef1f4;
+  }
+
+  [data-theme="dark"] {
+    --bg: #1a1815;
+    --bg-2: #252220;
+    --panel: #2a2622;
+    --ink: #f0e6d2;
+    --ink-soft: #b8a888;
+    --accent: #d4b87a;
+    --accent-2: #b8893a;
+    --rom: #dcc48c;
+    --shadow: rgba(0, 0, 0, 0.5);
+    --shadow-strong: rgba(0, 0, 0, 0.7);
+    --button-bg: #2a2622;
+    --button-hover: #353028;
+    --topbar-bg: #2a2622;
+  }
+
+  /* ========= RESET & BASE ========= */
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: var(--bg);
+    background-image: radial-gradient(ellipse at top, var(--bg-2) 0%, var(--bg) 70%);
+    background-attachment: fixed;
+    color: var(--ink);
+    line-height: 1.55;
+    min-height: 100%;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    /* Text on a review page must stay copyable — the app disables selection
+       globally because taps there are game moves, but here they are not. */
+    -webkit-text-size-adjust: 100%;
+  }
+  [data-theme="paper"] body { background-image: none; }
+
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input { font-family: inherit; }
+  img { max-width: 100%; display: block; }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .wrap { width: 100%; max-width: var(--measure); margin: 0 auto; padding: 0 1rem; }
+
+  /* ========= SCROLL PROGRESS ========= */
+  #progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    width: 0%;
+    background: var(--accent);
+    z-index: 60;
+    transition: width 0.08s linear;
+  }
+
+  /* ========= TOPBAR ========= */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.55rem 1rem;
+    background: var(--topbar-bg);
+    border-bottom: 1px solid var(--hairline);
+    box-shadow: 0 1px 6px var(--shadow);
+  }
+  .topbar-brand {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+  .topbar-brand .tb-lesson {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .topbar-brand .tb-course {
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  @media (max-width: 520px) { .topbar-brand .tb-course { display: none; } }
+
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: var(--button-bg);
+    border: 1px solid var(--shadow);
+    transition: background-color 0.2s ease, transform 0.1s ease;
+  }
+  .icon-btn:hover { background: var(--button-hover); }
+  .icon-btn:active { transform: scale(0.95); }
+  .icon-btn svg { width: 20px; height: 20px; fill: var(--ink); }
+
+  /* ========= SETTINGS PANEL ========= */
+  .settings-wrap { position: relative; }
+  .settings-panel {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    width: 260px;
+    background: var(--panel);
+    border: 1px solid var(--shadow);
+    border-radius: 12px;
+    box-shadow: 0 8px 28px var(--shadow-strong);
+    padding: 0.9rem;
+    z-index: 55;
+  }
+  .settings-panel[hidden] { display: none; }
+  .settings-label {
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-soft);
+    margin-bottom: 0.45rem;
+  }
+  .theme-row { display: flex; gap: 0.4rem; margin-bottom: 1rem; }
+  .theme-opt {
+    flex: 1;
+    padding: 0.5rem 0.2rem 0.45rem;
+    border: 1px solid var(--shadow);
+    border-radius: 8px;
+    background: var(--button-bg);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .theme-opt .sw {
+    width: 100%;
+    height: 16px;
+    border-radius: 4px;
+    border: 1px solid var(--shadow);
+  }
+  .theme-opt[aria-pressed="true"] {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent) inset;
+  }
+  .sw-warm  { background: linear-gradient(135deg, #f5ecd9 50%, #b8893a 50%); }
+  .sw-paper { background: linear-gradient(135deg, #dee2e6 50%, #5a6b80 50%); }
+  .sw-dark  { background: linear-gradient(135deg, #1a1815 50%, #d4b87a 50%); }
+
+  /* Font-size slider — same pill component as the app's Vocabulary menu. */
+  .font-slider {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.85rem;
+    background: var(--bg);
+    border: 1px solid var(--shadow);
+    border-radius: 999px;
+  }
+  .font-slider .mfs-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    display: flex;
+    align-items: baseline;
+    gap: 0.3rem;
+  }
+  .font-slider .mfs-a-small { font-size: 0.8rem; }
+  .font-slider .mfs-a-big { font-size: 1.05rem; }
+  .font-slider input[type="range"] { flex: 1; min-width: 0; accent-color: var(--accent); cursor: pointer; }
+  .font-slider .mfs-value {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent);
+    min-width: 3.6ch;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ========= HERO ========= */
+  .hero { text-align: center; padding: 2.4rem 0 1.6rem; }
+  .hero h1 {
+    font-family: 'Prompt', sans-serif;
+    font-size: clamp(2rem, 7vw, 3rem);
+    font-weight: 700;
+    line-height: 1.05;
+    color: var(--accent);
+    letter-spacing: 0.01em;
+  }
+  .hero-rom {
+    font-size: clamp(0.95rem, 3vw, 1.1rem);
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent-2);
+    margin-top: 0.15rem;
+  }
+  .hero-rom .th { font-style: normal; }
+  .hero-lede {
+    max-width: 32rem;
+    margin: 0.9rem auto 0;
+    color: var(--ink-soft);
+    font-size: calc(1.02rem * var(--tx));
+  }
+  /* ========= CONTENTS ========= */
+  .contents {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.5rem;
+    margin: 0.5rem 0 2.6rem;
+  }
+  .toc-link {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.65rem 0.8rem;
+    background: var(--panel);
+    border: 1px solid var(--shadow);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: var(--ink);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: border-color 0.15s ease, transform 0.12s ease;
+  }
+  .toc-link:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .toc-num {
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    flex: 0 0 auto;
+  }
+
+  /* ========= PART SECTIONS ========= */
+  .part {
+    /* Clears the sticky topbar when a TOC link jumps here. */
+    scroll-margin-top: 72px;
+    margin-bottom: 3.2rem;
+  }
+  .part-head { margin-bottom: 1.3rem; }
+  .part-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .part-eyebrow::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--hairline);
+  }
+  .part-head h2 {
+    font-family: 'Prompt', sans-serif;
+    font-size: calc(clamp(1.3rem, 4vw, 1.7rem) * var(--tx));
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--ink);
+  }
+  .part-head p {
+    margin-top: 0.4rem;
+    color: var(--ink-soft);
+    font-size: calc(1rem * var(--tx));
+    max-width: 44rem;
+  }
+
+  /* ========= PHRASE CARDS ========= */
+  .phrase-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  .phrase-card {
+    background: var(--panel);
+    border: 1px solid var(--shadow);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.15rem 1.2rem;
+    box-shadow: 0 1px 3px var(--shadow);
+  }
+  .question-transform {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 1rem;
+    align-items: center;
+  }
+  .transform-example {
+    min-width: 0;
+    padding: 0.9rem 1rem;
+    border-radius: calc(var(--radius) - 4px);
+    background: color-mix(in srgb, var(--panel) 84%, var(--accent) 16%);
+    border: 1px solid var(--hairline);
+  }
+  .transform-arrow {
+    display: grid;
+    justify-items: center;
+    gap: 0.25rem;
+    color: var(--accent-2);
+    text-align: center;
+  }
+  .transform-arrow strong {
+    font-family: 'Prompt', sans-serif;
+    font-size: calc(0.78rem * var(--tx));
+    line-height: 1.35;
+  }
+  .transform-arrow-symbol {
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .speaker-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+    padding-bottom: 0.65rem;
+    margin-bottom: 0.85rem;
+    border-bottom: 1px solid var(--hairline);
+    width: 100%;
+  }
+  /* Avatar icons in the speaker tags. Sized in rem, not em, so they stay
+     put when the text-size slider moves — the tag label is fixed-size too. */
+  .speaker-tag .sym-img {
+    flex: none;
+    width: 1.45rem;
+    height: 1.45rem;
+    object-fit: contain;
+    margin-right: 0.1rem;
+  }
+
+  .line { margin-bottom: 0.95rem; }
+  .line:last-child { margin-bottom: 0; }
+  .question-transform .transform-example { margin-bottom: 0; }
+  .line .th {
+    font-size: calc(1.5rem * var(--tx));
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.7;
+    word-break: break-word;
+  }
+  .line .rom {
+    font-size: calc(1rem * var(--tx));
+    font-weight: 500;
+    color: var(--rom);
+    line-height: 1.4;
+    margin-top: 0.1rem;
+  }
+  .line .en {
+    font-size: calc(0.9rem * var(--tx));
+    color: var(--ink-soft);
+    margin-top: 0.15rem;
+  }
+
+  /* The name slot that the personalisation input fills in. */
+  .slot {
+    display: inline-block;
+    padding: 0 0.3em;
+    border-bottom: 2px dotted var(--accent);
+    color: var(--accent-2);
+    font-weight: 600;
+    min-width: 2.5em;
+    text-align: center;
+  }
+  .slot.filled { border-bottom-style: solid; }
+
+  /* The English line gets a plain slot — no underline, just a light
+     emphasis once a real country is in it, so the sentence still reads
+     as ordinary English. */
+  .slot-en.filled { color: var(--ink); font-weight: 600; }
+
+  /* ========= NAME PERSONALISATION ========= */
+  .name-box {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.7rem;
+    margin-top: 1.1rem;
+    padding: 0.85rem 1rem;
+    background: var(--panel);
+    border: 1px solid var(--shadow);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+  }
+  .name-box label {
+    font-size: calc(0.92rem * var(--tx));
+    font-weight: 500;
+    color: var(--ink-soft);
+  }
+  .name-box input {
+    flex: 1;
+    min-width: 140px;
+    padding: 0.5rem 0.75rem;
+    font-size: calc(0.98rem * var(--tx));
+    color: var(--ink);
+    background: var(--bg);
+    border: 1px solid var(--shadow);
+    border-radius: 8px;
+  }
+  .name-box input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--shadow); }
+
+  /* ========= AUDIO PLAYER ========= */
+  .player {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.85rem 1rem;
+    background: var(--panel);
+    border: 1px solid var(--shadow);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 3px var(--shadow);
+  }
+  .player.is-error { opacity: 0.72; }
+
+  /* A player nested inside a card would otherwise be panel-on-panel and
+     disappear into it, so it drops back to the page background. */
+  .phrase-card .player,
+  .tip .player {
+    background: var(--bg);
+    box-shadow: none;
+  }
+  /* The .line above already contributes its own margin-bottom, so this only
+     needs to top it up — 1.05rem here totalled ~2rem and read as a gap. */
+  .phrase-card .player { margin-top: 0.35rem; }
+
+  .play-btn {
+    flex: 0 0 auto;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.12s ease, filter 0.15s ease;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+  .play-btn svg { width: 22px; height: 22px; fill: var(--panel); }
+  .play-btn:hover { filter: brightness(1.07); }
+  .play-btn:active { transform: scale(0.94); }
+  .play-btn:disabled { cursor: not-allowed; filter: grayscale(1); opacity: 0.5; }
+
+  .player-body { flex: 1; min-width: 0; }
+  .player-title {
+    font-size: calc(0.92rem * var(--tx));
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+    line-height: 1.3;
+  }
+  .player-title .hint { font-weight: 400; color: var(--ink-soft); }
+
+  .player-bar {
+    position: relative;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--bg);
+    border: 1px solid var(--shadow);
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .player-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0%;
+    background: var(--accent);
+    border-radius: 999px;
+  }
+  .player-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+  }
+  .player-time {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .player-tools { display: flex; gap: 0.35rem; }
+  .mini-btn {
+    padding: 0.2rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    background: var(--bg);
+    border: 1px solid var(--shadow);
+    border-radius: 999px;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .mini-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .mini-btn[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
+  .player-error { font-size: 0.78rem; color: var(--ink-soft); font-style: italic; }
+
+  /* ========= WAVEFORM PLAYER (listen-and-repeat tracks) =========
+     Used only where a player carries data-waveform="true". It is a
+     block, not the flex row above, because the waveform needs the
+     full width under the title rather than a lane beside it. */
+  .wave-player {
+    display: block;
+    padding: 0.95rem 1.1rem 0.85rem;
+    background: var(--panel);
+    border: 1px solid var(--shadow);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 3px var(--shadow);
+  }
+  .wave-head { display: flex; align-items: center; gap: 0.9rem; }
+  .wave-head-text { flex: 1; min-width: 0; }
+  .wave-title {
+    font-size: calc(0.92rem * var(--tx));
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .wave-title .hint { font-weight: 400; color: var(--ink-soft); }
+  .wave-sub {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    margin-top: 0.2rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .wave-canvas-wrap { margin-top: 0.8rem; }
+  .wave-canvas {
+    display: block;
+    width: 100%;
+    height: 78px;
+    cursor: pointer;
+    border-radius: 8px;
+    touch-action: none;
+  }
+  .wave-canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .wave-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-top: 0.55rem;
+    flex-wrap: wrap;
+  }
+  .wave-time {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .wave-tools { display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap; }
+  .wave-tools .mini-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .wave-tools .mini-btn svg { width: 13px; height: 13px; fill: currentColor; display: block; }
+  .wave-step { padding: 0.28rem 0.5rem; }
+  .wave-gap { display: inline-flex; align-items: center; gap: 0.3rem; }
+  .wave-gap-label { font-size: 0.75rem; font-weight: 600; color: var(--ink-soft); }
+  .wave-select {
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.4rem;
+    color: var(--ink-soft);
+    background: var(--bg);
+    border: 1px solid var(--shadow);
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .wave-select:disabled { opacity: 0.45; cursor: not-allowed; }
+  .wave-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  @media (max-width: 520px) {
+    .wave-canvas { height: 64px; }
+    .wave-foot { justify-content: flex-start; }
+  }
+
+  /* ========= LISTENING BLOCK (image + player) ========= */
+  .listen-block {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 190px;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  .listen-block .listen-figure { justify-self: center; text-align: center; }
+  .listen-block .listen-figure img {
+    max-height: 260px;
+    width: auto;
+    margin: 0 auto;
+    filter: drop-shadow(0 6px 14px var(--shadow));
+  }
+  /* The homework illustration is two people side by side, so it needs a wider
+     column than the single-figure blocks above. */
+  .listen-block--wide { grid-template-columns: minmax(0, 1fr) 280px; }
+  .listen-block--wide .listen-figure img { max-height: 210px; }
+  .listen-block--conversation { grid-template-columns: minmax(0, 1fr) 300px; }
+  .listen-block .listen-figure img.conversation-art {
+    display: block;
+    width: min(100%, 361px);
+    height: auto;
+    aspect-ratio: 361 / 283;
+    object-fit: contain;
+    max-height: none;
+    filter: none;
+  }
+  /* Two portraits need more room than one: at 320px each gets ~156px, which is
+     comfortably wider than either image needs at 195px tall, so the height —
+     not the width — stays the limiting dimension for both. */
+  .listen-block--pair { grid-template-columns: minmax(0, 1fr) 320px; }
+  .listen-block.no-figure { grid-template-columns: 1fr; }
+
+  /* Two speakers side by side (Parts 2 and 3).
+     Each portrait is drawn into a box of the SAME fixed height using
+     object-fit: contain, so the two people appear the same size on screen
+     whatever the source files measure. Mali is 869×1250 (ratio 0.695) and
+     Achara 738×1167 (ratio 0.632): letting the shared 190px-ish column width
+     drive the size made Achara render noticeably taller, because the narrower
+     image had height left to spare. Driving height instead of width fixes it,
+     and it keeps working for David, whose dimensions we don't know here. */
+  .listen-figure--pair {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-end;
+    justify-content: center;
+    width: 100%;
+  }
+  .listen-figure--pair .fig-one { flex: 1 1 0%; min-width: 0; text-align: center; }
+  /* Matched at the same weight as the .listen-block .listen-figure img rules
+     above and placed after them, so these are the values that actually win. */
+  .listen-block .listen-figure--pair img {
+    height: calc(var(--pair-h, 195px) * var(--fig-scale, 1));
+    width: 100%;
+    max-height: none;
+    object-fit: contain;
+    object-position: bottom center;
+  }
+  /* Part 3 only: Mali is drawn at 90% of the shared height so David reads as
+     slightly taller beside her. Scaling the SHORTER figure down (rather than
+     David up) is what keeps this safe: no image ever grows, so the block's
+     height is unchanged and no image can become width-limited at any
+     breakpoint. Because the pair is bottom-aligned, their feet stay on the
+     same line. Part 2 is untouched, so Mali and Achara stay matched there. */
+  .listen-figure--pair .fig-one--short img { --fig-scale: 0.9; }
+  .fig-name {
+    display: block;
+    margin-top: 0.35rem;
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+
+  /* The two .jpg illustrations sit on their own white background, which floats
+     awkwardly on the warm and dark themes — a soft frame settles them down. */
+  .framed {
+    border: 1px solid var(--shadow);
+    border-radius: var(--radius);
+    background: #fff;
+    padding: 4px;
+    box-shadow: 0 2px 10px var(--shadow);
+  }
+  .linking-figure {
+    width: min(100%, 620px);
+    margin: 1rem auto 0;
+  }
+  .linking-figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 786 / 514;
+    object-fit: cover;
+  }
+  /* Outweighs the drop-shadow on .listen-block .listen-figure img — the frame
+     carries its own box-shadow, so the filter would only double it up. */
+  .listen-block .listen-figure img.framed { filter: none; }
+
+  .hw-brief {
+    font-size: calc(1rem * var(--tx));
+    color: var(--ink);
+    margin-bottom: 1rem;
+    max-width: 40rem;
+  }
+  .hw-brief strong { color: var(--accent-2); font-weight: 600; }
+  @media (max-width: 640px) {
+    .listen-block { grid-template-columns: 1fr; gap: 1.1rem; }
+    .listen-block .listen-figure { order: -1; }
+    .listen-block .listen-figure img { max-height: 190px; }
+    /* Declared after the cap above so the pair keeps its own equal height. */
+    .listen-block .listen-figure--pair img { max-height: none; }
+    .listen-figure--pair { --pair-h: 175px; }
+    .listen-block .listen-figure img.conversation-art {
+      width: min(100%, 320px);
+      max-height: none;
+    }
+  }
+
+  /* Landscape phones and small tablets: still a two-column grid, but a 320px
+     figure column would squeeze the player. Narrow the figures and shrink
+     their height to match, keeping height the limiting dimension. */
+  @media (min-width: 641px) and (max-width: 760px) {
+    .listen-block--pair { grid-template-columns: minmax(0, 1fr) 260px; }
+    .listen-figure--pair { --pair-h: 160px; }
+  }
+
+  /* ========= REVEAL (transcript / answer) ========= */
+  .reveal { margin-top: 0.9rem; }
+  .reveal-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.42rem 0.9rem;
+    font-size: calc(0.85rem * var(--tx));
+    font-weight: 600;
+    color: var(--accent-2);
+    background: var(--panel);
+    border: 1px dashed var(--accent);
+    border-radius: 999px;
+  }
+  .reveal-btn:hover { background: var(--button-hover); }
+  .reveal-btn .chev { transition: transform 0.2s ease; display: inline-block; }
+  .reveal-btn[aria-expanded="true"] .chev { transform: rotate(180deg); }
+  .reveal-body {
+    margin-top: 0.7rem;
+    padding: 0.85rem 1rem;
+    background: var(--panel);
+    border: 1px solid var(--shadow);
+    border-left: 3px solid var(--accent-2);
+    border-radius: var(--radius);
+  }
+  .reveal-body[hidden] { display: none; }
+  /* A short teaching note under a transcript, set apart from the dialogue. */
+  .reveal-note {
+    margin-top: 0.9rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--hairline);
+    font-size: calc(0.88rem * var(--tx));
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .reveal-note .th-inline { color: var(--ink); font-weight: 600; }
+  .reveal-note .rom-inline { color: var(--rom); font-weight: 500; }
+
+  /* ========= DIALOGUE TRANSCRIPT ========= */
+  .dialogue { display: grid; }
+  .turn {
+    display: grid;
+    grid-template-columns: 5rem minmax(0, 1fr);
+    gap: 0 1rem;
+  }
+  /* Separator between speakers rather than a border on every turn — the reveal
+     box already has its own accent edge, so extra rules would read as clutter. */
+  .turn + .turn {
+    margin-top: 0.9rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--hairline);
+  }
+  .turn-who {
+    font-family: 'Prompt', sans-serif;
+    font-size: calc(0.88rem * var(--tx));
+    font-weight: 600;
+    color: var(--accent);
+    padding-top: 0.3rem;
+  }
+  .turn-lines .line { margin-bottom: 0.8rem; }
+  .turn-lines .line:last-child { margin-bottom: 0; }
+  .turn-lines .th { font-size: calc(1.28rem * var(--tx)); }
+
+  @media (max-width: 560px) {
+    .turn { grid-template-columns: 1fr; gap: 0.15rem; }
+    .turn-who { padding-top: 0; }
+  }
+
+  /* ========= TIP BOX ========= */
+  .tip {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 150px;
+    gap: 1.2rem;
+    align-items: center;
+    margin-top: 1.3rem;
+    padding: 1.05rem 1.15rem;
+    background: var(--panel);
+    border: 1px solid var(--shadow);
+    border-left: 3px solid var(--accent-2);
+    border-radius: var(--radius);
+  }
+  .tip-label {
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+    margin-bottom: 0.4rem;
+  }
+  .tip p { font-size: calc(0.96rem * var(--tx)); color: var(--ink); }
+  .tip .th-inline { font-weight: 600; }
+  /* The casual form itself — spaced away from the sentence that introduces it
+     and from the player that follows. */
+  .tip-line { margin: 0.8rem 0 0.9rem; }
+  .tip-note {
+    margin-top: 0.9rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--hairline);
+    font-size: calc(0.88rem * var(--tx));
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .tip-note .th-inline { color: var(--ink); }
+  .tip .rom-inline { color: var(--rom); font-weight: 500; }
+  .tip.no-figure { grid-template-columns: 1fr; }
+  .tip-figure img { max-height: 170px; width: auto; margin: 0 auto; filter: drop-shadow(0 6px 14px var(--shadow)); }
+  @media (max-width: 640px) {
+    .tip { grid-template-columns: 1fr; }
+    .tip-figure { order: -1; }
+    .tip-figure img { max-height: 140px; }
+  }
+
+  /* ========= VOCABULARY ========= */
+  .vocab-head {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.2fr;
+    gap: 0.5rem;
+    padding: 0 0.9rem 0.45rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--hairline);
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .vocab-list { display: grid; grid-template-columns: 1fr; gap: 0.4rem; }
+  .vocab-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.2fr;
+    gap: 0.5rem;
+    padding: 0.7rem 0.9rem;
+    background: var(--panel);
+    border: 1px solid var(--shadow);
+    border-radius: 8px;
+    align-items: center;
+    transition: border-color 0.15s ease;
+  }
+  .vocab-item:hover { border-color: var(--accent); }
+  .vocab-item .v-th  { font-weight: 600; color: var(--ink); font-size: calc(1.15rem * var(--tx)); line-height: 1.7; }
+  .vocab-item .v-rom { font-weight: 500; color: var(--rom); font-size: calc(0.95rem * var(--tx)); }
+  .vocab-item .v-en  { font-weight: 500; color: var(--ink); font-size: calc(0.95rem * var(--tx)); }
+
+  /* Phones: the three columns become a stacked card — Thai leads, romanization
+     under it, English as the muted gloss. Mirrors the app's ≤480px vocab row. */
+  @media (max-width: 560px) {
+    .vocab-head { display: none; }
+    .vocab-item {
+      grid-template-columns: 1fr;
+      gap: 0.1rem;
+      padding: 0.75rem 0.9rem;
+    }
+    .vocab-item .v-en { color: var(--ink-soft); font-size: calc(0.88rem * var(--tx)); order: 3; }
+    .vocab-item .v-rom { order: 2; }
+    .vocab-item .v-th { order: 1; font-size: calc(1.25rem * var(--tx)); }
+  }
+
+  /* ========= PREVIOUS LESSON LINK ========= */
+  .prev-lesson {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    max-width: 30rem;
+    margin: 0 auto 2.4rem;
+    padding: 0.85rem 1.1rem;
+    background: var(--panel);
+    border: 1px solid var(--shadow);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: var(--ink);
+    box-shadow: 0 1px 3px var(--shadow);
+    transition: border-color 0.15s ease, transform 0.12s ease;
+  }
+  .prev-lesson:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .prev-lesson .pl-arrow {
+    flex: 0 0 auto;
+    font-size: 1.1rem;
+    color: var(--accent);
+  }
+  .prev-lesson .pl-text { min-width: 0; }
+  /* The three labels are spans, so they need to be told to stack. */
+  .prev-lesson .pl-kicker,
+  .prev-lesson .pl-title,
+  .prev-lesson .pl-sub { display: block; }
+  .prev-lesson .pl-kicker {
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .prev-lesson .pl-title { font-size: calc(0.95rem * var(--tx)); font-weight: 600; line-height: 1.3; }
+  .prev-lesson .pl-sub { font-size: calc(0.85rem * var(--tx)); color: var(--ink-soft); line-height: 1.35; }
+
+  /* ========= FOOTER ========= */
+  .foot {
+    text-align: center;
+    padding: 2.2rem 0 3rem;
+    border-top: 1px solid var(--hairline);
+    margin-top: 1rem;
+  }
+  .foot-line {
+    font-family: 'Prompt', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 0.2rem;
+  }
+  .foot-rom { font-style: italic; font-size: 0.9rem; color: var(--accent-2); margin-bottom: 1rem; }
+  .foot-rom .th { font-style: normal; }
+  .foot-credit { font-size: 0.8rem; color: var(--ink-soft); }
+  .foot-credit-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    margin-left: 0.12em;
+    padding: 0.2em 0.58em;
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    background: var(--button-bg);
+    box-shadow: 0 2px 7px var(--shadow);
+    color: var(--accent-2);
+    font-weight: 600;
+    line-height: 1.35;
+    text-decoration: none;
+    transition: transform 180ms ease, color 180ms ease, background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    transform: translateZ(0);
+  }
+  .foot-credit-link::after {
+    content: '\2197';
+    font-size: 0.9em;
+    line-height: 1;
+    opacity: 0.72;
+  }
+  .foot-credit-link:hover {
+    color: var(--accent);
+    background: var(--button-hover);
+    border-color: var(--accent);
+    box-shadow: 0 4px 12px var(--shadow-strong);
+    transform: translateY(-1px) scale(1.04);
+  }
+  .foot-credit-link:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+  }
+  .foot-credit-link:active { transform: translateY(0) scale(0.99); }
+
+  /* ========= BACK TO TOP ========= */
+  #to-top {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--panel);
+    border: 1px solid var(--shadow);
+    box-shadow: 0 3px 12px var(--shadow-strong);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(8px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 45;
+  }
+  #to-top.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+  #to-top svg { width: 20px; height: 20px; fill: var(--accent); }
+
+  .key-grid, .question-grid, .tone-grid, .answer-grid { display:grid; gap:.85rem; }
+  .key-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .question-grid, .answer-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .tone-grid { grid-template-columns:repeat(5,minmax(0,1fr)); }
+  .key-card, .question-card, .tone-card, .answer-card {
+    min-width:0; padding:1rem; border:1px solid var(--shadow); border-radius:var(--radius);
+    background:color-mix(in srgb,var(--panel) 92%,var(--accent) 8%);
+  }
+  .key-card .th { font-size:calc(1.55rem * var(--tx)); font-weight:700; }
+  .key-card .player { margin-top:.75rem; background:var(--bg); box-shadow:none; }
+  .template-slot {
+    display:inline-block;
+    font-style:italic;
+    text-decoration:underline;
+    text-decoration-thickness:.08em;
+    text-underline-offset:.16em;
+  }
+  .question-card .player { margin-top:.7rem; }
+  .question-number, .tone-name {
+    margin-bottom:.4rem; font-family:'Prompt',sans-serif; color:var(--accent-2);
+    font-size:calc(.78rem * var(--tx)); font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+  }
+  .tone-card, .answer-card { text-align:center; }
+  .tone-card .rom { font-size:calc(1.2rem * var(--tx)); font-weight:700; }
+  .tone-card .en, .answer-card .en { color:var(--ink-soft); font-size:calc(.88rem * var(--tx)); }
+  .answer-card .th { font-size:calc(1.3rem * var(--tx)); font-weight:700; }
+  .answer-card .rom { color:var(--rom); font-weight:600; }
+  .answer-grid.two { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .answer-grid.five { grid-template-columns:repeat(5,minmax(0,1fr)); }
+  .stack-lines .line + .line { margin-top:.9rem; padding-top:.9rem; border-top:1px solid var(--hairline); }
+  .homework-age-grid {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:1rem;
+  }
+  .homework-age-card {
+    min-width:0;
+    padding:1rem;
+    border:1px solid var(--shadow);
+    border-radius:var(--radius);
+    background:var(--panel);
+  }
+  .homework-age-card .question-number { text-align:center; }
+  .homework-age-card img {
+    display:block;
+    width:100%;
+    height:180px;
+    object-fit:contain;
+    margin:0 auto .85rem;
+  }
+  .homework-age-card .player { margin-top:0; background:var(--bg); box-shadow:none; }
+  .homework-age-card .reveal-body { text-align:center; }
+  .homework-listen-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .homework-listen-card {
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid var(--shadow);
+    border-radius: var(--radius);
+    background: var(--panel);
+    box-shadow: 0 1px 3px var(--shadow);
+  }
+  .homework-listen-card .player { margin-top: 0; background: var(--bg); box-shadow: none; }
+  .homework-listen-card .reveal-body { text-align: center; }
+  @media(max-width:760px){
+    .question-grid{grid-template-columns:1fr}.tone-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .answer-grid.five{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .homework-age-grid{grid-template-columns:1fr}
+    .homework-age-card img{height:auto;max-height:220px}
+    .homework-listen-grid{grid-template-columns:1fr}
+  }
+  @media(max-width:520px){
+    .key-grid,.answer-grid,.answer-grid.two,.answer-grid.five{grid-template-columns:1fr}
+    .question-transform{grid-template-columns:1fr;gap:.75rem}
+    .transform-arrow-symbol{transform:rotate(90deg)}
+  }
+</style>
+</head>
+<body>
+
+<div id="progress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="topbar-brand">
+    <span class="tb-lesson">Lesson 7 · Review</span>
+    <span class="tb-course">Thai Beginner Course</span>
+  </div>
+
+  <div class="settings-wrap">
+    <button id="btn-settings" class="icon-btn" aria-label="Display settings" aria-expanded="false" title="Display settings">
+      <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.48.48 0 00-.59.22L2.74 8.87a.49.49 0 00.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 00-.12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/></svg>
+    </button>
+
+    <div class="settings-panel" id="settings-panel" hidden>
+      <div class="settings-label">Theme</div>
+      <div class="theme-row" role="group" aria-label="Theme">
+        <button class="theme-opt" data-theme-set="warm"  aria-pressed="true"><span class="sw sw-warm"></span>Warm</button>
+        <button class="theme-opt" data-theme-set="paper" aria-pressed="false"><span class="sw sw-paper"></span>Paper</button>
+        <button class="theme-opt" data-theme-set="dark"  aria-pressed="false"><span class="sw sw-dark"></span>Dark</button>
+      </div>
+
+      <div class="settings-label">Text size</div>
+      <div class="font-slider">
+        <span class="mfs-label"><span class="mfs-a-small">A</span><span class="mfs-a-big">A</span></span>
+        <input type="range" id="text-slider" min="90" max="140" step="5" value="100" aria-label="Text size">
+        <span class="mfs-value" id="text-value">100%</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap"></div>
+</main>
+
+<script>
+document.querySelector('.tb-lesson').textContent = 'Lesson 7 · Review';
+document.querySelector('main').innerHTML = `
+<div class="wrap">
+  <section class="hero">
+    <h1>Lesson 7</h1>
+    <p class="hero-rom"><span class="th">บทเรียนที่ 7</span> - bòt rian têe jèt</p>
+    <p class="hero-lede">In <strong>Lesson 7</strong>, you learned how to make sentences negative, link ideas with <span class="th">แต่</span> dtàe (but), talk about the future with <span class="th">จะ</span> jà, and describe how you feel.<br>This is a <strong>focused review</strong>: see each pattern, listen before you read, then finish with the full vocabulary.<br>Tip: Use the <strong>settings</strong> button in the top-right corner to change the theme or text size.</p>
+  </section>
+
+  <nav class="contents" aria-label="Lesson contents">
+    <a class="toc-link" href="#part-1"><span class="toc-num">01</span> Making sentences negative</a>
+    <a class="toc-link" href="#part-2"><span class="toc-num">02</span> Negatives in practice</a>
+    <a class="toc-link" href="#part-3"><span class="toc-num">03</span> See and hear</a>
+    <a class="toc-link" href="#part-4"><span class="toc-num">04</span> Linking with แต่ dtàe</a>
+    <a class="toc-link" href="#part-5"><span class="toc-num">05</span> Likes and dislikes</a>
+    <a class="toc-link" href="#part-6"><span class="toc-num">06</span> Surprise and strong feelings</a>
+    <a class="toc-link" href="#part-7"><span class="toc-num">07</span> The future with จะ jà</a>
+    <a class="toc-link" href="#part-8"><span class="toc-num">08</span> Talking about emotions</a>
+    <a class="toc-link" href="#part-9"><span class="toc-num">09</span> Vocabulary review</a>
+    <a class="toc-link" href="#part-10"><span class="toc-num">10</span> Homework</a>
+  </nav>
+
+  <!-- ===================== PART 1 ===================== -->
+  <section class="part" id="part-1">
+    <div class="part-head"><div class="part-eyebrow">Part 01</div><h2>Making sentences negative with ไม่ <span class="rom-inline">mâi</span></h2><p>To say you <em>don't</em> do something, put <span class="th-inline">ไม่</span> <span class="rom-inline">mâi</span> (no / not) directly before the verb. Nothing else changes.</p></div>
+    <div class="answer-grid">
+      <div class="answer-card"><div class="th">กิน</div><div class="rom">gin</div><div class="en">to eat</div></div>
+      <div class="answer-card"><div class="th">ไม่กิน</div><div class="rom">mâi gin</div><div class="en">don't eat</div></div>
+      <div class="answer-card"><div class="th">ดื่ม</div><div class="rom">dèum</div><div class="en">to drink</div></div>
+      <div class="answer-card"><div class="th">ไม่ดื่ม</div><div class="rom">mâi dèum</div><div class="en">don't drink</div></div>
+      <div class="answer-card"><div class="th">ไป</div><div class="rom">bpai</div><div class="en">to go</div></div>
+      <div class="answer-card"><div class="th">ไม่ไป</div><div class="rom">mâi bpai</div><div class="en">don't go</div></div>
+    </div>
+    <div class="player" data-src="lesson_7_00.mp3" data-title="Listen and repeat - making verbs negative" style="margin-top:1rem"></div>
+    <div class="phrase-card question-transform" style="margin-top:1.4rem">
+      <div class="transform-example line"><div class="th">ผมชอบคุณ</div><div class="rom">pŏm chôp kun</div><div class="en">I like you.</div></div>
+      <div class="transform-arrow" aria-label="Add ไม่ mâi to make it negative"><span class="transform-arrow-symbol" aria-hidden="true">→</span><strong>Add ไม่ <span class="rom-inline">mâi</span></strong></div>
+      <div class="transform-example line"><div class="th">ผมไม่ชอบคุณ</div><div class="rom">pŏm mâi chôp kun</div><div class="en">I don't like you.</div></div>
+    </div>
+    <div class="phrase-card" style="margin-top:1rem">
+      <div class="speaker-tag">More examples</div>
+      <div class="line"><div class="th">ผมไม่ชอบอ่าน</div><div class="rom">pŏm mâi chôp àan</div><div class="en">I don't like to read.</div></div>
+      <div class="line" style="margin-top:1rem"><div class="th">ฉันไม่ชอบฟังเพลง</div><div class="rom">chăn mâi chôp fang pleng</div><div class="en">I don't like to listen to music.</div></div>
+      <div class="line" style="margin-top:1rem"><div class="th">เขาไม่ชอบเรียน</div><div class="rom">kăo mâi chôp rian</div><div class="en">He / she doesn't like to study.</div></div>
+      <div class="line" style="margin-top:1rem"><div class="th">พวกเขาไม่ชอบกินอาหารไทย</div><div class="rom">pûak kăo mâi chôp gin aa-hăan Thai</div><div class="en">They don't like to eat Thai food.</div></div>
+    </div>
+  </section>
+
+  <!-- ===================== PART 2 ===================== -->
+  <section class="part" id="part-2">
+    <div class="part-head"><div class="part-eyebrow">Part 02</div><h2>Negatives in practice</h2><p>Try to build each sentence yourself before you reveal the answer. The example answers use a male speaker's <span class="th-inline">ผม</span> <span class="rom-inline">pŏm</span> and <span class="th-inline">ครับ</span> <span class="rom-inline">kráp</span>; women use <span class="th-inline">ฉัน</span> <span class="rom-inline">chăn</span> and <span class="th-inline">ค่ะ</span> <span class="rom-inline">kâ</span>.</p></div>
+    <div class="homework-listen-grid">
+      <div class="homework-listen-card"><div class="question-number">Say it in Thai</div><p class="hw-brief" style="margin-bottom:0.6rem">I don't go to the restaurant.</p><div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-p2-a">Show the answer <span class="chev">▾</span></button><div class="reveal-body" id="l7-p2-a" hidden><div class="line"><div class="th">ผมไม่ไปร้านอาหารครับ</div><div class="rom">pŏm mâi bpai ráan aa-hăan kráp</div><div class="en">I don't go to the restaurant.</div></div></div></div></div>
+      <div class="homework-listen-card"><div class="question-number">Say it in Thai</div><p class="hw-brief" style="margin-bottom:0.6rem">I don't eat fruit.</p><div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-p2-b">Show the answer <span class="chev">▾</span></button><div class="reveal-body" id="l7-p2-b" hidden><div class="line"><div class="th">ผมไม่กินผลไม้</div><div class="rom">pŏm mâi gin pŏn-lá-mái</div><div class="en">I don't eat fruit.</div></div></div></div></div>
+      <div class="homework-listen-card"><div class="question-number">Say it in Thai</div><p class="hw-brief" style="margin-bottom:0.6rem">I don't like to cook.</p><div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-p2-c">Show the answer <span class="chev">▾</span></button><div class="reveal-body" id="l7-p2-c" hidden><div class="line"><div class="th">ผมไม่ชอบทำอาหาร</div><div class="rom">pŏm mâi chôp tam aa-hăan</div><div class="en">I don't like to cook.</div></div></div></div></div>
+      <div class="homework-listen-card"><div class="question-number">Say it in Thai</div><p class="hw-brief" style="margin-bottom:0.6rem">I don't like her.</p><div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-p2-d">Show the answer <span class="chev">▾</span></button><div class="reveal-body" id="l7-p2-d" hidden><div class="line"><div class="th">ผมไม่ชอบเขา</div><div class="rom">pŏm mâi chôp kăo</div><div class="en">I don't like her.</div></div></div></div></div>
+      <div class="homework-listen-card"><div class="question-number">Say it in Thai</div><p class="hw-brief" style="margin-bottom:0.6rem">She doesn't like me.</p><div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-p2-e">Show the answer <span class="chev">▾</span></button><div class="reveal-body" id="l7-p2-e" hidden><div class="line"><div class="th">เขาไม่ชอบผม</div><div class="rom">kăo mâi chôp pŏm</div><div class="en">She doesn't like me.</div></div></div></div></div>
+    </div>
+    <div class="listen-block listen-block--pair" style="margin-top:1.8rem">
+      <div>
+        <p class="hw-brief"><strong>Listen first:</strong> David and Mali ask each other about exercising and music. Try to follow before opening the transcript.</p>
+        <div class="player" data-src="lesson_7_01.mp3" data-title="David and Mali - likes and dislikes"></div>
+        <div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-dialogue-01">Show the transcript <span class="chev">▾</span></button><div class="reveal-body" id="l7-dialogue-01" hidden><div class="dialogue">
+          <div class="turn"><div class="turn-who">Mali</div><div class="turn-lines"><div class="line"><div class="th">คุณชอบออกกำลังกายไหมคะ</div><div class="rom">kun chôp òk gam-lang gaai măi ká</div><div class="en">Do you like exercising?</div></div></div></div>
+          <div class="turn"><div class="turn-who">David</div><div class="turn-lines"><div class="line"><div class="th">ไม่ชอบครับ</div><div class="rom">mâi chôp kráp</div><div class="en">I don't like it.</div></div></div></div>
+          <div class="turn"><div class="turn-who">Mali</div><div class="turn-lines"><div class="line"><div class="th">แล้วชอบฟังเพลงไหม</div><div class="rom">láew chôp fang pleng măi</div><div class="en">And do you like listening to music?</div></div></div></div>
+          <div class="turn"><div class="turn-who">David</div><div class="turn-lines"><div class="line"><div class="th">ชอบครับ</div><div class="rom">chôp kráp</div><div class="en">I like it.</div></div></div></div>
+        </div></div></div>
+      </div>
+      <figure class="listen-figure listen-figure--pair"><div class="fig-one"><img src="mali.png" alt="Mali" loading="lazy" onerror="lessonImgFail(this)"><span class="fig-name">Mali</span></div><div class="fig-one"><img src="david.png" alt="David" loading="lazy" onerror="lessonImgFail(this)"><span class="fig-name">David</span></div></figure>
+    </div>
+  </section>
+
+  <!-- ===================== PART 3 ===================== -->
+  <section class="part" id="part-3">
+    <div class="part-head"><div class="part-eyebrow">Part 03</div><h2>See and hear</h2><p>Two useful verbs, and the same negative rule at work. Add <span class="th-inline">ไม่</span> <span class="rom-inline">mâi</span> before the verb, or <span class="th-inline">ไหม</span> <span class="rom-inline">măi</span> at the end to ask.</p></div>
+    <div class="answer-grid two">
+      <div class="answer-card"><div class="th">เห็น</div><div class="rom">hĕn</div><div class="en">to see</div></div>
+      <div class="answer-card"><div class="th">ได้ยิน</div><div class="rom">dâai yin</div><div class="en">to hear</div></div>
+    </div>
+    <div class="phrase-card" style="margin-top:1rem">
+      <div class="line"><div class="th">ผมเห็นคุณ</div><div class="rom">pŏm hĕn kun</div><div class="en">I see you.</div></div>
+      <div class="line" style="margin-top:1rem"><div class="th">ผมไม่เห็นคุณ</div><div class="rom">pŏm mâi hĕn kun</div><div class="en">I don't see you.</div></div>
+      <div class="line" style="margin-top:1rem"><div class="th">ผมได้ยินคุณ</div><div class="rom">pŏm dâai yin kun</div><div class="en">I hear you.</div></div>
+      <div class="line" style="margin-top:1rem"><div class="th">ผมไม่ได้ยินคุณ</div><div class="rom">pŏm mâi dâai yin kun</div><div class="en">I don't hear you.</div></div>
+    </div>
+    <div class="listen-block" style="margin-top:1.4rem">
+      <div>
+        <p class="hw-brief"><strong>Picture this:</strong> you're in an online lesson with your Thai teacher, and suddenly the connection acts up. Here's how to handle it. These examples add a polite particle at the end.</p>
+        <div class="player" data-src="lesson_7_02.mp3" data-title="Listen and repeat - see and hear, politely"></div>
+        <div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-examples-03">Show the examples <span class="chev">▾</span></button><div class="reveal-body" id="l7-examples-03" hidden><div class="dialogue">
+          <div class="turn"><div class="turn-who">A</div><div class="turn-lines"><div class="line"><div class="th">ได้ยินไหมครับ</div><div class="rom">dâai yin măi kráp</div><div class="en">Can you hear me?</div></div></div></div>
+          <div class="turn"><div class="turn-who">B</div><div class="turn-lines"><div class="line"><div class="th">ได้ยินค่ะ แล้วคุณล่ะคะ</div><div class="rom">dâai yin kâ · láew kun lâ ká</div><div class="en">I can hear you. And you?</div></div></div></div>
+          <div class="turn"><div class="turn-who">A</div><div class="turn-lines"><div class="line"><div class="th">ได้ยิน แต่ไม่เห็นครับ</div><div class="rom">dâai yin · dtàe mâi hĕn kráp</div><div class="en">I can hear you, but I can't see you.</div></div></div></div>
+          <div class="turn"><div class="turn-who">B</div><div class="turn-lines"><div class="line"><div class="th">ไม่เห็นเหรอ</div><div class="rom">mâi hĕn rŏr</div><div class="en">Oh, you can't see me? (surprised)</div></div></div></div>
+        </div></div></div>
+      </div>
+      <figure class="listen-figure"><img src="video_call.png" alt="A laptop on a video call" loading="lazy" onerror="lessonImgFail(this)"></figure>
+    </div>
+    <div class="tip no-figure"><div><div class="tip-label">Drop the pronoun</div><p>In everyday Thai the pronouns usually disappear once the context is clear. People simply say <span class="th-inline">เห็นไหม</span> <span class="rom-inline">hĕn măi</span> ("See?"), <span class="th-inline">ได้ยินไหม</span> <span class="rom-inline">dâai yin măi</span> ("Hear?"), <span class="th-inline">ไม่เห็น</span> <span class="rom-inline">mâi hĕn</span> ("Don't see"), or <span class="th-inline">ไม่ได้ยิน</span> <span class="rom-inline">mâi dâai yin</span> ("Don't hear").</p><p class="tip-line">You can still sound polite by adding <span class="th-inline">ครับ</span> <span class="rom-inline">kráp</span> or <span class="th-inline">ค่ะ</span> <span class="rom-inline">kâ</span> at the end.</p></div></div>
+  </section>
+
+  <!-- ===================== PART 4 ===================== -->
+  <section class="part" id="part-4">
+    <div class="part-head"><div class="part-eyebrow">Part 04</div><h2>Linking with แต่ <span class="rom-inline">dtàe</span></h2><p>Last lesson you met <span class="th-inline">และ</span> <span class="rom-inline">láe</span> (and). Now meet its cousin <span class="th-inline">แต่</span> <span class="rom-inline">dtàe</span> (but) - used just like "but" in English.</p></div>
+    <div class="phrase-card">
+      <div class="line"><div class="th">ฉันชอบหมาแต่ไม่ชอบแมว</div><div class="rom">chăn chôp măa dtàe mâi chôp maew</div><div class="en">I like dogs, <strong>but</strong> I don't like cats.</div></div>
+    </div>
+    <div class="part-head" style="margin-top:1.8rem"><h3>Essential nouns</h3><p>Four foods you'll use constantly.</p></div>
+    <div class="answer-grid">
+      <div class="answer-card"><div class="th">ปลา</div><div class="rom">bplaa</div><div class="en">fish</div></div>
+      <div class="answer-card"><div class="th">เนื้อ</div><div class="rom">néua</div><div class="en">beef</div></div>
+      <div class="answer-card"><div class="th">หมู</div><div class="rom">mŏo</div><div class="en">pork</div></div>
+      <div class="answer-card"><div class="th">ผัก</div><div class="rom">pàk</div><div class="en">vegetable</div></div>
+    </div>
+    <p class="hw-brief" style="margin-top:1rem"><span class="th-inline">เนื้อ</span> <span class="rom-inline">néua</span> is short for <span class="th-inline">เนื้อวัว</span> <span class="rom-inline">néua wuua</span>; the <span class="th-inline">วัว</span> <span class="rom-inline">wuua</span> can be left off.</p>
+    <div class="phrase-card" style="margin-top:1.4rem">
+      <div class="speaker-tag">Putting it together</div>
+      <div class="line"><div class="th">ผมชอบกินเนื้อ แต่ไม่ชอบกินไก่</div><div class="rom">pŏm chôp gin néua · dtàe mâi chôp gin gài</div><div class="en">I like eating beef, <strong>but</strong> I don't like eating chicken.</div></div>
+      <div class="line" style="margin-top:1rem"><div class="th">ฉันชอบกินอาหารไทย แต่ไม่ชอบกินอาหารอเมริกัน</div><div class="rom">chăn chôp gin aa-hăan Thai · dtàe mâi chôp gin aa-hăan à-may-rí-gan</div><div class="en">I like eating Thai food, <strong>but</strong> I don't like eating American food.</div></div>
+	  <div class="line" style="margin-top:1rem"><div class="th">ผมชอบกินหมูและเนื้อ แต่ไม่ชอบกินไก่และปลา</div><div class="rom">pŏm chôp gin mŏo láe néua · dtàe mâi chôp gin gài láe bplaa</div><div class="en">I like eating pork and beef, <strong>but</strong> I don’t like eating chicken and fish.</div></div>
+      <div class="player" data-src="lesson_7_03.mp3" data-title="Listen and repeat - and / but with foods" style="margin-top:1rem"></div>
+    </div>
+  </section>
+
+  <!-- ===================== PART 5 ===================== -->
+  <section class="part" id="part-5">
+    <div class="part-head"><div class="part-eyebrow">Part 05</div><h2>Likes and dislikes</h2><p>Listen to two short conversations, then try the longer challenge. New word here: <span class="th-inline">ผัก</span> <span class="rom-inline">pàk</span> (vegetable).</p></div>
+    <div class="listen-block listen-block--pair">
+      <div>
+        <p class="hw-brief"><strong>Listen first:</strong> Mali and David talk about fish and beef.</p>
+        <div class="player" data-src="lesson_7_04A.mp3" data-title="Mali and David - fish and beef"></div>
+        <div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-dialogue-04a">Show the transcript <span class="chev">▾</span></button><div class="reveal-body" id="l7-dialogue-04a" hidden><div class="dialogue">
+          <div class="turn"><div class="turn-who">Mali</div><div class="turn-lines"><div class="line"><div class="th">ชอบกินปลาไหม</div><div class="rom">chôp gin bplaa măi</div><div class="en">Do you like eating fish?</div></div></div></div>
+          <div class="turn"><div class="turn-who">David</div><div class="turn-lines"><div class="line"><div class="th">ชอบนิดหน่อยครับ</div><div class="rom">chôp nít nòi kráp</div><div class="en">I like it a little.</div></div></div></div>
+          <div class="turn"><div class="turn-who">David</div><div class="turn-lines"><div class="line"><div class="th">ชอบกินเนื้อใช่ไหม</div><div class="rom">chôp gin néua châi măi</div><div class="en">You like eating beef, right?</div></div></div></div>
+          <div class="turn"><div class="turn-who">Mali</div><div class="turn-lines"><div class="line"><div class="th">ไม่ใช่ค่ะ</div><div class="rom">mâi châi kâ</div><div class="en">No, I don't.</div></div></div></div>
+        </div></div></div>
+      </div>
+      <figure class="listen-figure listen-figure--pair"><div class="fig-one"><img src="mali.png" alt="Mali" loading="lazy" onerror="lessonImgFail(this)"><span class="fig-name">Mali</span></div><div class="fig-one"><img src="david.png" alt="David" loading="lazy" onerror="lessonImgFail(this)"><span class="fig-name">David</span></div></figure>
+    </div>
+    <div class="listen-block listen-block--pair" style="margin-top:1.8rem">
+      <div>
+        <p class="hw-brief"><strong>Listen first:</strong> Somchai asks Achara what she likes to eat.</p>
+        <div class="player" data-src="lesson_7_04B.mp3" data-title="Somchai and Achara - what do you like to eat"></div>
+        <div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-dialogue-04b">Show the transcript <span class="chev">▾</span></button><div class="reveal-body" id="l7-dialogue-04b" hidden><div class="dialogue">
+          <div class="turn"><div class="turn-who">Somchai</div><div class="turn-lines"><div class="line"><div class="th">ชอบกินอะไรครับ</div><div class="rom">chôp gin à-rai kráp</div><div class="en">What do you like to eat?</div></div></div></div>
+          <div class="turn"><div class="turn-who">Achara</div><div class="turn-lines"><div class="line"><div class="th">ชอบกินไก่และผัก แต่ไม่ชอบกินหมู</div><div class="rom">chôp gin gài láe pàk · dtàe mâi chôp gin mŏo</div><div class="en">I like chicken and vegetables, but I don't like pork.</div></div></div></div>
+        </div><div class="reveal-note"><span class="th-inline">หมู</span> <span class="rom-inline">mŏo</span> has a rising tone, so it can almost sound like a question.</div></div></div>
+      </div>
+      <figure class="listen-figure listen-figure--pair"><div class="fig-one"><img src="somchai.png" alt="Somchai" loading="lazy" onerror="lessonImgFail(this)"><span class="fig-name">Somchai</span></div><div class="fig-one"><img src="achara.png" alt="Achara" loading="lazy" onerror="lessonImgFail(this)"><span class="fig-name">Achara</span></div></figure>
+    </div>
+    <div class="listen-block no-figure" style="margin-top:1.4rem">
+      <div>
+        <p class="hw-brief"><strong>Listening challenge:</strong> this one is longer, and there's no English - get used to relying on Thai. Listen a few times, then reveal the transliteration.</p>
+        <div class="player" data-src="lesson_7_05.mp3" data-title="Listening challenge - age and likes"></div>
+        <div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-challenge-05">Show the transliteration <span class="chev">▾</span></button><div class="reveal-body" id="l7-challenge-05" hidden><div class="dialogue">
+          <div class="turn"><div class="turn-who">1</div><div class="turn-lines"><div class="line"><div class="th">ฉันอายุยี่สิบหกปี</div><div class="rom">chăn aa-yú yêe-sìp hòk bpee</div></div></div></div>
+          <div class="turn"><div class="turn-who">2</div><div class="turn-lines"><div class="line"><div class="th">ฉันชอบออกกำลังกายและดูหนัง</div><div class="rom">chăn chôp òk gam-lang gaai · láe doo năng</div></div></div></div>
+          <div class="turn"><div class="turn-who">3</div><div class="turn-lines"><div class="line"><div class="th">ฉันชอบกินไก่ ปลา และผัก แต่ไม่ชอบกินหมู</div><div class="rom">chăn chôp gin gài · bplaa · láe pàk · dtàe mâi chôp gin mŏo</div></div></div></div>
+        </div></div></div>
+      </div>
+    </div>
+    <div class="phrase-card" style="margin-top:1.4rem">
+      <div class="speaker-tag">Quick Q &amp; A</div>
+      <p class="hw-brief">Based on the challenge above - question (<span class="th-inline">คำถาม</span> <span class="rom-inline">kam tăam</span>) and answer (<span class="th-inline">คำตอบ</span> <span class="rom-inline">kam dtòp</span>):</p>
+      <div class="stack-lines">
+        <div class="line"><div class="th">เขาอายุเท่าไหร่ → เขาอายุ 26 ปี</div><div class="rom">kăo aa-yú tâo rài → kăo aa-yú yêe sìb hòk bpee</div><div class="en">How old is she? → She's 26.</div></div>
+        <div class="line"><div class="th">เขาชอบทำอะไร → เขาชอบออกกำลังกายและดูหนัง</div><div class="rom">kăo chôp tam à-rai → kăo chôp òk gam-lang gaai láe doo năng</div><div class="en">What does she like doing? → Exercising and watching movies.</div></div>
+        <div class="line"><div class="th">เขาชอบกินหมูไหม → ไม่ เขาไม่ชอบกินหมู</div><div class="rom">kăo chôp gin mŏo măi → mâi · kăo mâi chôp gin mŏo</div><div class="en">Does she like pork? → No, she doesn't.</div></div>
+        <div class="line"><div class="th">เขาชอบกินอะไร → เขาชอบกินไก่ ปลาและผัก</div><div class="rom">kăo chôp gin à-rai → kăo chôp gin gài, bplaa láe pàk</div><div class="en">What does she like to eat? → Chicken, fish, and vegetables.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PART 6 ===================== -->
+  <section class="part" id="part-6">
+    <div class="part-head"><div class="part-eyebrow">Part 06</div><h2>Surprise and strong feelings</h2><p>A few verbs for talking and telling, plus the phrases Thai people reach for when something surprises them.</p></div>
+    <div class="answer-grid">
+      <div class="answer-card"><div class="th">คุย</div><div class="rom">kui</div><div class="en">to talk; chat</div></div>
+      <div class="answer-card"><div class="th">บอก</div><div class="rom">bòk</div><div class="en">to tell</div></div>
+      <div class="answer-card"><div class="th">พูด</div><div class="rom">pôot</div><div class="en">to speak</div></div>
+      <div class="answer-card"><div class="th">รัก</div><div class="rom">rák</div><div class="en">to love</div></div>
+    </div>
+    <div class="tip no-figure" style="margin-top:1.3rem"><div><div class="tip-label">"Really?!" - จริงเหรอ</div><p>When something surprises you, use <span class="th-inline">จริงเหรอ</span> <span class="rom-inline">jing rŏr</span> - "Really?!". <span class="th-inline">จริง</span> <span class="rom-inline">jing</span> means "really / truly", and <span class="th-inline">เหรอ</span> <span class="rom-inline">rŏr</span> is a question particle that adds a sense of surprise. It's like <span class="th-inline">ไหม</span> <span class="rom-inline">măi</span>, but with a lift of astonishment.</p><p class="tip-line">To insist something is true, double the word: <span class="th-inline">จริง ๆ</span> <span class="rom-inline">jing jing</span> ("Really / truly"). To deny it, <span class="th-inline">ไม่จริง</span> <span class="rom-inline">mâi jing</span> ("Not true").</p><p class="tip-note">In casual speech the "R" often softens toward "L", so <span class="th-inline">เหรอ</span> <span class="rom-inline">rŏr</span> may sound like <span class="rom-inline">lŏr</span> - same word, just a relaxed pronunciation.</p></div></div>
+    <div class="phrase-card" style="margin-top:1.4rem">
+      <div class="speaker-tag">A little exchange</div>
+      <div class="line"><div class="th">ผมรักคุณ</div><div class="rom">pŏm rák kun</div><div class="en">I love you.</div></div>
+      <div class="line" style="margin-top:1rem"><div class="th">จริงเหรอ</div><div class="rom">jing rŏr</div><div class="en">Really? (surprised)</div></div>
+      <div class="line" style="margin-top:1rem"><div class="th">จริง ๆ</div><div class="rom">jing jing</div><div class="en">Really. (truly)</div></div>
+    </div>
+    <div class="listen-block listen-block--pair" style="margin-top:1.4rem">
+      <div>
+        <p class="hw-brief"><strong>Listen first:</strong> David and Mali - how old are you?</p>
+        <div class="player" data-src="lesson_7_06.mp3" data-title="David and Mali - I'm not telling"></div>
+        <div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-dialogue-06">Show the transcript <span class="chev">▾</span></button><div class="reveal-body" id="l7-dialogue-06" hidden><div class="dialogue">
+          <div class="turn"><div class="turn-who">David</div><div class="turn-lines"><div class="line"><div class="th">อายุเท่าไหร่ครับ</div><div class="rom">aa-yú tâo rài kráp</div><div class="en">How old are you?</div></div></div></div>
+          <div class="turn"><div class="turn-who">Mali</div><div class="turn-lines"><div class="line"><div class="th">ไม่บอกค่ะ</div><div class="rom">mâi bòk kâ</div><div class="en">I'm not telling you.</div></div></div></div>
+        </div></div></div>
+      </div>
+      <figure class="listen-figure listen-figure--pair"><div class="fig-one"><img src="david.png" alt="David" loading="lazy" onerror="lessonImgFail(this)"><span class="fig-name">David</span></div><div class="fig-one"><img src="mali.png" alt="Mali" loading="lazy" onerror="lessonImgFail(this)"><span class="fig-name">Mali</span></div></figure>
+    </div>
+    <div class="listen-block listen-block--pair" style="margin-top:1.8rem">
+      <div>
+        <p class="hw-brief"><strong>Listen first:</strong> Mali is sure David likes movies. Is she right? You'll hear <span class="th-inline">ดูหนัง</span> <span class="rom-inline">doo năng</span> (to watch movies).</p>
+        <div class="player" data-src="lesson_7_07.mp3" data-title="Mali and David - really?!"></div>
+        <div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-dialogue-07">Show the transcript <span class="chev">▾</span></button><div class="reveal-body" id="l7-dialogue-07" hidden><div class="dialogue">
+          <div class="turn"><div class="turn-who">Mali</div><div class="turn-lines"><div class="line"><div class="th">ชอบดูหนังใช่ไหมคะ</div><div class="rom">chôp doo năng châi măi ká</div><div class="en">You like watching movies, right?</div></div></div></div>
+          <div class="turn"><div class="turn-who">David</div><div class="turn-lines"><div class="line"><div class="th">ไม่ใช่ครับ</div><div class="rom">mâi châi kráp</div><div class="en">No, I don't.</div></div></div></div>
+          <div class="turn"><div class="turn-who">Mali</div><div class="turn-lines"><div class="line"><div class="th">จริงเหรอ</div><div class="rom">jing rŏr</div><div class="en">Really?!</div></div></div></div>
+          <div class="turn"><div class="turn-who">David</div><div class="turn-lines"><div class="line"><div class="th">จริง ๆ ไม่ชอบดูหนัง</div><div class="rom">jing jing · mâi chôp doo năng</div><div class="en">Really. I don't like watching movies.</div></div></div></div>
+        </div></div></div>
+        <p class="hw-brief" style="margin-top:1.4rem"><strong>Listen first:</strong> Achara asks Somchai his age - and doesn't believe the answer.</p>
+        <div class="player" data-src="lesson_7_08.mp3" data-title="Achara and Somchai - that's not true"></div>
+        <div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-dialogue-08">Show the transcript <span class="chev">▾</span></button><div class="reveal-body" id="l7-dialogue-08" hidden><div class="dialogue">
+          <div class="turn"><div class="turn-who">Achara</div><div class="turn-lines"><div class="line"><div class="th">อายุเท่าไรคะ</div><div class="rom">aa-yú tâo-rai ká</div><div class="en">How old are you?</div></div></div></div>
+          <div class="turn"><div class="turn-who">Somchai</div><div class="turn-lines"><div class="line"><div class="th">ผมอายุยี่สิบปีครับ</div><div class="rom">pŏm aa-yú yêe-sìp bpee kráp</div><div class="en">I'm twenty years old.</div></div></div></div>
+          <div class="turn"><div class="turn-who">Achara</div><div class="turn-lines"><div class="line"><div class="th">ไม่จริง</div><div class="rom">mâi jing</div><div class="en">That's not true.</div></div></div></div>
+        </div></div></div>
+      </div>
+      <figure class="listen-figure listen-figure--pair"><div class="fig-one"><img src="achara.png" alt="Achara" loading="lazy" onerror="lessonImgFail(this)"><span class="fig-name">Achara</span></div><div class="fig-one"><img src="somchai.png" alt="Somchai" loading="lazy" onerror="lessonImgFail(this)"><span class="fig-name">Somchai</span></div></figure>
+    </div>
+  </section>
+
+  <!-- ===================== PART 7 ===================== -->
+  <section class="part" id="part-7">
+    <div class="part-head"><div class="part-eyebrow">Part 07</div><h2>The future with จะ <span class="rom-inline">jà</span></h2><p>To talk about the future, put <span class="th-inline">จะ</span> <span class="rom-inline">jà</span> (will) before the verb. That's the whole rule.</p></div>
+    <div class="phrase-card question-transform">
+      <div class="transform-example line"><div class="th">ผมทำงาน</div><div class="rom">pŏm tam ngaan</div><div class="en">I work. / I'm working.</div></div>
+      <div class="transform-arrow" aria-label="Add จะ jà for the future"><span class="transform-arrow-symbol" aria-hidden="true">→</span><strong>Add จะ <span class="rom-inline">jà</span></strong></div>
+      <div class="transform-example line"><div class="th">ผมจะทำงาน</div><div class="rom">pŏm jà tam ngaan</div><div class="en">I will work.</div></div>
+    </div>
+    <div class="phrase-card" style="margin-top:1rem">
+      <div class="speaker-tag">Questions and negatives</div>
+      <div class="line"><div class="th">ผมจะเรียนภาษาไทย</div><div class="rom">pŏm jà rian paa-săa thai</div><div class="en">I will study Thai.</div></div>
+      <div class="line" style="margin-top:1rem"><div class="th">ผมจะไม่เรียนภาษาไทย</div><div class="rom">pŏm jà mâi rian paa-săa thai</div><div class="en">I will not study Thai.</div></div>
+      <div class="line" style="margin-top:1rem"><div class="th">คุณจะเรียนภาษาไทยไหม</div><div class="rom">kun jà rian paa-săa thai măi</div><div class="en">Will you study Thai?</div></div>
+      <div class="player" data-src="lesson_7_09.mp3" data-title="Listen and repeat - the future with jà" style="margin-top:1rem"></div>
+    </div>
+    <div class="tip no-figure"><div><div class="tip-label">Negative future</div><p>For "will not", the order is <span class="rom-inline">jà + mâi + verb</span>: <span class="th-inline">ผมจะไม่ทำอาหาร</span> <span class="rom-inline">pŏm jà mâi tam aa-hăan</span> - "I will not cook." Women use <span class="th-inline">ฉัน</span> <span class="rom-inline">chăn</span>.</p></div></div>
+    <div class="part-head" style="margin-top:1.8rem"><h3>Time words</h3><p>These can go at the <em>start</em> or the <em>end</em> of the sentence - both are correct.</p></div>
+    <div class="answer-grid">
+      <div class="answer-card"><div class="th">วันนี้</div><div class="rom">wan-née</div><div class="en">today</div></div>
+      <div class="answer-card"><div class="th">พรุ่งนี้</div><div class="rom">prûng-née</div><div class="en">tomorrow</div></div>
+      <div class="answer-card"><div class="th">คืนนี้</div><div class="rom">keun-née</div><div class="en">tonight</div></div>
+    </div>
+    <div class="phrase-card" style="margin-top:1rem">
+      <div class="line"><div class="th">คุณจะทำอะไรพรุ่งนี้</div><div class="rom">kun jà tam à-rai prûng-née</div><div class="en">What are you going to do tomorrow?</div></div>
+      <div class="line" style="margin-top:1rem"><div class="th">พรุ่งนี้คุณจะทำอะไร</div><div class="rom">prûng-née kun jà tam à-rai</div><div class="en">Tomorrow, what will you do? <strong>(same meaning)</strong></div></div>
+    </div>
+    <div class="part-head" style="margin-top:1.8rem"><h3>Your turn</h3><p>Build each sentence, then reveal the answer. Time words can sit at either end.</p></div>
+    <div class="homework-listen-grid">
+      <div class="homework-listen-card"><div class="question-number">Say it in Thai</div><p class="hw-brief" style="margin-bottom:0.6rem">I will exercise.</p><div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-p7-a">Show the answer <span class="chev">▾</span></button><div class="reveal-body" id="l7-p7-a" hidden><div class="line"><div class="th">ฉันจะออกกำลังกาย</div><div class="rom">chăn jà òk gam-lang gaai</div><div class="en">I will exercise. (female)</div></div></div></div></div>
+      <div class="homework-listen-card"><div class="question-number">Say it in Thai</div><p class="hw-brief" style="margin-bottom:0.6rem">Tonight I will exercise.</p><div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-p7-b">Show the answer <span class="chev">▾</span></button><div class="reveal-body" id="l7-p7-b" hidden><div class="line"><div class="th">ผมจะออกกำลังกายคืนนี้</div><div class="rom">pŏm jà òk gam-lang gaai keun-née</div><div class="en">Tonight I will exercise. (male)</div></div></div></div></div>
+      <div class="homework-listen-card"><div class="question-number">Say it in Thai</div><p class="hw-brief" style="margin-bottom:0.6rem">Today I will study Thai.</p><div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-p7-c">Show the answer <span class="chev">▾</span></button><div class="reveal-body" id="l7-p7-c" hidden><div class="line"><div class="th">วันนี้ฉันจะเรียนภาษาไทย</div><div class="rom">wan-née chăn jà rian paa-săa thai</div><div class="en">Today I will study Thai.</div></div></div></div></div>
+      <div class="homework-listen-card"><div class="question-number">Say it in Thai</div><p class="hw-brief" style="margin-bottom:0.6rem">I'm not going to work tomorrow.</p><div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-p7-d">Show the answer <span class="chev">▾</span></button><div class="reveal-body" id="l7-p7-d" hidden><div class="line"><div class="th">ผมจะไม่ไปทำงานพรุ่งนี้</div><div class="rom">pŏm jà mâi bpai tam ngaan prûng-née</div><div class="en">I'm not going to work tomorrow.</div></div></div></div></div>
+    </div>
+    <div class="tip no-figure"><div><div class="tip-label">"I don't know yet" - ยังไม่รู้</div><p><span class="th-inline">ยัง</span> <span class="rom-inline">yang</span> means "yet" (or "still"). A very common reply: <span class="th-inline">ยังไม่รู้</span> <span class="rom-inline">yang mâi róo</span> - "I don't know yet."</p><p class="tip-line">As in Lesson 6, the most natural way to answer a <span class="th-inline">ไหม</span> <span class="rom-inline">măi</span> question is to repeat the main verb - and that's true in the future too: <span class="th-inline">พรุ่งนี้คุณจะไปทำงานไหม</span> <span class="rom-inline">prûng-née kun jà bpai tam ngaan măi</span> → <span class="th-inline">ไปครับ</span> <span class="rom-inline">bpai kráp</span> ("Yes, I am").</p></div></div>
+    <div class="listen-block listen-block--conversation" style="margin-top:1.4rem">
+      <div>
+        <p class="hw-brief"><strong>Listen first:</strong> Somchai and Achara make a plan for tonight. New word: <span class="th-inline">ได้</span> <span class="rom-inline">dâai</span> - "Sure / Okay" (agreeing to a suggestion).</p>
+        <div class="player" data-src="lesson_7_10.mp3" data-title="Somchai and Achara - a plan for tonight"></div>
+        <div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-dialogue-10">Show the transcript <span class="chev">▾</span></button><div class="reveal-body" id="l7-dialogue-10" hidden><div class="dialogue">
+          <div class="turn"><div class="turn-who">Somchai</div><div class="turn-lines"><div class="line"><div class="th">คืนนี้จะทำอะไรครับ</div><div class="rom">keun-née jà tam à-rai kráp</div><div class="en">What are you going to do tonight?</div></div></div></div>
+          <div class="turn"><div class="turn-who">Achara</div><div class="turn-lines"><div class="line"><div class="th">ยังไม่รู้ค่ะ</div><div class="rom">yang mâi róo kâ</div><div class="en">I don't know yet.</div></div></div></div>
+          <div class="turn"><div class="turn-who">Somchai</div><div class="turn-lines"><div class="line"><div class="th">ไปดูหนังกันไหม</div><div class="rom">bpai doo năng gan măi</div><div class="en">Shall we go watch a movie?</div></div></div></div>
+          <div class="turn"><div class="turn-who">Achara</div><div class="turn-lines"><div class="line"><div class="th">ได้ค่ะ</div><div class="rom">dâai kâ</div><div class="en">Sure.</div></div></div></div>
+        </div><div class="reveal-note"><span class="th-inline">ได้</span> <span class="rom-inline">dâai</span> has many uses; for now, keep it as an everyday "okay / sure / that works."</div></div></div>
+      </div>
+      <figure class="listen-figure"><img class="conversation-art" src="lesson_7_01.jpg" alt="A couple deciding what to do" loading="lazy" onerror="lessonImgFail(this)"></figure>
+    </div>
+  </section>
+
+  <!-- ===================== PART 8 ===================== -->
+  <section class="part" id="part-8">
+    <div class="part-head"><div class="part-eyebrow">Part 08</div><h2>Talking about emotions</h2><p>Now that you can make statements, questions, and negatives, you can describe how you feel. Start with the essentials.</p></div>
+    <div class="phrase-card">
+      <div class="speaker-tag">มีความสุข <span class="rom-inline">mee kwaam sùk</span> - to be happy</div>
+      <div class="line"><div class="th">ผม / ฉันมีความสุข</div><div class="rom">pŏm / chăn mee kwaam sùk</div><div class="en">I am happy.</div></div>
+      <div class="line" style="margin-top:1rem"><div class="th">ผม / ฉันไม่มีความสุข</div><div class="rom">pŏm / chăn mâi mee kwaam sùk</div><div class="en">I am not happy.</div></div>
+      <div class="line" style="margin-top:1rem"><div class="th">คุณมีความสุขไหม</div><div class="rom">kun mee kwaam sùk măi</div><div class="en">Are you happy?</div></div>
+    </div>
+    <div class="phrase-card" style="margin-top:1rem">
+      <div class="speaker-tag">Quick drill - เศร้า <span class="rom-inline">sâo</span> (to be sad)</div>
+      <p class="hw-brief">Same tools as always: <span class="th-inline">ไม่</span> <span class="rom-inline">mâi</span> before the word for negative, <span class="th-inline">ไหม</span> <span class="rom-inline">măi</span> at the end for a question.</p>
+      <div class="line"><div class="th">ผมเศร้า</div><div class="rom">pŏm sâo</div><div class="en">I'm sad.</div></div>
+      <div class="line" style="margin-top:1rem"><div class="th">ผมไม่เศร้า</div><div class="rom">pŏm mâi sâo</div><div class="en">I'm not sad.</div></div>
+      <div class="line" style="margin-top:1rem"><div class="th">คุณเศร้าไหม</div><div class="rom">kun sâo măi</div><div class="en">Are you sad?</div></div>
+    </div>
+    <div class="part-head" style="margin-top:1.8rem"><h3>More emotions</h3><p></p></div>
+    <div class="answer-grid">
+      <div class="answer-card"><div class="th">เหนื่อย</div><div class="rom">nèuay</div><div class="en">to be tired</div></div>
+      <div class="answer-card"><div class="th">ตื่นเต้น</div><div class="rom">dtèun dtên</div><div class="en">to be excited</div></div>
+      <div class="answer-card"><div class="th">กังวล</div><div class="rom">gang-won</div><div class="en">to be worried</div></div>
+      <div class="answer-card"><div class="th">กลัว</div><div class="rom">glua</div><div class="en">to be scared</div></div>
+      <div class="answer-card"><div class="th">โกรธ</div><div class="rom">gròht</div><div class="en">to be angry</div></div>
+      <div class="answer-card"><div class="th">ดีใจ</div><div class="rom">dee jai</div><div class="en">to be glad</div></div>
+    </div>
+    <div class="tip no-figure"><div><div class="tip-label">"Me too / me neither" - เหมือนกัน</div><p><span class="th-inline">เหมือนกัน</span> <span class="rom-inline">mĕuan gan</span> literally means "same", so it works for both agreement and shared dislikes. After <span class="th-inline">ฉันชอบออกกำลังกาย</span> <span class="rom-inline">chăn chôp òk gam-lang gaai</span> it means "Me too"; after <span class="th-inline">ฉันไม่ชอบออกกำลังกาย</span> <span class="rom-inline">chăn mâi chôp òk gam-lang gaai</span> it means "Me neither."</p></div></div>
+  </section>
+
+  <!-- ===================== PART 9 ===================== -->
+  <section class="part" id="part-9">
+    <div class="part-head"><div class="part-eyebrow">Part 09</div><h2>Vocabulary review</h2><p>All the new words and phrases from Parts 1 and 2. Listen and repeat each list aloud - use the waveform controls to replay a single word or slow the recording down.</p></div>
+
+    <div class="part-head" style="margin-top:0.4rem"><h3>Verbs and core words</h3></div>
+    <div class="player" data-src="lesson_7_vocab_1.mp3" data-waveform="true" data-lead-in="1" data-words="14" data-title="Listen carefully and repeat after me" data-hint="- verbs and core words" style="margin-bottom:1.2rem"></div>
+    <div class="vocab-head" aria-hidden="true"><span>Thai</span><span>Romanization</span><span>English</span></div><div class="vocab-list" id="vocab-list-1"></div>
+
+    <div class="part-head" style="margin-top:1.8rem"><h3>Everyday phrases</h3><p>Common phrases for everyday situations - pronouns are usually dropped when the context is clear.</p></div>
+    <div class="player" data-src="lesson_7_vocab_2.mp3" data-waveform="true" data-lead-in="1" data-words="12" data-title="Listen carefully and repeat after me" data-hint="- everyday phrases" style="margin-bottom:1.2rem"></div>
+    <div class="vocab-head" aria-hidden="true"><span>Thai</span><span>Romanization</span><span>English</span></div><div class="vocab-list" id="vocab-list-2"></div>
+
+    <div class="part-head" style="margin-top:1.8rem"><h3>Emotions, time &amp; the future</h3></div>
+    <div class="player" data-src="lesson_7_vocab_3.mp3" data-waveform="true" data-lead-in="1" data-words="12" data-title="Listen carefully and repeat after me" data-hint="- emotions, time and future" style="margin-bottom:1.2rem"></div>
+    <div class="vocab-head" aria-hidden="true"><span>Thai</span><span>Romanization</span><span>English</span></div><div class="vocab-list" id="vocab-list-3"></div>
+  </section>
+
+  <!-- ===================== PART 10 ===================== -->
+  <section class="part" id="part-10">
+    <div class="part-head"><div class="part-eyebrow">Part 10</div><h2>Homework</h2><p>Listen to each recording and try to understand the question. Reveal the answer only after you have made your best guess.</p></div>
+    <div class="homework-listen-grid">
+      <div class="homework-listen-card">
+        <div class="question-number">Sentence 01</div>
+        <div class="player" data-src="homework_7_01.mp3" data-title="Homework sentence 01 - listen and translate"></div>
+        <div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-hw-01">Show the answer <span class="chev">▾</span></button><div class="reveal-body" id="l7-hw-01" hidden><div class="line"><div class="th">พวกเขาไม่ชอบออกกำลังกาย</div><div class="rom">pûak kăo mâi chôp òk gam-lang gaai</div><div class="en">They don't like exercising.</div></div></div></div>
+      </div>
+      <div class="homework-listen-card">
+        <div class="question-number">Sentence 02</div>
+        <div class="player" data-src="homework_7_02.mp3" data-title="Homework sentence 02 - listen and translate"></div>
+        <div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-hw-02">Show the answer <span class="chev">▾</span></button><div class="reveal-body" id="l7-hw-02" hidden><div class="line"><div class="th">เราไม่ชอบกินปลา</div><div class="rom">rao mâi chôp gin bplaa</div><div class="en">We don't like eating fish.</div></div></div></div>
+      </div>
+      <div class="homework-listen-card">
+        <div class="question-number">Sentence 03</div>
+        <div class="player" data-src="homework_7_03.mp3" data-title="Homework sentence 03 - listen and translate"></div>
+        <div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-hw-03">Show the answer <span class="chev">▾</span></button><div class="reveal-body" id="l7-hw-03" hidden><div class="line"><div class="th">ผมไม่เข้าใจเขา</div><div class="rom">pŏm mâi kâo jai kăo</div><div class="en">I don't understand him / her.</div></div></div></div>
+      </div>
+      <div class="homework-listen-card">
+        <div class="question-number">Sentence 04</div>
+        <div class="player" data-src="homework_7_04.mp3" data-title="Homework sentence 04 - listen and translate"></div>
+        <div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-hw-04">Show the answer <span class="chev">▾</span></button><div class="reveal-body" id="l7-hw-04" hidden><div class="line"><div class="th">ผมชอบเขา แต่ไม่รักเขา</div><div class="rom">pŏm chôp kăo · dtàe mâi rák kăo</div><div class="en">I like him / her, but I don't love him / her.</div></div></div></div>
+      </div>
+      <div class="homework-listen-card">
+        <div class="question-number">Sentence 05</div>
+        <div class="player" data-src="homework_7_05.mp3" data-title="Homework sentence 05 - listen and translate"></div>
+        <div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-hw-05">Show the answer <span class="chev">▾</span></button><div class="reveal-body" id="l7-hw-05" hidden><div class="line"><div class="th">เราไม่เห็นเขา</div><div class="rom">rao mâi hĕn kăo</div><div class="en">We don't see him / her.</div></div></div></div>
+      </div>
+      <div class="homework-listen-card">
+        <div class="question-number">Sentence 06</div>
+        <div class="player" data-src="homework_7_06.mp3" data-title="Homework sentence 06 - listen and translate"></div>
+        <div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-hw-06">Show the answer <span class="chev">▾</span></button><div class="reveal-body" id="l7-hw-06" hidden><div class="line"><div class="th">เขาไม่ชอบดูหนังและฟังเพลง</div><div class="rom">kăo mâi chôp doo năng láe fang pleng</div><div class="en">He / she doesn't like watching movies and listening to music.</div></div></div></div>
+      </div>
+      <div class="homework-listen-card">
+        <div class="question-number">Sentence 07</div>
+        <div class="player" data-src="homework_7_07.mp3" data-title="Homework sentence 07 - listen and translate"></div>
+        <div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-hw-07">Show the answer <span class="chev">▾</span></button><div class="reveal-body" id="l7-hw-07" hidden><div class="line"><div class="th">คืนนี้ไปกินพิซซ่ากันไหม</div><div class="rom">keun née bpai gin pít-sâa gan măi</div><div class="en">Shall we go eat pizza tonight?</div></div></div></div>
+      </div>
+      <div class="homework-listen-card">
+        <div class="question-number">Sentence 08</div>
+        <div class="player" data-src="homework_7_08.mp3" data-title="Homework sentence 08 - listen and translate"></div>
+        <div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-hw-08">Show the answer <span class="chev">▾</span></button><div class="reveal-body" id="l7-hw-08" hidden><div class="line"><div class="th">พรุ่งนี้ฉันจะไม่เรียนภาษาไทย</div><div class="rom">prûng-née chăn jà mâi rian paa-săa thai</div><div class="en">Tomorrow I won't study Thai.</div></div></div></div>
+      </div>
+      <div class="homework-listen-card">
+        <div class="question-number">Sentence 09</div>
+        <div class="player" data-src="homework_7_09.mp3" data-title="Homework sentence 09 - listen and translate"></div>
+        <div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-hw-09">Show the answer <span class="chev">▾</span></button><div class="reveal-body" id="l7-hw-09" hidden><div class="line"><div class="th">พรุ่งนี้ผมจะไปออกกำลังกาย</div><div class="rom">prûng-née pŏm jà bpai òk gam-lang gaai</div><div class="en">Tomorrow I will go and exercise.</div></div></div></div>
+      </div>
+      <div class="homework-listen-card">
+        <div class="question-number">Sentence 10</div>
+        <div class="player" data-src="homework_7_10.mp3" data-title="Homework sentence 10 - listen and translate"></div>
+        <div class="reveal"><button type="button" class="reveal-btn" aria-expanded="false" aria-controls="l7-hw-10">Show the answer <span class="chev">▾</span></button><div class="reveal-body" id="l7-hw-10" hidden><div class="line"><div class="th">ฉันไม่โกรธค่ะ</div><div class="rom">chăn mâi gròht kâ</div><div class="en">I'm not angry.</div></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <a class="prev-lesson" href="https://thai-course.com/reviews/lesson_6_questions" target="_blank" rel="noopener"><span class="pl-arrow" aria-hidden="true">←</span><span class="pl-text"><span class="pl-kicker">Previous lesson</span><span class="pl-title">Lesson 6 · Questions</span><span class="pl-sub">Yes-or-no, what and where, confirmation, and invitations - four ways to ask and answer in Thai. Opens in a new tab.</span></span></a>
+
+  <footer class="foot"><div class="foot-line">เจอกันค่ะ</div><div class="foot-rom">jer gan kâ - See you!</div><div class="foot-credit">Thai Beginner Course · Created by <a class="foot-credit-link" href="https://www.italki.com/en/teacher/7941020" target="_blank" rel="noopener noreferrer" aria-label="Visit Naruemon (Kroo Apple) on italki">Naruemon (Kroo Apple)</a></div></footer>
+</div>`;
+</script>
+
+<button id="to-top" aria-label="Back to top" title="Back to top">
+  <svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
+</button>
+
+<script>
+(function () {
+  'use strict';
+
+
+  /* =========================================================
+     VOCABULARY — the three summary tables from the end of the
+     lesson (Part 1 + Part 2). Edit these arrays only; the lists
+     in Part 9 are built from them.
+     ========================================================= */
+  var VOCAB_1 = [
+    { th: 'เห็น',        rom: 'hĕn',       en: 'to see' },
+    { th: 'ได้ยิน',      rom: 'dâai yin',  en: 'to hear' },
+    { th: 'พูด',         rom: 'pôot',      en: 'to speak' },
+    { th: 'บอก',         rom: 'bòk',       en: 'to tell' },
+    { th: 'คุย',         rom: 'kui',       en: 'to talk; chat' },
+    { th: 'รู้',         rom: 'róo',       en: 'to know' },
+    { th: 'รู้จัก',      rom: 'róo jàk',   en: 'to know (a person or place)' },
+    { th: 'เข้าใจ',      rom: 'kâo jai',   en: 'to understand' },
+    { th: 'รัก',         rom: 'rák',       en: 'to love' },
+    { th: 'แต่',         rom: 'dtàe',      en: 'but' },
+    { th: 'เนื้อ',       rom: 'néua',      en: 'beef' },
+    { th: 'หมู',         rom: 'mŏo',       en: 'pork' },
+    { th: 'ปลา',         rom: 'bplaa',     en: 'fish' },
+    { th: 'ผัก',         rom: 'pàk',       en: 'vegetable' }
+  ];
+
+  var VOCAB_2 = [
+    { th: 'จริงเหรอ',    rom: 'jing rŏr',        en: 'Really? (surprised)' },
+    { th: 'จริง ๆ',      rom: 'jing jing',       en: 'Really. (truly)' },
+    { th: 'ไม่ชอบ',      rom: 'mâi chôp',        en: "I don't like." },
+    { th: 'เข้าใจ',      rom: 'kâo jai',         en: 'I understand.' },
+    { th: 'ไม่เข้าใจ',   rom: 'mâi kâo jai',     en: "I don't understand." },
+    { th: 'เข้าใจไหม',   rom: 'kâo jai măi',     en: 'Do you understand?' },
+    { th: 'รู้',         rom: 'róo',             en: 'I know.' },
+    { th: 'รู้จัก',      rom: 'róo jàk',         en: 'I know. (a person, place, etc.)' },
+    { th: 'ไม่รู้',      rom: 'mâi róo',         en: "I don't know." },
+    { th: 'ยังไม่รู้',   rom: 'yang mâi róo',    en: "I don't know yet." },
+    { th: 'รู้ไหม',      rom: 'róo măi',         en: 'Do you know?' },
+    { th: 'ได้',         rom: 'dâai',            en: 'Sure. / Okay. (agreeing)' }
+  ];
+
+  var VOCAB_3 = [
+    { th: 'มีความสุข',   rom: 'mee kwaam sùk',   en: 'to be happy' },
+    { th: 'เศร้า',       rom: 'sâo',             en: 'to be sad' },
+    { th: 'เหนื่อย',     rom: 'nèuay',           en: 'to be tired' },
+    { th: 'ตื่นเต้น',    rom: 'dtèun dtên',      en: 'to be excited' },
+    { th: 'กังวล',       rom: 'gang-won',        en: 'to be worried' },
+    { th: 'กลัว',        rom: 'glua',            en: 'to be scared' },
+    { th: 'โกรธ',        rom: 'gròht',           en: 'to be angry' },
+    { th: 'ดีใจ',        rom: 'dee jai',         en: 'to be glad' },
+    { th: 'วันนี้',      rom: 'wan-née',         en: 'today' },
+    { th: 'พรุ่งนี้',    rom: 'prûng-née',       en: 'tomorrow' },
+    { th: 'คืนนี้',      rom: 'keun-née',        en: 'tonight' },
+    { th: 'จะ',          rom: 'jà',              en: 'will (future tense marker)' }
+  ];
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+
+  function renderVocab(id, data) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = data.map(function (v) {
+      return '<div class="vocab-item">' +
+               '<span class="v-th">'  + esc(v.th)  + '</span>' +
+               '<span class="v-rom">' + esc(v.rom) + '</span>' +
+               '<span class="v-en">'  + esc(v.en)  + '</span>' +
+             '</div>';
+    }).join('');
+  }
+  renderVocab('vocab-list-1', VOCAB_1);
+  renderVocab('vocab-list-2', VOCAB_2);
+  renderVocab('vocab-list-3', VOCAB_3);
+
+
+  /* =========================================================
+     AUDIO PLAYERS
+     Each .player[data-src] becomes a full player. Only one clip
+     plays at a time. A missing file degrades to a disabled
+     button plus a short note rather than a silent dead control.
+
+     Playback is a plain HTMLAudioElement — no Web Audio graph, no
+     silence trimming, no rate changes except the explicit 0.75×
+     button — so a clip always plays back at its true length.
+
+     AUDIO_VERSION is appended to every request as ?v=… Browsers
+     cache mp3s aggressively, so bump this string whenever you
+     re-record or re-export a file and students will get the new
+     one instead of the copy already sitting in their cache.
+     ========================================================= */
+  var AUDIO_VERSION = '2';
+
+  var ICON_PLAY  = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+  var ICON_PAUSE = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+
+  var players = [];
+
+
+  function fmt(t) {
+    if (!isFinite(t) || t < 0) t = 0;
+    var m = Math.floor(t / 60), s = Math.floor(t % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function buildPlayer(el) {
+    var src   = el.getAttribute('data-src');
+    var title = el.getAttribute('data-title') || 'Audio';
+    var hint  = el.getAttribute('data-hint') || '';
+
+    el.innerHTML =
+      '<button type="button" class="play-btn" aria-label="Play: ' + esc(title) + '">' + ICON_PLAY + '</button>' +
+      '<div class="player-body">' +
+        '<div class="player-title">' + esc(title) +
+          (hint ? ' <span class="hint">' + esc(hint) + '</span>' : '') +
+        '</div>' +
+        '<div class="player-bar" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">' +
+          '<div class="player-fill"></div>' +
+        '</div>' +
+        '<div class="player-foot">' +
+          '<span class="player-time">0:00 / 0:00</span>' +
+          '<span class="player-tools">' +
+            '<button type="button" class="mini-btn js-slow" aria-pressed="false" title="Play at 75% speed">0.75×</button>' +
+            '<button type="button" class="mini-btn js-replay" title="Play from the start">↻ Replay</button>' +
+          '</span>' +
+        '</div>' +
+      '</div>';
+
+    var audio  = new Audio();
+    audio.preload = 'metadata';
+    /* Pinned explicitly so nothing can inherit or retain a changed rate:
+       only the 0.75× button below ever moves it. */
+    audio.defaultPlaybackRate = 1;
+    audio.playbackRate = 1;
+    if ('preservesPitch' in audio) audio.preservesPitch = true;
+    audio.src = src + (AUDIO_VERSION ? (src.indexOf('?') < 0 ? '?v=' : '&v=') + AUDIO_VERSION : '');
+
+    var btn    = el.querySelector('.play-btn');
+    var bar    = el.querySelector('.player-bar');
+    var fill   = el.querySelector('.player-fill');
+    var time   = el.querySelector('.player-time');
+    var slow   = el.querySelector('.js-slow');
+    var replay = el.querySelector('.js-replay');
+
+    var api = { audio: audio, pause: function () { audio.pause(); } };
+    players.push(api);
+
+    function paint() {
+      var d = audio.duration;
+      var pct = (isFinite(d) && d > 0) ? (audio.currentTime / d) * 100 : 0;
+      fill.style.width = pct + '%';
+      bar.setAttribute('aria-valuenow', Math.round(pct));
+      time.textContent = fmt(audio.currentTime) + ' / ' + fmt(isFinite(d) ? d : 0);
+    }
+
+    function stopOthers() {
+      players.forEach(function (p) { if (p !== api) p.pause(); });
+    }
+
+    btn.addEventListener('click', function () {
+      if (audio.paused) { stopOthers(); audio.play().catch(function () {}); }
+      else { audio.pause(); }
+    });
+
+    audio.addEventListener('play',  function () { btn.innerHTML = ICON_PAUSE; btn.setAttribute('aria-label', 'Pause'); });
+    audio.addEventListener('pause', function () { btn.innerHTML = ICON_PLAY;  btn.setAttribute('aria-label', 'Play: ' + title); });
+    audio.addEventListener('ended', function () { audio.currentTime = 0; paint(); });
+    audio.addEventListener('timeupdate', paint);
+    audio.addEventListener('loadedmetadata', paint);
+
+    audio.addEventListener('error', function () {
+      el.classList.add('is-error');
+      btn.disabled = true;
+      bar.style.display = 'none';
+      el.querySelector('.player-foot').innerHTML =
+        '<span class="player-error">Audio not added yet (' + esc(src) + ')</span>';
+    });
+
+    function seekTo(clientX) {
+      var r = bar.getBoundingClientRect();
+      var ratio = Math.min(1, Math.max(0, (clientX - r.left) / r.width));
+      if (isFinite(audio.duration)) { audio.currentTime = ratio * audio.duration; paint(); }
+    }
+    bar.addEventListener('click', function (e) { seekTo(e.clientX); });
+    bar.addEventListener('keydown', function (e) {
+      if (!isFinite(audio.duration)) return;
+      if (e.key === 'ArrowRight') { audio.currentTime = Math.min(audio.duration, audio.currentTime + 2); paint(); e.preventDefault(); }
+      if (e.key === 'ArrowLeft')  { audio.currentTime = Math.max(0, audio.currentTime - 2); paint(); e.preventDefault(); }
+    });
+
+    slow.addEventListener('click', function () {
+      var on = slow.getAttribute('aria-pressed') === 'true';
+      slow.setAttribute('aria-pressed', on ? 'false' : 'true');
+      audio.playbackRate = on ? 1 : 0.75;
+    });
+
+    replay.addEventListener('click', function () {
+      stopOthers();
+      audio.currentTime = 0;
+      audio.play().catch(function () {});
+    });
+
+    paint();
+  }
+
+  /* =========================================================
+     WAVEFORM PLAYER — listen-and-repeat tracks only.
+     Opt a player in with data-waveform="true".
+
+     WHY THIS IS DIFFERENT FROM THE PLAYER ABOVE
+
+     The listen-and-repeat tracks are long files made of short
+     spoken words separated by deliberate pauses, and that shape
+     asks for two things a plain progress bar cannot give.
+
+     Students need to move around by WORD rather than by second,
+     and they need to SEE where a pause starts and ends. The word
+     boundaries are found automatically by measuring loudness
+     across the file, so nothing has to be typed in by hand — a
+     re-recorded track just works, and so does a different lesson.
+
+     This player also decodes the whole file into memory with the
+     Web Audio API and plays it from an AudioBufferSourceNode
+     instead of streaming it through an <audio> element. Seeking
+     is therefore sample-exact rather than estimated from the
+     bitrate, and long quiet passages cannot be skipped by the
+     browser's media pipeline.
+
+     Everything degrades safely. If fetch or decoding fails for
+     any reason — opening this page straight from disk over
+     file:// will do it, because fetch is CORS-blocked there —
+     the element quietly falls back to the streaming player above
+     and the student still gets working audio.
+
+     SUPPORTED ATTRIBUTES
+
+       data-waveform="true"   turns this player on. Required.
+       data-lead-in="1"|"0"   optional. Forces the first phrase to
+                              be treated as a spoken instruction
+                              ("1") or as a real word ("0"). Left
+                              off, it is detected automatically.
+       data-words="14"        optional SANITY CHECK ONLY. It never
+                              steers the detection; a mismatch just
+                              logs a console warning. Leave it off
+                              unless you want the page to nag you
+                              when a re-recording changes shape.
+     ========================================================= */
+
+  var ICON_PREV = '<svg viewBox="0 0 24 24"><path d="M7 6h2.2v12H7zm3.4 6 8.6 6V6z"/></svg>';
+  var ICON_NEXT = '<svg viewBox="0 0 24 24"><path d="M14.8 6H17v12h-2.2zM5 18l8.6-6L5 6z"/></svg>';
+
+  var sharedCtx = null;
+  function audioCtx() {
+    if (sharedCtx === null) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      sharedCtx = AC ? new AC() : false;
+    }
+    return sharedCtx;
+  }
+
+  var waveRedraws = [];
+  var waveSeq = 0;
+
+  /* ==== SEGMENTATION (pure functions — no DOM, no audio context) ====
+
+     These three functions are the whole "understand the recording"
+     layer, and they are deliberately free of any browser object so
+     they can be tested against a decoded file outside the page.
+
+     THE IDEA
+
+     A listen-and-repeat track has exactly two kinds of silence in
+     it: the tiny breaks inside a phrase (breaths, the stop before
+     a hard consonant — measured at 0.02–0.26 s on lesson 4) and
+     the deliberate pauses the student repeats into (2.3–4.9 s on
+     the same file). Those two populations are separated by a huge
+     margin, so instead of guessing a fixed threshold — which is
+     what the first version did, and what needed hand-tuning per
+     file — we measure every silence in the recording and let the
+     recording itself tell us where the boundary lies.
+
+     That is why nothing has to be configured per lesson. Add two
+     more words, or point this at Lesson 3's shorter track, and the
+     split lands in the same empty stretch of the histogram.
+     ================================================================ */
+
+  /* Loudness is measured in 20 ms windows. Speech is anything above
+     a threshold read from the recording's own levels, so a quiet
+     mic, a loud mic and a re-export at a different gain all behave
+     the same. */
+  function analyseSegments(d, sr) {
+    var WIN = 0.02;
+    var win = Math.max(1, Math.round(sr * WIN));
+    var count = Math.floor(d.length / win);
+    if (count < 8) return [];
+
+    var rms = new Float32Array(count), i, j;
+    for (i = 0; i < count; i++) {
+      var sum = 0, base = i * win;
+      for (j = 0; j < win; j++) { var v = d[base + j]; sum += v * v; }
+      rms[i] = Math.sqrt(sum / win);
+    }
+
+    var sorted = Array.prototype.slice.call(rms).sort(function (a, b) { return a - b; });
+    var floor = sorted[Math.floor(count * 0.10)] || 0;
+    var loud  = sorted[Math.floor(count * 0.95)] || 0;
+    if (loud <= floor) return [];
+    var thr = Math.max(floor * 5, loud * 0.07, 1e-5);
+
+    /* Raw runs first: every unbroken stretch above the threshold,
+       breaths included. Nothing is merged at this stage. */
+    var runs = [], start = -1;
+    for (i = 0; i < count; i++) {
+      if (rms[i] >= thr) { if (start < 0) start = i; }
+      else if (start >= 0) { runs.push([start, i]); start = -1; }
+    }
+    if (start >= 0) runs.push([start, count]);
+    if (!runs.length) return [];
+
+    var gaps = [];
+    for (i = 0; i < runs.length - 1; i++) gaps.push((runs[i + 1][0] - runs[i][1]) * WIN);
+    var split = splitPoint(gaps);
+
+    var merged = [], cur = runs[0];
+    for (i = 1; i < runs.length; i++) {
+      if ((runs[i][0] - cur[1]) * WIN < split) cur = [cur[0], runs[i][1]];
+      else { merged.push(cur); cur = runs[i]; }
+    }
+    merged.push(cur);
+
+    /* A "word" shorter than 120 ms is a click or a stray breath that
+       happened to clear the threshold, not something to navigate to. */
+    merged = merged.filter(function (p) { return (p[1] - p[0]) * WIN >= 0.12; });
+    if (!merged.length) return [];
+
+    /* Asymmetric padding: a little ahead of the onset so jumping to a
+       word never clips its first consonant, more after it so the tail
+       of a falling tone is not cut off. Padding is capped at half the
+       neighbouring silence, so two items can never overlap however
+       tightly they were recorded. */
+    var dur = d.length / sr;
+    var PAD_IN = 0.12, PAD_OUT = 0.20;
+    return merged.map(function (p, k) {
+      var s = p[0] * WIN, e = p[1] * WIN;
+      var prevEnd   = k > 0 ? merged[k - 1][1] * WIN : 0;
+      var nextStart = k < merged.length - 1 ? merged[k + 1][0] * WIN : dur;
+      return {
+        s: Math.max(0,   s - Math.min(PAD_IN,  (s - prevEnd)   / 2)),
+        e: Math.min(dur, e + Math.min(PAD_OUT, (nextStart - e) / 2))
+      };
+    });
+  }
+
+  /* Given every silence length in the file, return the length that
+     separates "pause between items" from "break inside an item".
+
+     Sorted, the gaps of a listen-and-repeat track look like
+        0.02 0.02 … 0.22 | 1.50 2.36 … 4.84
+     so the answer is the biggest RATIO step in that sorted list,
+     ignoring steps that land somewhere no real pause could be. The
+     margin on lesson 4 is about 7×, and it stays above 6× across a
+     14 dB swing in threshold, so this is not a close call. */
+  function splitPoint(gaps) {
+    if (!gaps.length) return Infinity;
+    var s = gaps.slice().sort(function (a, b) { return a - b; });
+    var best = 0, at = -1;
+    for (var i = 0; i < s.length - 1; i++) {
+      if (s[i + 1] < 0.5) continue;
+      var r = (s[i + 1] + 0.01) / (s[i] + 0.01);
+      if (r > best) { best = r; at = i; }
+    }
+    /* No clear step. Either every gap is a real pause (a track with
+       no breaths in it), or none of them is (one continuous phrase). */
+    if (at < 0 || best < 2.2) return s[0] >= 0.5 ? Math.max(0.3, s[0] * 0.8) : Infinity;
+    return (s[at] + s[at + 1]) / 2;
+  }
+
+  /* Is the first phrase a spoken instruction rather than word 1?
+     The signature is the pause that follows it: nobody repeats an
+     instruction, so it is followed by a short breath (1.5 s on
+     lesson 4) where every real word is followed by a full repeat
+     pause (2.4 s and up). Both tests must pass — clearly shorter
+     than the typical pause AND shorter than every other pause. */
+  function detectLeadIn(items) {
+    if (items.length < 4) return false;
+    var gaps = [], i;
+    for (i = 0; i < items.length - 1; i++) gaps.push(items[i + 1].s - items[i].e);
+    var rest = gaps.slice(1).sort(function (a, b) { return a - b; });
+    var med = rest[Math.floor(rest.length / 2)];
+    return gaps[0] < med * 0.6 && gaps[0] < rest[0] * 0.9;
+  }
+  /* ==== END SEGMENTATION ==== */
+
+  /* ==== SLOW PLAYBACK (pure function — no DOM, no audio context) ====
+
+     WHY THIS EXISTS
+
+     An <audio> element slows down without changing pitch: browsers
+     time-stretch it internally (preservesPitch, on by default). The
+     Web Audio path has no such thing. AudioBufferSourceNode's
+     playbackRate is plain resampling — it plays the same samples more
+     slowly, which drags the pitch down with it. At 0.75x that is a
+     drop of a musical fourth, roughly five semitones, and it turns
+     the speaker on these recordings into a man.
+
+     That is bad for any language and worse for a tonal one, so slow
+     playback is done properly instead: the audio is rebuilt at the
+     new length from short overlapping grains, each one positioned to
+     line up with the waveform already written. The period of the
+     voice is never altered, so the pitch, and every tone contour that
+     rides on it, comes through unchanged. Measured on lesson 1 the
+     speaker's pitch moves by well under a semitone, against nearly
+     five semitones for plain resampling.
+
+     Cost is one pass over the recording, a few hundred milliseconds,
+     done once and cached. The grain length and search window suit
+     speech from about 70 Hz upward, which covers any voice likely to
+     appear on these tracks. */
+  function timeStretch(x, rate) {
+    if (rate === 1) return x;
+
+    var N = 1024;                       /* grain, ~23 ms                     */
+    var HS = N >> 1;                    /* how far the output advances       */
+    var HA = Math.round(HS * rate);     /* how far the input advances        */
+    var SEARCH = 640;                   /* +/-14 ms: over a pitch period     */
+    var CORR = 512;                     /* samples compared when aligning    */
+    var D = 8;                          /* coarse pass runs decimated by 8   */
+
+    var outLen = Math.ceil(x.length / rate) + N;
+    var out = new Float32Array(outLen);
+    var norm = new Float32Array(outLen);
+    var win = new Float32Array(N), i, k;
+    for (i = 0; i < N; i++) win[i] = 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / (N - 1));
+
+    var dl = Math.ceil(x.length / D);
+    var xd = new Float32Array(dl);
+    for (i = 0; i < dl; i++) xd[i] = x[i * D];
+
+    var ana = 0, outPos = 0, tmpl = 0;
+
+    while (ana + N + SEARCH < x.length && outPos + N < outLen) {
+      var d = 0;
+      if (tmpl > 0) {
+        var lo = Math.max(0, ana - SEARCH);
+        var hi = Math.min(x.length - N, ana + SEARCH);
+        var num, den, c, p;
+
+        /* Coarse: where does the incoming grain best continue what was
+           just written? Searched on a decimated copy so the whole
+           window costs almost nothing. */
+        var bestC = -Infinity, bestPos = ana;
+        var td = (tmpl / D) | 0, cd = (CORR / D) | 0;
+        for (p = lo; p <= hi; p += D) {
+          var pd = (p / D) | 0;
+          num = 0; den = 0;
+          for (k = 0; k < cd; k++) {
+            var A = xd[pd + k] || 0, B = xd[td + k] || 0;
+            num += A * B; den += A * A;
+          }
+          c = num / Math.sqrt(den + 1e-9);
+          if (c > bestC) { bestC = c; bestPos = p; }
+        }
+
+        /* Fine: full rate, only the few samples either side. */
+        var bestF = -Infinity, bestFine = bestPos;
+        var from2 = Math.max(lo, bestPos - D), to2 = Math.min(hi, bestPos + D);
+        for (p = from2; p <= to2; p++) {
+          num = 0; den = 0;
+          for (k = 0; k < CORR; k++) {
+            var A2 = x[p + k] || 0, B2 = x[tmpl + k] || 0;
+            num += A2 * B2; den += A2 * A2;
+          }
+          c = num / Math.sqrt(den + 1e-9);
+          if (c > bestF) { bestF = c; bestFine = p; }
+        }
+        d = bestFine - ana;
+      }
+
+      var from = ana + d;
+      for (i = 0; i < N; i++) {
+        var v = x[from + i];
+        if (v === undefined) break;
+        out[outPos + i] += v * win[i];
+        norm[outPos + i] += win[i];
+      }
+      tmpl = from + HS;
+      ana += HA;
+      outPos += HS;
+    }
+
+    /* Dividing by the summed window keeps the level flat where grains
+       overlap, so nothing pumps or dips at the seams. */
+    var end = Math.min(outLen, outPos + N);
+    for (i = 0; i < end; i++) if (norm[i] > 1e-6) out[i] /= norm[i];
+    return out.subarray(0, Math.round(x.length / rate));
+  }
+  /* ==== END SLOW PLAYBACK ==== */
+
+  function buildWavePlayer(el) {
+    var ctx = audioCtx();
+    if (!ctx || !window.fetch || !window.Float32Array) { buildPlayer(el); return; }
+
+    var src   = el.getAttribute('data-src');
+    var title = el.getAttribute('data-title') || 'Audio';
+    var hint  = el.getAttribute('data-hint') || '';
+    var url   = src + (AUDIO_VERSION ? (src.indexOf('?') < 0 ? '?v=' : '&v=') + AUDIO_VERSION : '');
+    var gapId = 'wave-gap-' + (++waveSeq);
+
+    el.classList.remove('player');
+    el.classList.add('wave-player');
+    el.innerHTML =
+      '<div class="wave-head">' +
+        '<button type="button" class="play-btn" aria-label="Play: ' + esc(title) + '" disabled>' + ICON_PLAY + '</button>' +
+        '<div class="wave-head-text">' +
+          '<div class="wave-title">' + esc(title) +
+            (hint ? ' <span class="hint">' + esc(hint) + '</span>' : '') +
+          '</div>' +
+          '<div class="wave-sub js-sub">Loading audio…</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="wave-canvas-wrap">' +
+        '<canvas class="wave-canvas js-canvas" tabindex="0" role="slider" aria-label="Seek" ' +
+                'aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></canvas>' +
+      '</div>' +
+      '<div class="wave-foot">' +
+        '<span class="wave-time js-time">0:00 / 0:00</span>' +
+        '<span class="wave-tools">' +
+          '<button type="button" class="mini-btn wave-step js-prev" title="Previous word" aria-label="Previous word" disabled>' + ICON_PREV + '</button>' +
+          '<button type="button" class="mini-btn wave-step js-next" title="Next word" aria-label="Next word" disabled>' + ICON_NEXT + '</button>' +
+          '<button type="button" class="mini-btn js-loop" aria-pressed="false" title="Repeat the current word over and over" disabled>↺ Loop word</button>' +
+          '<button type="button" class="mini-btn js-slow" aria-pressed="false" title="Play at 75% speed" disabled>0.75×</button>' +
+          '<span class="wave-gap">' +
+            '<label class="wave-gap-label" for="' + gapId + '">Pause length</label>' +
+            '<select class="wave-select js-gap" id="' + gapId + '" ' +
+                    'title="How much silence to leave after each word for you to repeat it" disabled>' +
+              '<option value="0">as recorded</option>' +
+              '<option value="4">4s</option>' +
+              '<option value="5">5s</option>' +
+              '<option value="7">7s</option>' +
+              '<option value="10">10s</option>' +
+            '</select>' +
+          '</span>' +
+          '<button type="button" class="mini-btn js-replay" title="Play from the start" disabled>↻ Replay</button>' +
+        '</span>' +
+      '</div>';
+
+    var btn    = el.querySelector('.play-btn');
+    var canvas = el.querySelector('.js-canvas');
+    var sub    = el.querySelector('.js-sub');
+    var timeEl = el.querySelector('.js-time');
+    var prevB  = el.querySelector('.js-prev');
+    var nextB  = el.querySelector('.js-next');
+    var loopB  = el.querySelector('.js-loop');
+    var slowB  = el.querySelector('.js-slow');
+    var gapSel = el.querySelector('.js-gap');
+    var replay = el.querySelector('.js-replay');
+
+    /* ---- state ----
+       items  every detected phrase, the spoken instruction included
+       words  the phrases the student actually repeats — this is what
+              the counter, the ⏮/⏭ buttons and Loop word work on
+       lead   1 when items[0] is an instruction, 0 when it is word 1 */
+    var origBuffer = null, origItems = [], roomTone = null;
+    var slowBuffer = null, slowItems = null;      /* built on first use, then kept */
+    var buffer = null, items = [], words = [], lead = 0;
+    var peaks = null, peakBuckets = 0;
+    var source = null, gainNode = null;
+    var startedAt = 0, startOffset = 0, playing = false;
+    var rate = 1, loopIdx = -1, raf = 0;
+    var SLOW_RATE = 0.75;
+
+    var api = {
+      audio: null,
+      pause: function () { if (playing) stop(false); }
+    };
+    players.push(api);
+
+    /* ---- load ---- */
+    fetch(url)
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.arrayBuffer();
+      })
+      .then(function (ab) {
+        return new Promise(function (resolve, reject) {
+          var p = ctx.decodeAudioData(ab, resolve, reject);
+          if (p && p.then) p.then(resolve, reject);
+        });
+      })
+      .then(onDecoded)
+      .catch(fallback);
+
+    function fallback() {
+      var i = players.indexOf(api);
+      if (i >= 0) players.splice(i, 1);
+      el.classList.remove('wave-player');
+      el.classList.add('player');
+      el.innerHTML = '';
+      buildPlayer(el);
+    }
+
+    function onDecoded(buf) {
+      origBuffer = toMono(buf);
+      origItems  = analyseSegments(origBuffer.getChannelData(0), origBuffer.sampleRate);
+
+      var forced = el.getAttribute('data-lead-in');
+      if (forced === '1' || forced === 'true')       lead = origItems.length > 1 ? 1 : 0;
+      else if (forced === '0' || forced === 'false') lead = 0;
+      else                                           lead = detectLeadIn(origItems) ? 1 : 0;
+
+      roomTone    = grabRoomTone(origBuffer, origItems);
+
+      setSegments(origBuffer, origItems);
+
+      /* Optional cross-check. It cannot change anything — it only
+         speaks up if the recording no longer matches the markup. */
+      var want = parseInt(el.getAttribute('data-words'), 10);
+      if (isFinite(want) && want > 0 && want !== words.length && window.console && console.warn) {
+        console.warn('[wave-player] ' + src + ': data-words says ' + want +
+                     ' but ' + words.length + ' words were detected' +
+                     (lead ? ' (plus a lead-in instruction)' : '') + '.');
+      }
+
+      gainNode = ctx.createGain();
+      gainNode.connect(ctx.destination);
+
+      btn.disabled = false;
+      slowB.disabled = false;
+      replay.disabled = false;
+      if (words.length > 1) {
+        prevB.disabled = false;
+        nextB.disabled = false;
+        loopB.disabled = false;
+        gapSel.disabled = !roomTone;
+      }
+      waveRedraws.push(render);
+      render();
+    }
+
+    function setSegments(buf, list) {
+      buffer = buf;
+      items  = list.slice();
+      words  = items.slice(lead);
+      peaks  = null;
+    }
+
+    /* Mixing to mono keeps every later step simple, and these are voice
+       recordings, so nothing meaningful lives in the stereo image. */
+    function toMono(buf) {
+      if (buf.numberOfChannels === 1) return buf;
+      var n = buf.length;
+      var out = ctx.createBuffer(1, n, buf.sampleRate);
+      var d = out.getChannelData(0);
+      var chans = [], c;
+      for (c = 0; c < buf.numberOfChannels; c++) chans.push(buf.getChannelData(c));
+      for (var i = 0; i < n; i++) {
+        var s = 0;
+        for (c = 0; c < chans.length; c++) s += chans[c][i];
+        d[i] = s / chans.length;
+      }
+      return out;
+    }
+
+    /* A slice of real recorded silence. Reused to fill the gaps when the
+       student lengthens the pause, so the rebuilt track keeps the same
+       faint room tone instead of turning into digital silence. */
+    function grabRoomTone(buf, list) {
+      if (list.length < 2) return null;
+      var best = 0, bs = 0, be = 0;
+      for (var i = 0; i < list.length - 1; i++) {
+        var g = list[i + 1].s - list[i].e;
+        if (g > best) { best = g; bs = list[i].e; be = list[i + 1].s; }
+      }
+      if (best < 0.5) return null;
+      var sr = buf.sampleRate;
+      var mid = (bs + be) / 2;
+      var half = Math.min(0.2, best / 2 - 0.05);
+      return buf.getChannelData(0).slice(
+        Math.round((mid - half) * sr), Math.round((mid + half) * sr)
+      );
+    }
+
+    /* ---- source selection ----
+       The pipeline is: recording -> optional slow-down -> optional pause
+       rebuild. Doing it in that order means the slow-down is computed
+       once from the original and never redone when the pause length
+       changes, and that a pause set to 7 s is 7 s of silence at either
+       speed rather than 7 s stretched into 9.3 s. */
+    function srcBuf()  { return (rate === 1 || !slowBuffer) ? origBuffer : slowBuffer; }
+    function srcList() { return (rate === 1 || !slowItems)  ? origItems  : slowItems; }
+    function srcLeadGap() {
+      var L = srcList();
+      return (lead && L.length > 1) ? (L[1].s - L[0].e) : 0;
+    }
+    function gapNow() { return parseFloat(gapSel.value) || 0; }
+
+    /* Building the slowed copy blocks for a few hundred milliseconds, so
+       the status line is updated and the controls greyed out first, and
+       the work is handed to the next tick where the browser can paint. */
+    function ensureSlow(done) {
+      if (slowBuffer) { done(); return; }
+      /* Remember exactly which controls were live and restore only those:
+         on a track with nothing to navigate, the disabled buttons must
+         stay disabled. */
+      var all = el.querySelectorAll('.wave-tools .mini-btn, .wave-select');
+      var held = [], i;
+      for (i = 0; i < all.length; i++) if (!all[i].disabled) { held.push(all[i]); all[i].disabled = true; }
+      sub.textContent = 'preparing slower playback…';
+      setTimeout(function () {
+        var d = timeStretch(origBuffer.getChannelData(0), SLOW_RATE);
+        slowBuffer = ctx.createBuffer(1, d.length, origBuffer.sampleRate);
+        slowBuffer.getChannelData(0).set(d);
+        /* The stretch is uniform, so every boundary simply moves out by
+           the same factor — no need to hunt for the words again. */
+        slowItems = origItems.map(function (it) {
+          return { s: it.s / SLOW_RATE, e: it.e / SLOW_RATE };
+        });
+        for (var k = 0; k < held.length; k++) held[k].disabled = false;
+        done();
+      }, 30);
+    }
+
+    /* ---- rebuild with a different pause length ----
+       The instruction keeps its own short gap: the student is not
+       repeating it, so stretching it to 10 s would just be dead air. */
+    function rebuild(gapSec) {
+      var wasPlaying = playing;
+      var keepWord = words.length ? Math.max(0, wordIndexNear(pos())) : -1;
+      if (playing) stop(false);
+
+      var base = srcBuf(), list = srcList(), leadGap = srcLeadGap();
+
+      if (!gapSec || !roomTone || !list.length) {
+        setSegments(base, list);
+      } else {
+        var sr = base.sampleRate;
+        var d = base.getChannelData(0);
+        var lead0 = Math.round(0.15 * sr);
+        var i, total = lead0;
+        for (i = 0; i < list.length; i++) {
+          var gapAfter = (lead && i === 0) ? leadGap : gapSec;
+          total += Math.round((list[i].e - list[i].s) * sr) + Math.round(gapAfter * sr);
+        }
+        var nb = ctx.createBuffer(1, total, sr);
+        var out = nb.getChannelData(0);
+        for (i = 0; i < total; i += roomTone.length) {
+          out.set(roomTone.subarray(0, Math.min(roomTone.length, total - i)), i);
+        }
+        var w = lead0, ns = [];
+        for (i = 0; i < list.length; i++) {
+          var a = Math.round(list[i].s * sr);
+          var b = Math.round(list[i].e * sr);
+          out.set(d.subarray(a, b), w);
+          ns.push({ s: w / sr, e: (w + (b - a)) / sr });
+          w += (b - a) + Math.round(((lead && i === 0) ? leadGap : gapSec) * sr);
+        }
+        setSegments(nb, ns);
+      }
+
+      /* Every timestamp just changed, so hold the student's place by
+         word number rather than by seconds. */
+      startOffset = (keepWord >= 0 && words[keepWord]) ? words[keepWord].s : 0;
+      if (loopIdx >= words.length) loopIdx = -1;
+      render();
+      if (wasPlaying) play(startOffset);
+    }
+
+    /* ---- playback ----
+       Every AudioBufferSourceNode gets an onended handler that first
+       checks whether it is still THE current source. Without that
+       check a node discarded half a millisecond ago reports "I ended"
+       after its replacement has already started, and the player stops
+       itself and jumps to 0:00 — which is exactly what the ⏭ button
+       used to do. Identity is checked per node; there is deliberately
+       no shared "was this deliberate?" flag to get out of step. */
+    /* Looping runs a little way past the end of the word — roughly
+       180 ms, so the repeat lands after a short breath rather than
+       snapping straight back onto the next consonant. The tail is
+       capped at whatever silence actually follows the word, so it can
+       never eat into the next one, and the last word on every one of
+       these tracks has ~400 ms of trailing pause to spend. */
+    var LOOP_TAIL = 0.18;
+
+    function loopEnd(i) {
+      var w = words[i];
+      if (!w) return 0;
+      var limit = buffer.duration;
+      for (var k = 0; k < items.length; k++) {
+        if (items[k].s > w.e) { limit = items[k].s; break; }
+      }
+      return Math.min(w.e + LOOP_TAIL, limit, buffer.duration);
+    }
+
+    function pos() {
+      if (!buffer) return 0;
+      if (!playing) return startOffset;
+      var t = startOffset + (ctx.currentTime - startedAt);
+      if (loopIdx >= 0 && words[loopIdx]) {
+        var a = words[loopIdx].s, b = loopEnd(loopIdx), len = b - a;
+        if (len > 0 && t > b) t = a + ((t - a) % len);
+      }
+      return Math.max(0, Math.min(buffer.duration, t));
+    }
+
+    function dropSource() {
+      if (source) {
+        var s = source;
+        source = null;
+        try { s.onended = null; } catch (e) {}
+        try { s.stop(); } catch (e) {}
+        try { s.disconnect(); } catch (e) {}
+      }
+    }
+
+    function stop(reset) {
+      if (playing) startOffset = pos();
+      dropSource();
+      playing = false;
+      if (reset) startOffset = 0;
+      btn.innerHTML = ICON_PLAY;
+      btn.setAttribute('aria-label', 'Play: ' + title);
+      cancelAnimationFrame(raf);
+      render();
+    }
+
+    function play(from) {
+      if (!buffer) return;
+      /* buildPlayer keeps its own stopOthers() private to its closure, so
+         this walks the shared registry directly. */
+      for (var pi = 0; pi < players.length; pi++) {
+        if (players[pi] !== api) players[pi].pause();
+      }
+      if (ctx.state === 'suspended' && ctx.resume) ctx.resume();
+      dropSource();
+
+      var at = (typeof from === 'number') ? from : startOffset;
+      if (at >= buffer.duration - 0.02) at = 0;
+
+      var node = ctx.createBufferSource();
+      node.buffer = buffer;
+      /* Always 1: slowing down is done by rebuilding the audio, never by
+         resampling it, so the speaker's pitch never moves. */
+      node.playbackRate.value = 1;
+      if (loopIdx >= 0 && words[loopIdx]) {
+        node.loop = true;
+        node.loopStart = words[loopIdx].s;
+        node.loopEnd = loopEnd(loopIdx);
+        if (at < node.loopStart || at > node.loopEnd) at = node.loopStart;
+      }
+      node.connect(gainNode);
+      node.onended = function () { if (source === node) stop(true); };
+      source = node;
+      node.start(0, at);
+
+      startOffset = at;
+      startedAt = ctx.currentTime;
+      playing = true;
+      btn.innerHTML = ICON_PAUSE;
+      btn.setAttribute('aria-label', 'Pause');
+      tick();
+    }
+
+    function tick() {
+      render();
+      if (playing) raf = requestAnimationFrame(tick);
+    }
+
+    function seek(t, keepPlaying) {
+      var was = playing;
+      if (playing) stop(false);
+      startOffset = Math.max(0, Math.min(buffer ? buffer.duration : 0, t));
+      if (was || keepPlaying) play(startOffset); else render();
+    }
+
+    /* ---- word lookup ----
+       Three different questions, three different answers — conflating
+       them is what made ⏭ skip a word. */
+
+    /* The word the playhead is INSIDE, or -1 while in a pause. */
+    function wordIndexAt(t) {
+      for (var i = 0; i < words.length; i++) {
+        if (t >= words[i].s && t <= words[i].e) return i;
+      }
+      return -1;
+    }
+
+    /* The word this moment belongs to: the one being spoken, or the
+       one whose pause we are sitting in. Used by Loop word and by the
+       rebuild, which need an answer even mid-silence. */
+    function wordIndexNear(t) {
+      var last = -1;
+      for (var i = 0; i < words.length; i++) {
+        if (words[i].s <= t + 0.05) last = i; else break;
+      }
+      return last;
+    }
+
+    function jump(dir) {
+      if (!words.length) return;
+      var t = pos(), i;
+      if (dir > 0) {
+        i = -1;
+        for (var k = 0; k < words.length; k++) {
+          if (words[k].s > t + 0.05) { i = k; break; }
+        }
+        if (i < 0) return;                 /* already at the last word */
+      } else {
+        /* First press restarts the word you are on; press again to
+           step back. Sitting in a pause counts as "on" the word you
+           have just heard, which is the one you want to hear again. */
+        i = wordIndexNear(t - 0.25);
+        if (i < 0) i = 0;
+      }
+      if (loopIdx >= 0) loopIdx = i;
+      seek(words[i].s, true);
+    }
+
+    /* ---- drawing ---- */
+    function cssVar(name, fallbackColor) {
+      var v = getComputedStyle(el).getPropertyValue(name);
+      return (v && v.trim()) || fallbackColor;
+    }
+
+    /* Canvas roundRect() is recent, so this draws the path by hand. */
+    function roundRect(g, x, y, w, h, r) {
+      r = Math.min(r, w / 2, h / 2);
+      g.beginPath();
+      g.moveTo(x + r, y);
+      g.arcTo(x + w, y,     x + w, y + h, r);
+      g.arcTo(x + w, y + h, x,     y + h, r);
+      g.arcTo(x,     y + h, x,     y,     r);
+      g.arcTo(x,     y,     x + w, y,     r);
+      g.closePath();
+    }
+
+    function buildPeaks(buckets) {
+      var d = buffer.getChannelData(0), n = d.length;
+      var out = new Float32Array(buckets), max = 0;
+      var step = n / buckets;
+      for (var i = 0; i < buckets; i++) {
+        var a = Math.floor(i * step), b = Math.min(n, Math.floor((i + 1) * step));
+        var m = 0;
+        for (var j = a; j < b; j++) {
+          var v = d[j] < 0 ? -d[j] : d[j];
+          if (v > m) m = v;
+        }
+        out[i] = m;
+        if (m > max) max = m;
+      }
+      if (max > 0) for (i = 0; i < buckets; i++) out[i] /= max;
+      peaks = out;
+      peakBuckets = buckets;
+    }
+
+    function render() {
+      if (!buffer || !canvas.clientWidth) return;
+
+      var dpr  = window.devicePixelRatio || 1;
+      var wCss = canvas.clientWidth;
+      var hCss = canvas.clientHeight || 78;
+      var W = Math.round(wCss * dpr), H = Math.round(hCss * dpr);
+      if (canvas.width !== W || canvas.height !== H) {
+        canvas.width = W;
+        canvas.height = H;
+        peaks = null;
+      }
+
+      var barW = 2 * dpr, step = 3 * dpr;
+      var buckets = Math.max(1, Math.floor(W / step));
+      if (!peaks || peakBuckets !== buckets) buildPeaks(buckets);
+
+      var g = canvas.getContext('2d');
+      var accent = cssVar('--accent', '#b8893a');
+      var soft   = cssVar('--ink-soft', '#6b5d44');
+      var dur    = buffer.duration;
+      var t      = pos();
+
+      /* A label lane across the top carries the word numbers; the
+         waveform lives underneath it. */
+      var lane = Math.round(14 * dpr);
+      var top = lane, boxH = H - lane;
+      var mid = top + boxH / 2, maxH = boxH - 8 * dpr;
+      var playedX = (t / dur) * W;
+      function X(sec) { return (sec / dur) * W; }
+
+      g.clearRect(0, 0, W, H);
+
+      /* Pauses are marked, not boxed: an inset rounded shape at very
+         low opacity. Enough to say "wait here", quiet enough to stay
+         in the background. */
+      var prevEnd = 0, k;
+      for (k = 0; k <= items.length; k++) {
+        var gs = prevEnd;
+        var ge = (k < items.length) ? items[k].s : dur;
+        if (ge - gs > 0.35) {
+          g.save();
+          g.globalAlpha = 0.05;
+          g.fillStyle = soft;
+          roundRect(g, X(gs), top + boxH * 0.16, X(ge) - X(gs), boxH * 0.68, 5 * dpr);
+          g.fill();
+          g.restore();
+        }
+        if (k < items.length) prevEnd = items[k].e;
+      }
+
+      /* The word being spoken right now, softly lit. */
+      var cur = wordIndexAt(t);
+      var marked = loopIdx >= 0 ? loopIdx : cur;
+      if (marked >= 0 && words[marked]) {
+        g.save();
+        g.globalAlpha = loopIdx >= 0 ? 0.16 : 0.10;
+        g.fillStyle = accent;
+        roundRect(g, X(words[marked].s), top, X(words[marked].e) - X(words[marked].s), boxH, 4 * dpr);
+        g.fill();
+        g.restore();
+      }
+
+      for (var i = 0; i < buckets; i++) {
+        var x = i * step;
+        var h = Math.max(2 * dpr, peaks[i] * maxH);
+        g.fillStyle = accent;
+        g.globalAlpha = (x + barW / 2 <= playedX) ? 1 : 0.28;
+        g.fillRect(x, mid - h / 2, barW, h);
+      }
+      g.globalAlpha = 1;
+
+      /* Word numbers. These replace the old tick marks: a number says
+         what a tick could not, and turns the waveform into a map the
+         student can aim at. */
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.font = '600 ' + Math.round(10 * dpr) + 'px "Prompt", "Sarabun", sans-serif';
+      if (lead && items.length) {
+        g.globalAlpha = 0.5;
+        g.fillStyle = soft;
+        g.fillText('▸', (X(items[0].s) + X(items[0].e)) / 2, lane / 2);
+      }
+      var lastLabelX = -1e9;
+      for (i = 0; i < words.length; i++) {
+        var cx = (X(words[i].s) + X(words[i].e)) / 2;
+        if (cx - lastLabelX < 13 * dpr) continue;   /* never let numbers collide */
+        lastLabelX = cx;
+        var hot = (i === marked);
+        g.globalAlpha = hot ? 1 : 0.55;
+        g.fillStyle = hot ? accent : soft;
+        g.fillText(String(i + 1), cx, lane / 2);
+      }
+      g.globalAlpha = 1;
+
+      g.fillStyle = accent;
+      g.fillRect(Math.min(W - 2 * dpr, playedX), 0, 2 * dpr, H);
+
+      timeEl.textContent = fmt(t) + ' / ' + fmt(dur);
+      canvas.setAttribute('aria-valuenow', Math.round((t / dur) * 100));
+      sub.textContent = statusText(t, cur);
+    }
+
+    function statusText(t, cur) {
+      if (!words.length) return 'Click the waveform to jump anywhere';
+      var n = words.length, head = n + ' words · ';
+      if (loopIdx >= 0) return head + 'looping word ' + (loopIdx + 1);
+      if (lead && items.length && t < items[0].e) return head + 'instructions';
+      if (cur >= 0) return head + 'word ' + (cur + 1) + ' of ' + n;
+      var near = wordIndexNear(t);
+      if (near < 0) return head + 'ready';
+      return head + 'your turn — repeat word ' + (near + 1);
+    }
+
+    /* ---- interaction ---- */
+    btn.addEventListener('click', function () {
+      if (playing) stop(false); else play();
+    });
+
+    replay.addEventListener('click', function () {
+      loopIdx = -1;
+      loopB.setAttribute('aria-pressed', 'false');
+      play(0);
+    });
+
+    /* Clicking a phrase snaps to its start, so a click can never land
+       40 ms into a word and clip its first consonant. Clicking a pause
+       still seeks exactly where you pointed. */
+    canvas.addEventListener('click', function (e) {
+      if (!buffer) return;
+      var r = canvas.getBoundingClientRect();
+      var ratio = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+      var t = ratio * buffer.duration;
+      for (var i = 0; i < items.length; i++) {
+        if (t >= items[i].s && t <= items[i].e) { t = items[i].s; break; }
+      }
+      loopIdx = -1;
+      loopB.setAttribute('aria-pressed', 'false');
+      seek(t);
+    });
+
+    canvas.addEventListener('keydown', function (e) {
+      if (!buffer) return;
+      if (e.key === 'ArrowRight') { seek(pos() + 2); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft') { seek(pos() - 2); e.preventDefault(); }
+      else if (e.key === ' ' || e.key === 'Enter') {
+        if (playing) stop(false); else play();
+        e.preventDefault();
+      }
+    });
+
+    prevB.addEventListener('click', function () { jump(-1); });
+    nextB.addEventListener('click', function () { jump(1); });
+
+    loopB.addEventListener('click', function () {
+      var on = loopB.getAttribute('aria-pressed') === 'true';
+      if (on) {
+        /* Releasing the loop always continues from just after the word
+           that was looping, whether it ran round twice or fifty times.
+           The old code read pos() AFTER clearing loopIdx, so pos() no
+           longer wrapped and handed back the raw elapsed time — loop a
+           word for half a minute and playback resumed half a minute
+           further down the track. Read the resume point first, clear
+           the loop second. */
+        var at = words[loopIdx] ? words[loopIdx].e : pos();
+        loopIdx = -1;
+        loopB.setAttribute('aria-pressed', 'false');
+        if (playing) play(at);
+        else { startOffset = at; render(); }
+      } else {
+        var i = wordIndexNear(pos());
+        if (i < 0) i = 0;
+        loopIdx = i;
+        loopB.setAttribute('aria-pressed', 'true');
+        play(words[i].s);
+      }
+    });
+
+    slowB.addEventListener('click', function () {
+      var on = slowB.getAttribute('aria-pressed') === 'true';
+      if (on) {
+        rate = 1;
+        slowB.setAttribute('aria-pressed', 'false');
+        rebuild(gapNow());
+        return;
+      }
+      ensureSlow(function () {
+        rate = SLOW_RATE;
+        slowB.setAttribute('aria-pressed', 'true');
+        rebuild(gapNow());
+      });
+    });
+
+    gapSel.addEventListener('change', function () {
+      rebuild(parseFloat(gapSel.value) || 0);
+    });
+  }
+
+  /* Waveforms are painted, not styled, so they have to be repainted
+     when the theme changes or the element is resized. */
+  function repaintWaves() {
+    for (var i = 0; i < waveRedraws.length; i++) waveRedraws[i]();
+  }
+  if (window.MutationObserver) {
+    new MutationObserver(repaintWaves).observe(document.documentElement, {
+      attributes: true, attributeFilter: ['data-theme']
+    });
+  }
+  var waveResizeTimer = 0;
+  window.addEventListener('resize', function () {
+    clearTimeout(waveResizeTimer);
+    waveResizeTimer = setTimeout(repaintWaves, 120);
+  }, { passive: true });
+
+  Array.prototype.forEach.call(document.querySelectorAll('.player[data-src]'), function (el) {
+    if (el.getAttribute('data-waveform') === 'true') buildWavePlayer(el);
+    else buildPlayer(el);
+  });
+
+  /* =========================================================
+     REVEAL BUTTONS
+     ========================================================= */
+  Array.prototype.forEach.call(document.querySelectorAll('.reveal-btn'), function (btn) {
+    btn.addEventListener('click', function () {
+      var body = document.getElementById(btn.getAttribute('aria-controls'));
+      if (!body) return;
+      var open = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+      body.hidden = open;
+      btn.firstChild.nodeValue = (open ? btn.dataset.showLabel : btn.dataset.hideLabel) || btn.firstChild.nodeValue;
+    });
+    // Remember both label variants ("Show …" / "Hide …") on first wire.
+    var label = btn.firstChild.nodeValue.trim();
+    btn.dataset.showLabel = ' ' + label + ' ';
+    btn.dataset.hideLabel = ' ' + label.replace(/^Show/, 'Hide') + ' ';
+  });
+
+  /* =========================================================
+     COUNTRY PERSONALISATION
+     Fills the student's country into the ผมมาจาก … ครับ pattern.
+     ========================================================= */
+  var countryInput = document.getElementById('yourcountry');
+  var slotsTh   = document.querySelectorAll('[data-slot-th]');
+  var slotsRom  = document.querySelectorAll('[data-slot-rom]');
+  var slotsEn   = document.querySelectorAll('[data-slot-en]');
+
+  function applyCountry(v) {
+    var country = (v || '').trim();
+    Array.prototype.forEach.call(slotsTh, function (s) {
+      s.textContent = country || '…';
+      s.classList.toggle('filled', !!country);
+    });
+    Array.prototype.forEach.call(slotsRom, function (s) {
+      s.textContent = country || 'your country';
+      s.classList.toggle('filled', !!country);
+    });
+    /* The full stop belongs to the finished sentence, so it only
+       appears once there is a real country to end. */
+    Array.prototype.forEach.call(slotsEn, function (s) {
+      s.textContent = country ? country + '.' : '…';
+      s.classList.toggle('filled', !!country);
+    });
+  }
+
+  if (countryInput) {
+    try {
+      var saved = localStorage.getItem('thaiL2Country');
+      if (saved) { countryInput.value = saved; applyCountry(saved); }
+    } catch (e) {}
+
+    countryInput.addEventListener('input', function () {
+      applyCountry(countryInput.value);
+      try { localStorage.setItem('thaiL2Country', countryInput.value.trim()); } catch (e) {}
+    });
+  }
+
+  /* =========================================================
+     THEME + TEXT SIZE
+
+     The storage keys below are deliberately the "L1" ones. Theme and text
+     size are reader preferences, not lesson data, so every review page in
+     the course shares one pair of keys — set dark + 110% in Lesson 1 and
+     Lesson 2 opens the same way. Keep these names in future lessons too.
+     Lesson-specific answers (thaiL2Country) stay per-lesson.
+     ========================================================= */
+  var TOPBAR_COLOR = { warm: '#fffaf0', paper: '#eef1f4', dark: '#2a2622' };
+  var metaColor = document.getElementById('meta-theme-color');
+  var themeBtns = document.querySelectorAll('[data-theme-set]');
+
+  function setTheme(name) {
+    if (name === 'warm') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', name);
+    if (metaColor) metaColor.setAttribute('content', TOPBAR_COLOR[name] || '#fffaf0');
+    Array.prototype.forEach.call(themeBtns, function (b) {
+      b.setAttribute('aria-pressed', b.getAttribute('data-theme-set') === name ? 'true' : 'false');
+    });
+    try { localStorage.setItem('thaiL1Theme', name); } catch (e) {}
+  }
+
+  Array.prototype.forEach.call(themeBtns, function (b) {
+    b.addEventListener('click', function () { setTheme(b.getAttribute('data-theme-set')); });
+  });
+
+  var slider = document.getElementById('text-slider');
+  var sliderVal = document.getElementById('text-value');
+
+  function setScale(n) {
+    document.documentElement.style.setProperty('--tx', (n / 100).toFixed(2));
+    if (sliderVal) sliderVal.textContent = n + '%';
+    try { localStorage.setItem('thaiL1Text', String(n)); } catch (e) {}
+  }
+
+  if (slider) {
+    slider.addEventListener('input', function () {
+      var n = parseInt(slider.value, 10);
+      if (isFinite(n)) setScale(n);
+    });
+  }
+
+  // Restore saved preferences.
+  try {
+    var t = localStorage.getItem('thaiL1Theme');
+    setTheme((t === 'paper' || t === 'dark') ? t : 'warm');
+
+    var s = parseInt(localStorage.getItem('thaiL1Text'), 10);
+    if (isFinite(s) && s >= 90 && s <= 140) { if (slider) slider.value = s; setScale(s); }
+  } catch (e) { setTheme('warm'); }
+
+  /* =========================================================
+     SETTINGS PANEL
+     ========================================================= */
+  var settingsBtn   = document.getElementById('btn-settings');
+  var settingsPanel = document.getElementById('settings-panel');
+
+  function closeSettings() {
+    settingsPanel.hidden = true;
+    settingsBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  settingsBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    var open = !settingsPanel.hidden;
+    settingsPanel.hidden = open;
+    settingsBtn.setAttribute('aria-expanded', open ? 'false' : 'true');
+  });
+
+  document.addEventListener('click', function (e) {
+    if (!settingsPanel.hidden && !settingsPanel.contains(e.target)) closeSettings();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !settingsPanel.hidden) { closeSettings(); settingsBtn.focus(); }
+  });
+
+  /* =========================================================
+     SCROLL PROGRESS + BACK TO TOP
+     ========================================================= */
+  var progress = document.getElementById('progress');
+  var toTop = document.getElementById('to-top');
+  var ticking = false;
+
+  function onScroll() {
+    var doc = document.documentElement;
+    var max = doc.scrollHeight - doc.clientHeight;
+    var y = window.scrollY || doc.scrollTop;
+    progress.style.width = (max > 0 ? (y / max) * 100 : 0) + '%';
+    toTop.classList.toggle('show', y > 600);
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', function () {
+    if (!ticking) { ticking = true; window.requestAnimationFrame(onScroll); }
+  }, { passive: true });
+
+  window.addEventListener('resize', onScroll, { passive: true });
+  onScroll();
+
+  toTop.addEventListener('click', function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+})();
+</script>
+</body>
+</html>
