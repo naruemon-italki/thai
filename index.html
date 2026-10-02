@@ -15312,6 +15312,9 @@
      on / off. Played by lessons.js through playSound(). -->
 <audio id="snd-toggle-on" preload="auto"></audio>
 <audio id="snd-toggle-off" preload="auto"></audio>
+<!-- Lesson Downloads: a download link tapped, with the "Download started"
+     card. Played by lessons.js through playSound(). -->
+<audio id="snd-download" preload="auto"></audio>
 <!-- Recorded pronunciation player. Deliberately separate from the sound effects
      above: its src is swapped per word at playback time, it is never touched by
      SOUND_CONFIG / the mute toggle (recordings are teaching material, like TTS,
@@ -17251,6 +17254,10 @@ const GUIDE_GOTIT_SOUND_B64 = "audio/got-it.mp3";
 // Lesson Downloads' email switch, turned on / off (played by lessons.js).
 const TOGGLE_ON_SOUND_B64 = "audio/toggle-on.mp3";
 const TOGGLE_OFF_SOUND_B64 = "audio/toggle-off.mp3";
+// Lesson Downloads: a download has started (played by lessons.js). success2.mp3
+// re-exported with its playback level (0.35) built into the file and the silence
+// before its first note trimmed, so the chime lands with the tap.
+const DOWNLOAD_SOUND_B64 = "audio/success2-v2.mp3";   // level built into the file, see SOUND CONFIG
 const CHAR_GRANDMA_B64 = "images/artwork_1_grandma.jpg";
 const CHAR_TUKTUK_B64 = "images/artwork_2_tuktuk.jpg";
 const CHAR_FIGHTER_B64 = "images/artwork_3_fighter.jpg";
@@ -17326,6 +17333,7 @@ document.getElementById('snd-skip').src = GUIDE_SKIP_SOUND_B64;
 document.getElementById('snd-gotit').src = GUIDE_GOTIT_SOUND_B64;
 document.getElementById('snd-toggle-on').src = TOGGLE_ON_SOUND_B64;
 document.getElementById('snd-toggle-off').src = TOGGLE_OFF_SOUND_B64;
+document.getElementById('snd-download').src = DOWNLOAD_SOUND_B64;
 
 /* ========= SOUND CONFIG =========
    Single source of truth for sound effect volumes. Edit the `volume` values
@@ -17379,7 +17387,10 @@ const SOUND_CONFIG = {
   'snd-skip':       { volume: 0.40, label: 'Guide — Skip / Close' },
   'snd-gotit':      { volume: 0.35, label: 'Guide — Got it (last slide)' },
   'snd-toggle-on':  { volume: 0.30, label: 'Lesson emails switched on' },
-  'snd-toggle-off': { volume: 0.30, label: 'Lesson emails switched off' }
+  'snd-toggle-off': { volume: 0.30, label: 'Lesson emails switched off' },
+  // Lesson Downloads: a download link tapped. A notch louder than the menu
+  // click, level with the email switch above, well below the game sounds.
+  'snd-download':   { volume: 1.00, label: 'Lesson download started' }      // built in (was 0.35)
 };
 
 // Apply configured volumes to every audio element. Re-runnable.
@@ -21797,6 +21808,10 @@ const audioReady = {
                         the volume of an <audio> element, so there only this
                         path plays them at their SOUND_CONFIG level; the <audio>
                         fallback would play them at full volume.
+     • snd-download   — answers a tap on a lesson download, and its two notes
+                        are timed to the tick on lessons.js's "Download started"
+                        card. Its level is built into the file, so both paths
+                        play it equally loud.
 
    FAILURE BEHAVIOUR. Every method is guarded and play() returns a plain boolean.
    False means "could not play, for any reason at all" — no context, autoplay
@@ -21811,7 +21826,8 @@ const WEBAUDIO_SFX = {
   'snd-skip':       GUIDE_SKIP_SOUND_B64,
   'snd-gotit':      GUIDE_GOTIT_SOUND_B64,
   'snd-toggle-on':  TOGGLE_ON_SOUND_B64,
-  'snd-toggle-off': TOGGLE_OFF_SOUND_B64
+  'snd-toggle-off': TOGGLE_OFF_SOUND_B64,
+  'snd-download':   DOWNLOAD_SOUND_B64
 };
 
 const sfx = {

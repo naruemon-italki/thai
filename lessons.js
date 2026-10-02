@@ -164,6 +164,7 @@
     if (built) return host;
     injectStyles();
     injectNotifyStyles();
+    injectDownloadStyles();
     host.innerHTML =
       '<div class="lsn-wrap">' +
         '<h2>Lesson Downloads</h2>' +
@@ -186,6 +187,7 @@
     var btn = document.getElementById('lsn-refresh');
     if (btn) btn.addEventListener('click', function () { click(); load(); });
     bindNotify();
+    bindDownloads();
     built = true;
     return host;
   }
@@ -474,6 +476,221 @@
         click(sw.checked ? 'snd-toggle-on' : 'snd-toggle-off');
         setNotify(sw.checked);
       });
+    } catch (e) {}
+  }
+
+  /* ---- download feedback --------------------------------------------------
+     A download link fetches its file in the background: the page itself does
+     not change, and some browsers show nothing at all for a second or two. So
+     students took a tap for "nothing happened" and tapped again (or double-
+     clicked), and the same file came down twice. Now a tap that starts a
+     download:
+       • shows a card at the top of the screen for a few seconds: a big green
+         tick, "Download started", "Check your Downloads folder." It sits over
+         everything but never takes a tap, so nothing underneath is blocked;
+       • plays snd-download (index.html's SOUND_CONFIG), whose two rising
+         notes are timed to the tick popping in and then being drawn;
+       • marks that link as started for DOWNLOAD_COOLDOWN_MS: a green tick at
+         its end, its text dimmed, and a repeat tap on the same file swallowed
+         instead of downloading it again. Every other file stays available.
+     The cooldown is kept by URL rather than on the link element, so it still
+     holds if the list is redrawn meanwhile (Refresh).
+
+     The download itself is the browser's own default action and is never
+     touched: nothing here calls preventDefault() on a first tap or alters the
+     link's href or download attribute, and every step is guarded, so if any of
+     this fails the link behaves exactly as it did before. */
+
+  var DOWNLOAD_COOLDOWN_MS = 4000;   // a repeat tap on the same file within this is ignored
+  var DOWNLOAD_TOAST_MS = 3600;      // how long the "Download started" card stays up
+  var downloadUntil = {};            // link href → when its cooldown ends (nowMs())
+  var startedSeq = 0;                // see markStarted()
+  var toastCard = null;              // the card, created once and reused
+  var toastTimer = null;
+  var toastClearTimer = null;
+
+  var TOAST_TICK = '<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">' +
+                   '<path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+
+  /* A clock that only moves forward, so a device whose time is changed can
+     never stretch a cooldown; the range check in onDownloadClick() covers
+     the fallback. */
+  function nowMs() {
+    try { if (window.performance && typeof performance.now === 'function') return performance.now(); } catch (e) {}
+    return Date.now();
+  }
+
+  /* Guarded, unlike the two above: this runs inside build(), and a purely
+     cosmetic extra must never be what stops the screen from opening. */
+  function injectDownloadStyles() {
+    try {
+      if (document.getElementById('lsn-download-styles')) return;
+      var s = document.createElement('style');
+      s.id = 'lsn-download-styles';
+      s.textContent = [
+        /* The tapped link, while its cooldown runs. */
+        '#view-lessons a.lsn-file .lsn-ic,#view-lessons a.lsn-file .lsn-ft{transition:opacity .25s ease}',
+        '#view-lessons a.lsn-file{transition:border-color .25s ease}',
+        '#view-lessons a.lsn-file.lsn-started{pointer-events:none;cursor:default;border-color:var(--success)}',
+        '#view-lessons a.lsn-file.lsn-started .lsn-ic,#view-lessons a.lsn-file.lsn-started .lsn-ft{opacity:.55}',
+        '#view-lessons a.lsn-file.lsn-started::after{content:"";flex:0 0 auto;box-sizing:border-box;width:.45rem;',
+        'height:.8rem;margin:0 .4rem .2rem .1rem;border:solid var(--success);border-width:0 2.5px 2.5px 0;',
+        'transform:rotate(45deg);animation:lsnStartedIn .3s ease-out}',
+        '@keyframes lsnStartedIn{from{opacity:0;transform:rotate(45deg) scale(.4)}to{opacity:1;transform:rotate(45deg) scale(1)}}',
+        /* The card. Lives on <body>, not in #view-lessons, so leaving the screen
+           does not cut it off mid-message. Same look as the app's "Update
+           complete" card: panel, green border, green tick drawn in --panel, so
+           it reads in every theme. Above modals and guides, just below the
+           achievement toasts (4000). */
+        '.lsn-toast{position:fixed;top:0;left:0;right:0;z-index:3900;display:flex;justify-content:center;',
+        'box-sizing:border-box;padding:12px 12px 0;padding-top:max(12px,calc(env(safe-area-inset-top,0px) + 8px));',
+        'pointer-events:none}',
+        '.lsn-toast-card{display:flex;align-items:center;gap:14px;box-sizing:border-box;max-width:420px;',
+        'background:var(--panel);color:var(--ink);border:1.5px solid var(--success);border-radius:14px;',
+        'padding:12px 22px 12px 12px;box-shadow:0 10px 30px var(--shadow-strong);',
+        'opacity:0;visibility:hidden;transform:translateY(-18px) scale(.96);',
+        'transition:transform .28s ease-in,opacity .28s ease-in,visibility 0s linear .28s}',
+        '.lsn-toast-card.show{opacity:1;visibility:visible;transform:none;',
+        'transition:transform .45s cubic-bezier(.34,1.56,.64,1),opacity .2s ease-out,visibility 0s}',
+        '.lsn-toast-tick{position:relative;flex:0 0 auto;width:52px;height:52px;border-radius:50%;',
+        'background:var(--success);color:var(--panel);display:flex;align-items:center;justify-content:center;',
+        'box-shadow:0 4px 12px var(--shadow)}',
+        '.lsn-toast-tick svg{width:32px;height:32px;display:block;overflow:visible}',
+        '.lsn-toast-tick path{fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}',
+        '.lsn-toast-text{display:flex;flex-direction:column;min-width:0;line-height:1.25}',
+        '.lsn-toast-title{font-size:1.05rem;font-weight:700;color:var(--ink)}',
+        '.lsn-toast-msg{font-size:.88rem;color:var(--ink-soft);margin-top:2px}',
+        /* The tick pops in on the chime's first note, then is drawn as the
+           second rings; a soft ring spreads out behind it. The path is 19.8
+           units long, so a dash of 20 hides it completely. */
+        '.lsn-toast-card.show .lsn-toast-tick{animation:lsnTickPop .5s cubic-bezier(.34,1.56,.64,1) .04s both}',
+        '.lsn-toast-card.show .lsn-toast-tick path{stroke-dasharray:20;animation:lsnTickDraw .3s cubic-bezier(.65,0,.35,1) .16s both}',
+        '.lsn-toast-card.show .lsn-toast-tick::after{content:"";position:absolute;top:0;left:0;right:0;bottom:0;',
+        'box-sizing:border-box;border-radius:50%;border:2px solid var(--success);opacity:0;',
+        'animation:lsnTickRing .7s ease-out .22s}',
+        '@keyframes lsnTickPop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}',
+        '@keyframes lsnTickDraw{0%{stroke-dashoffset:20;opacity:0}12%{opacity:1}100%{stroke-dashoffset:0;opacity:1}}',
+        '@keyframes lsnTickRing{from{transform:scale(1);opacity:.6}to{transform:scale(1.4);opacity:0}}',
+        '@media (max-width:480px){.lsn-toast-card{gap:12px;padding:10px 18px 10px 10px}',
+        '.lsn-toast-tick{width:46px;height:46px}.lsn-toast-tick svg{width:28px;height:28px}}',
+        /* Reduced motion: the card simply fades, with the tick already drawn. */
+        '@media (prefers-reduced-motion:reduce){',
+        '.lsn-toast-card,.lsn-toast-card.show{transform:none}',
+        '.lsn-toast-card{transition:opacity .2s ease,visibility 0s linear .2s}',
+        '.lsn-toast-card.show{transition:opacity .2s ease,visibility 0s}',
+        '.lsn-toast-card.show .lsn-toast-tick,.lsn-toast-card.show .lsn-toast-tick path{animation:none}',
+        '.lsn-toast-card.show .lsn-toast-tick path{stroke-dasharray:none}',
+        '.lsn-toast-card.show .lsn-toast-tick::after{animation:none;display:none}',
+        '#view-lessons a.lsn-file.lsn-started::after{animation:none}}'
+      ].join('');
+      document.head.appendChild(s);
+    } catch (e) {}
+  }
+
+  /* Made once, when the screen is built: a live region is announced reliably
+     only if it is already on the page when its text changes. */
+  function ensureToast() {
+    try {
+      if (toastCard && toastCard.parentNode && toastCard.parentNode.parentNode) return toastCard;
+      var box = document.createElement('div');
+      box.className = 'lsn-toast';
+      box.setAttribute('role', 'status');
+      box.setAttribute('aria-live', 'polite');
+      box.innerHTML = '<div class="lsn-toast-card"></div>';
+      document.body.appendChild(box);
+      toastCard = box.firstChild;
+      return toastCard;
+    } catch (e) { return null; }
+  }
+
+  /* Shows the card, or if it is already up (a second file tapped), runs the
+     tick again and restarts the clock. Purely visual: failures are ignored. */
+  function showDownloadToast() {
+    try {
+      var card = ensureToast();
+      if (!card) return;
+      clearTimeout(toastTimer);
+      clearTimeout(toastClearTimer);
+      card.innerHTML =
+        '<span class="lsn-toast-tick">' + TOAST_TICK + '</span>' +
+        '<span class="lsn-toast-text">' +
+          '<strong class="lsn-toast-title">Download started</strong>' +
+          '<span class="lsn-toast-msg">Check your Downloads folder.</span>' +
+        '</span>';
+      if (!card.classList.contains('show')) {
+        void card.offsetWidth;   // commit the hidden state first, so the slide-in runs
+        card.classList.add('show');
+      }
+      toastTimer = setTimeout(hideDownloadToast, DOWNLOAD_TOAST_MS);
+    } catch (e) {}
+  }
+
+  function hideDownloadToast() {
+    try {
+      clearTimeout(toastTimer);
+      if (!toastCard) return;
+      toastCard.classList.remove('show');
+      // Emptied once it has slid away, so a screen reader never meets stale text.
+      toastClearTimer = setTimeout(function () {
+        try { if (!toastCard.classList.contains('show')) toastCard.innerHTML = ''; } catch (e) {}
+      }, 400);
+    } catch (e) {}
+  }
+
+  /* The tapped link, for `ms`: green tick, dimmed text, no pointer (the CSS).
+     Only the latest call for a link may clear it, so a timer left over from an
+     earlier tap can never cut a newer cooldown short. */
+  function markStarted(a, ms) {
+    try {
+      var token = String(++startedSeq);
+      a.setAttribute('data-lsn-started', token);
+      a.setAttribute('aria-disabled', 'true');
+      a.classList.add('lsn-started');
+      setTimeout(function () {
+        try {
+          if (a.getAttribute('data-lsn-started') !== token) return;
+          a.classList.remove('lsn-started');
+          a.removeAttribute('aria-disabled');
+          a.removeAttribute('data-lsn-started');
+        } catch (e) {}
+      }, Math.max(0, ms));
+    } catch (e) {}
+  }
+
+  function onDownloadClick(e) {
+    var a, href;
+    try {
+      a = (e.target && e.target.closest) ? e.target.closest('a.lsn-file') : null;
+      href = a ? (a.getAttribute('href') || '') : '';
+    } catch (err) { return; }
+    if (!href) return;   // not a download link (a locked row has no link at all)
+
+    var now = nowMs();
+    var left = (downloadUntil[href] || 0) - now;
+    if (left > 0 && left <= DOWNLOAD_COOLDOWN_MS) {
+      /* The same file again, moments after it started: the double tap this is
+         here for. Swallowed, so the browser does not fetch it a second time. */
+      try { e.preventDefault(); } catch (err) {}
+      markStarted(a, left);
+      return;
+    }
+    downloadUntil[href] = now + DOWNLOAD_COOLDOWN_MS;
+
+    // Feedback only, from here on. The download is the browser's default action.
+    try { if (typeof playSound === 'function') playSound('snd-download'); } catch (err) {}
+    try { if (typeof haptic === 'function') haptic(25); } catch (err) {}
+    showDownloadToast();
+    /* The link is marked after this tap has been fully handled, so nothing
+       about it changes while the browser is still acting on the tap. */
+    setTimeout(function () { markStarted(a, (downloadUntil[href] || 0) - nowMs()); }, 0);
+  }
+
+  function bindDownloads() {
+    try {
+      var list = document.getElementById('lsn-list');
+      if (!list) return;
+      list.addEventListener('click', onDownloadClick);
+      ensureToast();
     } catch (e) {}
   }
 
