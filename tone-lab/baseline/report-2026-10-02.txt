@@ -1,0 +1,180 @@
+
+=== SR 44100  (strip = calibration offset -3 .. +3 st, step .25; '#'=correct, else letter of wrong guess; '|' = actual calibration)
+Female1_paa    centre 254.1 Hz   all-5-correct offsets: -1.5..2 (15 steps)
+   mid      paa   HHHHHH######|#########LLLL  -> mid      conf 1.00  {"mid":0.98,"low":0.15,"falling":0.09,"high":-0.15,"rising":0}
+   low      pàa   ############|#############  -> low      conf 1.00  {"mid":0,"low":1.15,"falling":0.25,"high":-1.12,"rising":0}
+   falling  pâa   ############|#############  -> falling  conf 1.00  {"mid":0,"low":0.15,"falling":1.97,"high":-1.02,"rising":0.16}
+   high     páa   ############|############M  -> high     conf 1.00  {"mid":0.02,"low":-0.36,"falling":0,"high":1.79,"rising":0.07}
+   rising   pǎa   ############|#############  -> rising   conf 1.00  {"mid":0,"low":-0.11,"falling":0.37,"high":0.16,"rising":1.93}
+Female2_paa    centre 234.6 Hz   all-5-correct offsets: 0.25..0.25 (1 steps)
+   mid      paa   HHFFFFFFFF##|##########LLL  -> mid      conf 0.68  {"mid":0.79,"low":0.15,"falling":0.4,"high":-0.37,"rising":0}
+   low      pàa   FFFFFFFFFFFF|F############  -> falling  conf 0.19  {"mid":0,"low":0.37,"falling":0.39,"high":-1.4,"rising":0}
+   falling  pâa   ############|#############  -> falling  conf 0.90  {"mid":0,"low":0.15,"falling":1.31,"high":0.78,"rising":0.09}
+   high     páa   ############|##RRRRRRRRRRR  -> high     conf 0.54  {"mid":0.17,"low":-0.5,"falling":0.16,"high":0.71,"rising":0.46}
+   rising   pǎa   ############|#############  -> rising   conf 0.58  {"mid":0,"low":-0.5,"falling":1.3,"high":0.04,"rising":1.45}
+Female3_maa    centre 252.1 Hz   all-5-correct offsets: -0.5..-0.5 (1 steps)
+   mid      maa   FFFFFFFFFF##|#FFLLLLLLLLLL  -> mid      conf 0.80  {"mid":0.83,"low":0.15,"falling":0.33,"high":-1.4,"rising":0.23}
+   low      màa   ############|#############  -> low      conf 1.00  {"mid":0,"low":1.15,"falling":0.19,"high":-0.67,"rising":0.11}
+   falling  mâa   ############|#############  -> falling  conf 1.00  {"mid":0,"low":0.15,"falling":1.65,"high":-0.4,"rising":0.13}
+   high     máa   ###########R|RRRRRRRRRRRRR  -> rising   conf 0.48  {"mid":0,"low":-0.5,"falling":0.3,"high":0.49,"rising":0.69}
+   rising   mǎa   ############|#############  -> rising   conf 0.96  {"mid":0,"low":0.48,"falling":1.13,"high":0,"rising":1.73}
+Female4_mixed  centre 212.6 Hz   all-5-correct offsets: 0..0.5 (3 steps)
+   mid      gin   FFFFFFFFFF##|######FLLLLLL  -> mid      conf 0.86  {"mid":0.83,"low":0.15,"falling":0.25,"high":-0.93,"rising":0}
+   low      pèt   MRRRRRRRMMMM|#############  -> low      conf 0.31  {"mid":0.22,"low":0.39,"falling":0.08,"high":-0.19,"rising":0}
+   falling  pîi   ############|#############  -> falling  conf 1.00  {"mid":0,"low":0.15,"falling":2.05,"high":-0.4,"rising":0.32}
+   high     rót   FFF#########|###RRRRRRRRRR  -> high     conf 0.32  {"mid":0,"low":-0.5,"falling":0,"high":0.42,"rising":0.26}
+   rising   hǐw   ############|#############  -> rising   conf 1.00  {"mid":0,"low":-0.08,"falling":0.36,"high":0,"rising":1.94}
+Female5_dtaa   centre 226.7 Hz   all-5-correct offsets: -0.25..2 (10 steps)
+   mid      dtaa  FFFFFFFFF###|#########LLLL  -> mid      conf 1.00  {"mid":0.96,"low":0.15,"falling":0.23,"high":-0.77,"rising":0}
+   low      dtàa  FFFFFFFFFFF#|#############  -> low      conf 0.39  {"mid":0,"low":0.5,"falling":0.31,"high":-1.4,"rising":0}
+   falling  dtâa  ############|#############  -> falling  conf 1.00  {"mid":0,"low":0.15,"falling":1.83,"high":-0.73,"rising":0.05}
+   high     dtáa  ############|#########RRRR  -> high     conf 1.00  {"mid":0,"low":-0.5,"falling":0,"high":1.15,"rising":0.3}
+   rising   dtǎa  ############|#############  -> rising   conf 1.00  {"mid":0,"low":0.32,"falling":1.3,"high":0,"rising":2.05}
+Female6_mai    centre 259.0 Hz   all-5-correct offsets: 0.25..0.75 (3 steps)
+   mid      mai   FFFFFFH#####|#########LLLL  -> mid      conf 1.00  {"mid":0.94,"low":0.1,"falling":0.15,"high":0.17,"rising":0.04}
+   low      mài   FFFFFFFMMMMM|M############  -> mid      conf 0.30  {"mid":0.61,"low":0.58,"falling":0.31,"high":-1.4,"rising":0}
+   falling  mâi   ############|####HHHHHHHHH  -> falling  conf 1.00  {"mid":0,"low":0.15,"falling":1.65,"high":-0.86,"rising":0.15}
+   high     mái   ############|#############  -> high     conf 1.00  {"mid":0,"low":-0.5,"falling":0,"high":1.8,"rising":0.22}
+   rising   mǎi   ############|#############  -> rising   conf 1.00  {"mid":0,"low":-0.07,"falling":1.05,"high":0.11,"rising":1.95}
+Male1_gee      centre 160.2 Hz   all-5-correct offsets: -0.5..0 (3 steps)
+   mid      gee   FFFFFFFFFF##|#FFFFFRLLLLLL  -> mid      conf 0.64  {"mid":0.94,"low":0.15,"falling":0.69,"high":-0.9,"rising":0.35}
+   low      gèe   FFF#########|#############  -> low      conf 1.00  {"mid":0,"low":1.15,"falling":0.31,"high":-1.4,"rising":0}
+   falling  gêe   ############|#############  -> falling  conf 1.00  {"mid":0,"low":0.15,"falling":2.12,"high":-1.4,"rising":0.31}
+   high     gée   ############|#RRRRRRRRRRRR  -> high     conf 0.66  {"mid":0,"low":-0.5,"falling":0,"high":0.98,"rising":0.72}
+   rising   gěe   ############|#############  -> rising   conf 1.00  {"mid":0,"low":0.23,"falling":1.3,"high":0,"rising":2.05}
+Male2_gai      centre 133.5 Hz   all-5-correct offsets: -1..1.5 (11 steps)
+   mid      gai   HHHHHHHH####|##########LLL  -> mid      conf 1.00  {"mid":0.96,"low":0.15,"falling":0.27,"high":0.17,"rising":0}
+   low      gài   ############|#############  -> low      conf 1.00  {"mid":0,"low":1.15,"falling":0.31,"high":-1.4,"rising":0}
+   falling  gâi   ############|#############  -> falling  conf 0.98  {"mid":0,"low":0.15,"falling":1.98,"high":0.15,"rising":1.35}
+   high     gái   ############|#######RRRRRR  -> high     conf 0.99  {"mid":0,"low":-0.5,"falling":0,"high":0.92,"rising":0.24}
+   rising   gǎi   ############|#############  -> rising   conf 1.00  {"mid":0,"low":0.5,"falling":0.11,"high":0,"rising":1.75}
+Male3_maa      centre 142.3 Hz   all-5-correct offsets: -1.25..2 (14 steps)
+   mid      maa   FFFFFFF#####|#########LLLL  -> mid      conf 1.00  {"mid":0.98,"low":0.15,"falling":0.09,"high":0.12,"rising":0}
+   low      màa   MMMMM#######|#############  -> low      conf 1.00  {"mid":0,"low":0.92,"falling":0.23,"high":-0.76,"rising":0}
+   falling  mâa   ############|#############  -> falling  conf 1.00  {"mid":0,"low":0.15,"falling":2.07,"high":-0.4,"rising":0}
+   high     máa   ############|############R  -> high     conf 1.00  {"mid":0,"low":-0.5,"falling":0.21,"high":1.6,"rising":0.63}
+   rising   mǎa   ############|#############  -> rising   conf 1.00  {"mid":0,"low":-0.5,"falling":0.48,"high":0,"rising":1.18}
+Male4_mai      centre 154.0 Hz   all-5-correct offsets: NONE
+   mid      mai   RRRRRRRRRRRR|RRRRRRRRRLLLL  -> rising   conf 1.00  {"mid":0,"low":-0.5,"falling":0.04,"high":0,"rising":0.87}
+   low      mài   FFFFFFFFFF##|#############  -> low      conf 0.39  {"mid":0.02,"low":0.51,"falling":0.31,"high":-1.38,"rising":0}
+   falling  mâi   LLLLLLLLLLLL|LLLLLLLL#####  -> low      conf 1.00  {"mid":0,"low":0.84,"falling":0,"high":0.1,"rising":0.03}
+   high     mái   FFFF########|########RRRRR  -> high     conf 1.00  {"mid":0,"low":-0.5,"falling":0,"high":1.5,"rising":0.51}
+   rising   mǎi   ############|#############  -> rising   conf 0.58  {"mid":0,"low":-0.5,"falling":1.3,"high":0.04,"rising":1.45}
+accuracy at calibrated centre: 45/50
+  mid      correct/10 by offset: 0 0 0 0 0 0 1 3 4 5 9 9 9 7 7 7 7 7 6 6 6 2 0 0 0
+  low      correct/10 by offset: 3 3 3 4 4 5 5 5 5 5 6 7 8 10 10 10 10 10 10 10 10 10 10 10 10
+  falling  correct/10 by offset: 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 8 8 8 8 9 9 9 9 9
+  high     correct/10 by offset: 8 8 8 9 10 10 10 10 10 10 10 9 9 8 7 6 6 6 6 5 4 3 3 3 1
+  rising   correct/10 by offset: 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10
+  TOTAL/50  by offset: -3:30 -2.75:30 -2.5:30 -2.25:32 -2:33 -1.75:34 -1.5:35 -1.25:37 -1:38 -0.75:39 -0.5:44 -0.25:44 0:45 0.25:44 0.5:43 0.75:42 1:41 1.25:41 1.5:40 1.75:39 2:39 2.25:34 2.5:32 2.75:32 3:30
+
+  singles (src C calibrated on gin/bpai/nom at 207.4 Hz; A/B shown at 200 Hz):
+   C gin   mid      @207Hz -> mid      conf 0.92   correct-centre window(s): 201.8-226.5 Hz
+   C bpai  mid      @207Hz -> mid      conf 1.00   correct-centre window(s): 198.9-236.6 Hz
+   C nom   mid      @207Hz -> mid      conf 1.00   correct-centre window(s): 193.3-233.2 Hz
+   C gai   low      @207Hz -> low      conf 0.53   correct-centre window(s): 198.9-298 Hz
+   C yoo   low      @207Hz -> low      conf 0.14   correct-centre window(s): 207.7-298 Hz
+   B pet   low      @200Hz -> low      conf 1.00   correct-centre window(s): 164.9-298 Hz
+   A sip   low      @200Hz -> falling  conf 0.39   correct-centre window(s): 247-298 Hz
+   B chuu  falling  @200Hz -> falling  conf 1.00   correct-centre window(s): 157.9-289.6 Hz
+   C chop  falling  @207Hz -> falling  conf 1.00   correct-centre window(s): 130.9-132.8, 138.6-258 Hz
+   C baan  falling  @207Hz -> falling  conf 1.00   correct-centre window(s): 120-229.8 Hz
+   C haa   falling  @207Hz -> falling  conf 1.00   correct-centre window(s): 134.7-265.5, 289.6-298 Hz
+   C rak   high     @207Hz -> high     conf 1.00   correct-centre window(s): 120-127.1, 146.9-233.2 Hz
+   A rot   high     @200Hz -> high     conf 1.00   correct-centre window(s): 130.9-243.5 Hz
+   A maah  high     @200Hz -> high     conf 1.00   correct-centre window(s): 155.6-250.6 Hz
+   A neua  high     @200Hz -> high     conf 1.00   correct-centre window(s): 144.8-240 Hz
+   C moo   rising   @207Hz -> rising   conf 1.00   correct-centre window(s): 174.7-298 Hz
+   B chan  rising   @200Hz -> rising   conf 1.00   correct-centre window(s): 167.3-298 Hz
+   C maar  rising   @207Hz -> rising   conf 0.90   correct-centre window(s): 120-298 Hz
+   B suay  rising   @200Hz -> rising   conf 0.98   correct-centre window(s): 130.9-298 Hz
+
+=== SR 48000  (strip = calibration offset -3 .. +3 st, step .25; '#'=correct, else letter of wrong guess; '|' = actual calibration)
+Female1_paa    centre 254.1 Hz   all-5-correct offsets: -1.5..2 (15 steps)
+   mid      paa   HHHHHH######|#########LLLL  -> mid      conf 1.00  {"mid":0.98,"low":0.15,"falling":0.1,"high":-0.2,"rising":0}
+   low      pàa   ############|#############  -> low      conf 1.00  {"mid":0,"low":1.15,"falling":0.28,"high":-1.21,"rising":0}
+   falling  pâa   ############|#############  -> falling  conf 1.00  {"mid":0,"low":0.15,"falling":1.94,"high":-0.77,"rising":0}
+   high     páa   ############|############M  -> high     conf 1.00  {"mid":0.02,"low":-0.35,"falling":0.13,"high":1.8,"rising":0.07}
+   rising   pǎa   ############|#############  -> rising   conf 1.00  {"mid":0,"low":-0.17,"falling":0.31,"high":0.16,"rising":1.89}
+Female2_paa    centre 234.3 Hz   all-5-correct offsets: NONE
+   mid      paa   HHHHFFFF####|##########LLL  -> mid      conf 0.80  {"mid":0.81,"low":0.15,"falling":0.31,"high":-0.28,"rising":0}
+   low      pàa   FFFFFFFFFFFF|F############  -> falling  conf 0.28  {"mid":0,"low":0.35,"falling":0.45,"high":-1.4,"rising":0}
+   falling  pâa   HHHHHHHHHHHH|HHHHHHHHHHHHH  -> high     conf 1.00  {"mid":0,"low":-0.12,"falling":0.19,"high":1.9,"rising":0.29}
+   high     páa   ############|##RRRRRRRRRRR  -> high     conf 0.51  {"mid":0.2,"low":-0.48,"falling":0.32,"high":0.72,"rising":0.49}
+   rising   pǎa   ############|#############  -> rising   conf 0.76  {"mid":0,"low":-0.5,"falling":1.3,"high":0,"rising":1.67}
+Female3_maa    centre 252.6 Hz   all-5-correct offsets: -0.75..-0.75 (1 steps)
+   mid      maa   FFFFFFFFF###|#FFLLLLLLLLLL  -> mid      conf 0.80  {"mid":0.81,"low":0.15,"falling":0.3,"high":-1.4,"rising":0.22}
+   low      màa   ############|#############  -> low      conf 1.00  {"mid":0,"low":1.15,"falling":0.19,"high":-0.69,"rising":0}
+   falling  mâa   ############|#############  -> falling  conf 1.00  {"mid":0,"low":0.15,"falling":1.65,"high":-0.4,"rising":0.13}
+   high     máa   ##########RR|RRRRRRRRRRRRR  -> rising   conf 0.51  {"mid":0,"low":-0.5,"falling":0.21,"high":0.46,"rising":0.69}
+   rising   mǎa   ############|#############  -> rising   conf 1.00  {"mid":0,"low":0.5,"falling":1.01,"high":0,"rising":1.67}
+Female4_mixed  centre 212.7 Hz   all-5-correct offsets: 0..0.25 (2 steps)
+   mid      gin   FFFFFFFFFF##|######FLLLLLL  -> mid      conf 0.82  {"mid":0.82,"low":0.15,"falling":0.29,"high":-1.09,"rising":0}
+   low      pèt   MMMMMFMMMMMM|#############  -> low      conf 0.27  {"mid":0.24,"low":0.37,"falling":0.08,"high":-0.2,"rising":0}
+   falling  pîi   ############|#############  -> falling  conf 1.00  {"mid":0,"low":0.15,"falling":2.04,"high":-0.4,"rising":0}
+   high     rót   ############|##RRRRRRRRRRR  -> high     conf 0.36  {"mid":0,"low":-0.5,"falling":0,"high":0.46,"rising":0.27}
+   rising   hǐw   ############|#############  -> rising   conf 1.00  {"mid":0,"low":-0.12,"falling":0.32,"high":0,"rising":1.92}
+Female5_dtaa   centre 226.6 Hz   all-5-correct offsets: -0.25..2 (10 steps)
+   mid      dtaa  FFFFFFFFF###|#########LLLL  -> mid      conf 1.00  {"mid":0.96,"low":0.15,"falling":0.21,"high":-0.68,"rising":0}
+   low      dtàa  FFFFFFFFFFF#|#############  -> low      conf 0.37  {"mid":0,"low":0.49,"falling":0.31,"high":-1.4,"rising":0}
+   falling  dtâa  ############|#############  -> falling  conf 1.00  {"mid":0,"low":0.15,"falling":1.82,"high":-0.73,"rising":0.06}
+   high     dtáa  ############|#########RRRR  -> high     conf 1.00  {"mid":0,"low":-0.5,"falling":0.03,"high":1.18,"rising":0.3}
+   rising   dtǎa  ############|#############  -> rising   conf 1.00  {"mid":0,"low":0.36,"falling":1.3,"high":0,"rising":2.05}
+Female6_mai    centre 257.9 Hz   all-5-correct offsets: 0.25..1.25 (5 steps)
+   mid      mai   HHHHHHHHH###|##########LLL  -> mid      conf 1.00  {"mid":0.94,"low":-0.17,"falling":0,"high":0.19,"rising":0.04}
+   low      mài   FFFFFFFMMMMM|M############  -> mid      conf 0.38  {"mid":0.65,"low":0.55,"falling":0.31,"high":-1.4,"rising":0}
+   falling  mâi   ############|######HHHHHHH  -> falling  conf 1.00  {"mid":0,"low":0.15,"falling":1.65,"high":-0.83,"rising":0.15}
+   high     mái   ############|#############  -> high     conf 1.00  {"mid":0,"low":-0.5,"falling":0,"high":1.8,"rising":0.21}
+   rising   mǎi   ############|#############  -> rising   conf 0.99  {"mid":0,"low":-0.09,"falling":1.3,"high":0.11,"rising":1.94}
+Male1_gee      centre 160.0 Hz   all-5-correct offsets: -0.5..0 (3 steps)
+   mid      gee   FFFFFFFFFF##|#FFFFFFFFFFLL  -> mid      conf 0.92  {"mid":0.94,"low":0.15,"falling":0.26,"high":-0.86,"rising":0.35}
+   low      gèe   FFF#########|#############  -> low      conf 1.00  {"mid":0,"low":1.15,"falling":0.31,"high":-1.4,"rising":0}
+   falling  gêe   ############|#############  -> falling  conf 1.00  {"mid":0,"low":0.15,"falling":2.13,"high":-1.25,"rising":1.35}
+   high     gée   ############|##RRRRRRRRRRR  -> high     conf 0.70  {"mid":0,"low":-0.5,"falling":0,"high":0.99,"rising":0.69}
+   rising   gěe   ############|#############  -> rising   conf 1.00  {"mid":0,"low":0.23,"falling":1.3,"high":0.01,"rising":2.05}
+Male2_gai      centre 133.4 Hz   all-5-correct offsets: -1..1 (9 steps)
+   mid      gai   HHHHHHHH####|##########LLL  -> mid      conf 1.00  {"mid":0.96,"low":0.14,"falling":0.22,"high":0.15,"rising":0}
+   low      gài   ############|#############  -> low      conf 1.00  {"mid":0,"low":1.15,"falling":0.31,"high":-1.4,"rising":0}
+   falling  gâi   ############|#############  -> falling  conf 0.99  {"mid":0,"low":0.15,"falling":1.98,"high":0.15,"rising":1.35}
+   high     gái   ############|#####FFFRRRRR  -> high     conf 0.78  {"mid":0.04,"low":-0.5,"falling":0.52,"high":0.94,"rising":0.24}
+   rising   gǎi   ############|#############  -> rising   conf 1.00  {"mid":0,"low":0.71,"falling":0.2,"high":0.1,"rising":1.75}
+Male3_maa      centre 142.4 Hz   all-5-correct offsets: -1.25..2 (14 steps)
+   mid      maa   FFFFFFF#####|#########LLLL  -> mid      conf 1.00  {"mid":0.99,"low":0.15,"falling":0.15,"high":0.1,"rising":0}
+   low      màa   MMMMM#######|#############  -> low      conf 1.00  {"mid":0,"low":0.94,"falling":0.18,"high":-0.58,"rising":0}
+   falling  mâa   ############|#############  -> falling  conf 1.00  {"mid":0,"low":0.15,"falling":2.06,"high":-0.4,"rising":0}
+   high     máa   ############|#############  -> high     conf 1.00  {"mid":0,"low":-0.5,"falling":0.48,"high":1.6,"rising":0.62}
+   rising   mǎa   ############|#############  -> rising   conf 1.00  {"mid":0,"low":-0.5,"falling":0.26,"high":0,"rising":1.18}
+Male4_mai      centre 154.5 Hz   all-5-correct offsets: NONE
+   mid      mai   FFFFFRRRRRRR|RRRRRRRRRRRRL  -> rising   conf 0.78  {"mid":0.1,"low":-0.5,"falling":0.04,"high":0,"rising":0.66}
+   low      mài   FFFFFFFFF###|#############  -> low      conf 0.51  {"mid":0,"low":0.6,"falling":0.32,"high":-1.38,"rising":0}
+   falling  mâi   LLLLLLLLLLLL|LLLLLLLLLLLLL  -> low      conf 1.00  {"mid":0,"low":0.86,"falling":0,"high":0.1,"rising":0.03}
+   high     mái   F###########|#############  -> high     conf 1.00  {"mid":0,"low":-0.5,"falling":0.33,"high":1.5,"rising":0.51}
+   rising   mǎi   ############|#############  -> rising   conf 0.78  {"mid":0,"low":-0.5,"falling":1.06,"high":0.05,"rising":1.45}
+accuracy at calibrated centre: 44/50
+  mid      correct/10 by offset: 0 0 0 0 0 0 1 2 4 7 9 9 9 7 7 7 7 7 6 6 6 3 0 0 0
+  low      correct/10 by offset: 3 3 3 4 4 5 5 5 5 6 6 7 8 10 10 10 10 10 10 10 10 10 10 10 10
+  falling  correct/10 by offset: 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 7 7 7 7 7 7 7
+  high     correct/10 by offset: 9 10 10 10 10 10 10 10 10 10 9 9 9 9 6 6 6 5 5 5 5 4 4 4 3
+  rising   correct/10 by offset: 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10
+  TOTAL/50  by offset: -3:30 -2.75:31 -2.5:31 -2.25:32 -2:32 -1.75:33 -1.5:34 -1.25:35 -1:37 -0.75:41 -0.5:42 -0.25:43 0:44 0.25:44 0.5:41 0.75:41 1:41 1.25:40 1.5:38 1.75:38 2:38 2.25:34 2.5:31 2.75:31 3:30
+
+  singles (src C calibrated on gin/bpai/nom at 207.5 Hz; A/B shown at 200 Hz):
+   C gin   mid      @208Hz -> mid      conf 0.95   correct-centre window(s): 201.8-229.8 Hz
+   C bpai  mid      @208Hz -> mid      conf 1.00   correct-centre window(s): 198.9-233.2 Hz
+   C nom   mid      @208Hz -> mid      conf 1.00   correct-centre window(s): 193.3-233.2 Hz
+   C gai   low      @208Hz -> low      conf 0.57   correct-centre window(s): 196.1-298 Hz
+   C yoo   low      @208Hz -> low      conf 0.14   correct-centre window(s): 207.7-298 Hz
+   B pet   low      @200Hz -> low      conf 1.00   correct-centre window(s): 164.9-298 Hz
+   A sip   low      @200Hz -> falling  conf 0.68   correct-centre window(s): 247-298 Hz
+   B chuu  falling  @200Hz -> falling  conf 1.00   correct-centre window(s): 146.9-146.9, 151.2-151.2, 155.6-289.6 Hz
+   C chop  falling  @208Hz -> falling  conf 1.00   correct-centre window(s): 130.9-132.8, 136.7-258, 285.4-285.4 Hz
+   C baan  falling  @208Hz -> falling  conf 1.00   correct-centre window(s): 120-229.8 Hz
+   C haa   falling  @208Hz -> falling  conf 1.00   correct-centre window(s): 129-265.5, 289.6-298 Hz
+   C rak   high     @208Hz -> high     conf 1.00   correct-centre window(s): 120-129, 149-233.2 Hz
+   A rot   high     @200Hz -> high     conf 1.00   correct-centre window(s): 132.8-236.6 Hz
+   A maah  high     @200Hz -> high     conf 1.00   correct-centre window(s): 120-120, 153.4-250.6 Hz
+   A neua  high     @200Hz -> high     conf 1.00   correct-centre window(s): 157.9-240 Hz
+   C moo   rising   @208Hz -> rising   conf 1.00   correct-centre window(s): 160.2-298 Hz
+   B chan  rising   @200Hz -> rising   conf 1.00   correct-centre window(s): 149-298 Hz
+   C maar  rising   @208Hz -> rising   conf 0.90   correct-centre window(s): 120-298 Hz
+   B suay  rising   @200Hz -> rising   conf 1.00   correct-centre window(s): 130.9-298 Hz
