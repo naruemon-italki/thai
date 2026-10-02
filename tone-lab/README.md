@@ -113,3 +113,58 @@ speakers are used for training. Features come from the engine's own
 `baseline/v1/` holds the engine and Challenge exactly as they were before v2,
 and `results/results-v1.json` their results on the full corpus. Compare any
 future version against `results/results-v2.json` (or v1).
+
+## Tongue Twister bench (`twister/`)
+
+Scores the native sentence recordings exactly as the Twister mode does:
+`tongue-twister.js` and `tone-trainer.js` run together, every attempt goes
+through the Twister's own capture (its VAD policy and pace watcher), and then
+`analyse()` — the same call `onCaptureEnd` makes. `twister/ttexp.mjs` checks
+that its switchable re-implementation reproduces the app's `analyse()` exactly
+(54/54 attempts) before any variant is compared.
+
+```sh
+LABEL=new node twister/ttrun.mjs                                   # ~1 min
+node twister/ttreport.mjs results/tt-results-v2.json out/tt-results-new.json
+node twister/ttdbg.mjs moo.ref 0                                   # one attempt in detail
+```
+
+Corpus (`twister/ttcorpus.mjs`): the 8 shipped reference tracks, 12 native
+alternatives, and two files said slow / medium / fast — 25 attempts, 168
+syllables in the main set, plus 4 fast attempts reported apart (the speaker's
+own note: at that speed the tones are gone). Multi-attempt files are split at
+the speaker's long pauses. These speakers never calibrated in the app, so
+each one's centre is estimated independently of any engine
+(`py/tt_centre.py`: Praat median pitch, corrected for the sentence's tone
+mix; committed as `twister/centres.json`), and every attempt is also scored
+with that centre off by ±1 and ±2 semitones. App exports from the Twister's
+"Save attempt" button can be added as `raw` entries (see the corpus file).
+
+Results (`results/tt-compare-v1-v2.txt`):
+
+| syllables right (of 168) | 44.1 kHz | 48 kHz | same verdict at both rates |
+|---|---|---|---|
+| Twister v1 | 137 (81.5%) | 135 (80.4%) | 158 / 188 |
+| Twister v2 | 137 (81.5%) | 138 (82.1%) | 163 / 188 |
+
+Twister v2 changes one thing: the sentence pitch path now uses the
+subharmonic fix from the single-word path (`toneDsp.sentencePath`), which
+makes the shipped `moo` and `kao` reference tracks read correctly on 48 kHz
+phones. It also passes the capture's real noise threshold to `analyse()`
+(the old code read a field that did not exist; no effect on this corpus).
+
+What was tried and NOT adopted, with the numbers (`twister/ttexp.mjs`,
+`twister/ttmodel-exp.mjs`, `twister/ttpath-exp.mjs`):
+- The single-word v2 model on sentence syllables: 52-63%. Natives compress
+  their tones in sentences (tonal undershoot): low sits at −2.0 st instead of
+  −4.4, high at +0.7 instead of +3.2 and almost flat, rising barely rises
+  inside its own syllable. Scaling the contours ×2 first: 68%.
+- A model trained on these sentence syllables (leave-one-recording-out):
+  64-68%. ~170 syllables are not enough; the Twister's hand-tuned rules use
+  sentence context (register rank, declination) and stay best at ~81%.
+- The full single-word pitch path for sentences: more robust to calibration
+  error but broke the shipped `saao` track, because between syllables the
+  voice legitimately jumps 9-12 st across a consonant, which the single-word
+  leap cost treats as impossible.
+The lever for the Twister is now data: native AND learner attempts, ideally
+with a native's note of what she heard on each learner syllable.

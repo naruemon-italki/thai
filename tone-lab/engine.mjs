@@ -34,6 +34,11 @@ export function loadEngine(srcPath, sampleRate = 48000, opts = {}) {
   sandbox.AudioContext = FakeCtx;
   vm.createContext(sandbox);
   vm.runInContext(src, sandbox, { filename: 'tone-trainer.js' });
+  // Further plain (non-module) app scripts that run on top of the engine,
+  // e.g. tongue-twister.js, loaded into the same window.
+  for (const extra of (opts.scripts || [])) {
+    vm.runInContext(fs.readFileSync(extra, 'utf8'), sandbox, { filename: extra.split('/').pop() });
+  }
   const dsp = sandbox.toneDsp;
 
   // Drive the real capture engine with PCM, chunked like a ScriptProcessor
@@ -66,7 +71,25 @@ export function loadEngine(srcPath, sampleRate = 48000, opts = {}) {
       const q = rafQueue.splice(0); for (const cb of q) cb(performance.now());
     }
   }
-  return { dsp, capture, sandbox, feed };
+  // Run one capture driven by the caller's own start options (the Tongue
+  // Twister passes its VAD policy and pace watcher). `start(cap)` must return
+  // the options; the watcher may stop the capture itself. Resolves with the
+  // onEnd result, stopping manually ("user tapped stop") if audio runs out.
+  async function captureWith(pcm, makeOpts) {
+    const cap = dsp.createCapture();
+    let result = null;
+    await cap.start(Object.assign(makeOpts(cap), { onEnd: r => { result = r; } }));
+    const CH = 1024;
+    for (let i = 0; i < pcm.length && !result; i += CH) {
+      const chunk = pcm.subarray(i, Math.min(pcm.length, i + CH));
+      if (fake.tap && fake.tap.onaudioprocess) fake.tap.onaudioprocess({ inputBuffer: { getChannelData: () => chunk } });
+      const q = rafQueue.splice(0); for (const cb of q) cb(performance.now());
+    }
+    if (!result) cap.stop('user');
+    cap.release();
+    return result;
+  }
+  return { dsp, capture, captureWith, sandbox, feed };
 }
 
 export function decode(file, sampleRate) {

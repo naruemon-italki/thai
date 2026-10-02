@@ -1,0 +1,66 @@
+tt-v2
+  @44.1k  syllables right: 137/168 (81.5%)  [references 45/49, alternatives 92/119]  perfect attempts 11/25  failed attempts 0  mean score 85%
+          by tone mid 18/23, low 17/21, falling 42/49, high 13/21, rising 47/54   fast attempts: 8/20
+          centre off by (st): -2:128  -1:130  0:137  +1:138  +2:136  (of 168)
+  @48k  syllables right: 138/168 (82.1%)  [references 46/49, alternatives 92/119]  perfect attempts 10/25  failed attempts 0  mean score 83%
+          by tone mid 19/23, low 18/21, falling 42/49, high 14/21, rising 45/54   fast attempts: 6/20
+          centre off by (st): -2:127  -1:137  0:138  +1:136  +2:128  (of 168)
+  same syllable verdict at 44.1k and 48k: 163/188
+
+@44.1k (target -> heard; capital = correct)
+  moo.ref#0              RLF -> RLF  3/3 100%
+  moo.m1#0               RLF -> RLF  3/3 100%
+  moo.m1#1               RLF -> RrF  2/3 74%
+  krai.ref#0             MRLL -> MRLL  4/4 100%
+  krai.f1#0              MRLL -> MRLL  4/4 100%
+  yak.ref#0              HLFHH -> HLFHH  5/5 100%
+  yak.f1#0               HLFHH -> HLFHH  5/5 100%
+  yak.f2#0               HLFHH -> HLFHH  5/5 100%
+  yak.f3#0               HLFHH -> fhFfH  2/5 43%
+  maa.ref#0              MLFHR -> MLFHR  5/5 98%
+  kao.ref#0              RMFHML -> RMFfML  5/6 83%
+  kao.f1#0               RMFHML -> RMFmMr  4/6 65%
+  mai.ref#0              RLFFFR -> RLFFFR  6/6 100%
+  mai.f2#0               RLFFFR -> RLhFFR  5/6 83%
+  mai.f2#1               RLFFFR -> RLFFFR  6/6 97%
+  chaam.ref#0            MRFHMRFF -> MRFHMRFF  8/8 100%
+  chaam.f1#0             MRFHMRFF -> MRhrlRhF  4/8 54%
+  chaam.f2#0             MRFHMRFF -> MRFrMRFF  7/8 91%
+  chaam.f3#0             MRFHMRFF -> lfrfflFF  2/8 45%
+  chaam.speed#0(slow)    MRFHMRFF -> MRFrMRFF  7/8 91%
+  chaam.speed#1(medium)  MRFHMRFF -> MRhHMlhF  5/8 60%
+  chaam.speed#2(fast)    MRFHMRFF -> hhhHlRhF  3/8 46%
+  saao.ref#0             RRRLFRMRFRRF -> RRRrFRMRFRfr  9/12 76%
+  saao.v1#0              RRRLFRMRFRRF -> RRRLFRMfFRlF  10/12 81%
+  saao.speed#0(slow)     RRRLFRMRFRRF -> RRRLFRrRFRRF  11/12 91%
+  saao.speed#1(medium)   RRRLFRMRFRRF -> RmRLFRlRFRRF  10/12 83%
+  saao.speed#2(fast)     RRRLFRMRFRRF -> mmmrFRflFlRF  5/12 49%
+
+@48k (target -> heard; capital = correct)
+  moo.ref#0              RLF -> RLF  3/3 100%
+  moo.m1#0               RLF -> RrF  2/3 67%
+  moo.m1#1               RLF -> RLh  2/3 54%
+  krai.ref#0             MRLL -> MRLL  4/4 100%
+  krai.f1#0              MRLL -> MRLL  4/4 88%
+  yak.ref#0              HLFHH -> HLFHH  5/5 100%
+  yak.f1#0               HLFHH -> HLFHH  5/5 99%
+  yak.f2#0               HLFHH -> HLFHH  5/5 100%
+  yak.f3#0               HLFHH -> fhFfH  2/5 44%
+  maa.ref#0              MLFHR -> MLFHR  5/5 99%
+  kao.ref#0              RMFHML -> fMFHML  5/6 86%
+  kao.f1#0               RMFHML -> RMFmrL  4/6 63%
+  mai.ref#0              RLFFFR -> RLFFFR  6/6 100%
+  mai.f2#0               RLFFFR -> RLhFFR  5/6 83%
+  mai.f2#1               RLFFFR -> RLFFFR  6/6 99%
+  chaam.ref#0            MRFHMRFF -> MRFHMRFF  8/8 100%
+  chaam.f1#0             MRFHMRFF -> MRhrMRhF  5/8 63%
+  chaam.f2#0             MRFHMRFF -> MRFrMRFF  7/8 90%
+  chaam.f3#0             MRFHMRFF -> MfFlMRFF  6/8 72%
+  chaam.speed#0(slow)    MRFHMRFF -> MRFrMRFF  7/8 91%
+  chaam.speed#1(medium)  MRFHMRFF -> flFHMlhF  4/8 52%
+  chaam.speed#2(fast)    MRFHMRFF -> MlhlrmFl  2/8 27%
+  saao.ref#0             RRRLFRMRFRRF -> RRRLFRMRFRfr  10/12 83%
+  saao.v1#0              RRRLFRMRFRRF -> RRRLFRMfFRlF  10/12 80%
+  saao.speed#0(slow)     RRRLFRMRFRRF -> RRffrRhRFRRF  8/12 67%
+  saao.speed#1(medium)   RRRLFRMRFRRF -> RmRLFRlRFRRF  10/12 83%
+  saao.speed#2(fast)     RRRLFRMRFRRF -> mmmrFlllFlRF  4/12 42%

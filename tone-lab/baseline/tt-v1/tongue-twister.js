@@ -1481,15 +1481,7 @@
       }
       var tones = twister.syllables.map(function (s) { return s.tone; });
       var N = tones.length;
-      /* Engine v2 sentence pitch path (toneDsp.sentencePath): the octave
-         fix that stopped whole stretches being tracked an octave off, without
-         the single-word continuity rules that do not fit sentences. Measured on
-         25 native attempts (tone-lab/twister): at 48 kHz 135 -> 138/168
-         syllables, and the moo and kao reference tracks, which misread on
-         48 kHz phones, now read correctly; 44.1 kHz unchanged. An older engine
-         without it falls back to the original path. */
-      var utt = d.extractUtterance(frames, liveThreshold, centreHz,
-                                   d.sentencePath ? { wordPath: d.sentencePath } : undefined);
+      var utt = d.extractUtterance(frames, liveThreshold, centreHz);
       if (!utt) return { ok: false, reason: 'nospeech' };
 
       var seg = segment(frames, utt, N);
@@ -3371,11 +3363,7 @@
       setStatus('I didn\u2019t hear anything. Tap the microphone and speak clearly.', true);
       return;
     }
-    // The capture reports its live noise threshold as `thresholdRms`; this
-    // read `res.threshold`, which does not exist, so the guard against a
-    // poisoned noise floor in prepareRuns() never received it. No change on the
-    // native corpus (quiet rooms); it matters in a noisy one.
-    var out = TTD.analyse(frames, (res && (res.thresholdRms || res.threshold)) || 0,
+    var out = TTD.analyse(frames, (res && res.threshold) || 0,
                           prof.centerHz > 0 ? prof.centerHz : 0, activeTwister);
     if (!out.ok) {
       // Report what went wrong rather than showing a confident wrong breakdown.

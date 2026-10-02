@@ -1,5 +1,7 @@
-// Guard for the Tongue Twister: its path (sentence capture without wordMode,
-// extractUtterance) must give IDENTICAL output under two engine versions.
+// Guard for the DEFAULT sentence path (sentence capture without wordMode,
+// extractUtterance with no options): it must give IDENTICAL output under two
+// engine versions. Since Twister v2 the Twister itself opts into
+// toneDsp.sentencePath; its results are measured by twister/ttrun.mjs.
 //   node twister-invariance.mjs [engineA] [engineB]
 import { loadEngine, decode, noise } from './engine.mjs';
 import { SPEAKERS, AUDIO } from './corpus.mjs';

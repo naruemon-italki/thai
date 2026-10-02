@@ -1637,16 +1637,6 @@ import { PitchDetector } from './pitchy.js';
   // word only up to WORD_GAP_SKIP weak frames in a row may be stepped over,
   // and an octave across such a gap still pays the leap cost, so this cannot
   // be used to hop octaves mid-word.
-  // SENTENCE PATH (Tongue Twister). The single-word settings above are wrong
-  // for sentences in one respect: between syllables the voice legitimately
-  // resets by 9-12 st across a consonant, which the leap cost treats as
-  // impossible (measured: it broke the shipped saao reference). What sentences
-  // DO need is the subharmonic fix, so the Twister opts into exactly that and
-  // nothing else: no leap cost, no edge or gap skipping. Measured on 25 native
-  // attempts (tone-lab/twister): 48 kHz 135 -> 138/168 syllables, 44.1 kHz
-  // unchanged, same verdict at both rates 144 -> 149/168, and the moo and kao
-  // reference tracks, which misread at 48 kHz, read correctly.
-  const SENTENCE_PATH = { subRatio: WORD_SUB_RATIO, leapCost: 0, edgeSkip: false, gapSkip: 0 };
   const EDGE_SKIP_V0 = 0.35;         // periodicity at the candidate floor (NSDF_MIN) is free to skip...
   const EDGE_SKIP_W_V = 3.0;         // ...above it each unit of NSDF costs this
   const EDGE_SKIP_W_E = 2.0;         // ...plus this times the frame's share of the loud level
@@ -1655,15 +1645,7 @@ import { PitchDetector } from './pitchy.js';
   const WORD_GAP_SKIP = 2;           // inside a word, at most this many weak frames in a row
                                      // may be stepped over (same price as an edge skip)
 
-  // `o` overrides the single-word settings (used by the sentence path, see
-  // SENTENCE_PATH below); omitted, these are exactly the single-word values.
-  function resolveWordPath(frames, centreHz, o) {
-    o = o || {};
-    const subRatio = o.subRatio != null ? o.subRatio : WORD_SUB_RATIO;
-    const leapCost = o.leapCost != null ? o.leapCost : WORD_LEAP_COST;
-    const leapGrow = o.leapGrow != null ? o.leapGrow : 1;     // st of extra allowance per skipped 10 ms
-    const edgeSkip = o.edgeSkip != null ? o.edgeSkip : true;
-    const gapSkip = o.gapSkip != null ? o.gapSkip : WORD_GAP_SKIP;
+  function resolveWordPath(frames, centreHz) {
     const semi = hz => 12 * Math.log2(hz / centreHz);
     const near = (a, b) => Math.abs(12 * Math.log2(a / b)) < 1.2;
     const loud = percentile(frames.map(f => f.rms || 0), 0.90) || 1;
@@ -1672,7 +1654,7 @@ import { PitchDetector } from './pitchy.js';
       return f.cands.map(c => {
         let sub = 0;
         for (const d of f.cands) {
-          if (d === c || d.v < subRatio * c.v) continue;
+          if (d === c || d.v < WORD_SUB_RATIO * c.v) continue;
           if (near(d.hz, 2 * c.hz) || near(d.hz, 3 * c.hz)) sub = Math.max(sub, Math.min(1, d.v / Math.max(1e-6, c.v)));
         }
         const sv = semi(c.hz);
@@ -1691,7 +1673,7 @@ import { PitchDetector } from './pitchy.js';
       // Clearly voiced AND reasonably loud: this is the word, never an edge to
       // drop. Without this a genuinely fast final rise (130 -> 196 Hz in 50 ms
       // through two weak frames) was cheaper to cut off than to climb.
-      if (!edgeSkip || (vmax >= EDGE_KEEP_V && share >= EDGE_KEEP_E)) return Infinity;
+      if (vmax >= EDGE_KEEP_V && share >= EDGE_KEEP_E) return Infinity;
       return EDGE_SKIP_W_V * Math.max(0, vmax - EDGE_SKIP_V0) + EDGE_SKIP_W_E * share;
     });
 
@@ -1712,7 +1694,7 @@ import { PitchDetector } from './pitchy.js';
       for (let a = 0; a < K; a++) {
         cost[a] = prevC[PRE(j - 1)] + cur[a].emit; bp[a] = [j - 1, PRE(j - 1)];
         let gapCost = 0;
-        for (let g = 1; g <= gapSkip + 1 && j - g >= 0; g++) {
+        for (let g = 1; g <= WORD_GAP_SKIP + 1 && j - g >= 0; g++) {
           if (g > 1) gapCost += skip[j - g + 1];      // the frame stepped over
           if (!isFinite(gapCost)) break;
           const jp = j - g, pn = nodes[idx[jp]], pc = costs[jp];
@@ -1722,10 +1704,10 @@ import { PitchDetector } from './pitchy.js';
           // leap limit grows by 1 st per extra 10 ms rather than in
           // proportion to the gap, which made an octave over 30 ms look like
           // ordinary movement.
-          const leapAt = WORD_LEAP_ST + leapGrow * (loosen - 1);
+          const leapAt = WORD_LEAP_ST + (loosen - 1);
           for (let b = 0; b < pn.length; b++) {
             const jump = Math.abs(cur[a].s - pn[b].s);
-            const c = pc[b] + gapCost + OCT_W_JUMP * jump / loosen + (jump > leapAt ? leapCost : 0) + cur[a].emit;
+            const c = pc[b] + gapCost + OCT_W_JUMP * jump / loosen + (jump > leapAt ? WORD_LEAP_COST : 0) + cur[a].emit;
             if (c < cost[a]) { cost[a] = c; bp[a] = [jp, b]; }
           }
         }
@@ -2313,7 +2295,7 @@ import { PitchDetector } from './pitchy.js';
     if (frames.some(f => f.cands && f.cands.length)) {
       if (wordPath) {
         const anchor = centreHint > 0 ? centreHint : wordAnchor(frames);
-        if (anchor > 0) frames = resolveWordPath(frames, anchor, typeof wordPath === 'object' ? wordPath : null);
+        if (anchor > 0) frames = resolveWordPath(frames, anchor);
       } else {
         const voiced = frames.filter(f => f.hz > 0).map(f => f.hz);
         const anchor = centreHint > 0 ? centreHint : (voiced.length ? median(voiced) : 0);
@@ -2456,9 +2438,7 @@ import { PitchDetector } from './pitchy.js';
      something was discarded.                                                */
   function extractUtterance(frames, liveThreshold, centreHint, opts) {
     opts = opts || {};
-    // opts.wordPath: use the v2 single-word pitch path (resolveWordPath) for the
-    // whole utterance. Off by default, so existing callers are unchanged.
-    const prep = prepareRuns(frames, liveThreshold, centreHint, opts.wordPath || false);
+    const prep = prepareRuns(frames, liveThreshold, centreHint);
     if (!prep) return null;
 
     const minRunMs = (typeof opts.minRunMs === 'number') ? opts.minRunMs : MIN_SPEECH_MS;
@@ -4104,7 +4084,6 @@ import { PitchDetector } from './pitchy.js';
     // Whole-sentence extraction: same cleanup pipeline as extractContour, but
     // keeps every run instead of the loudest one. Callers MUST pass centreHint.
     extractUtterance: extractUtterance,
-    sentencePath: SENTENCE_PATH,        // pass as extractUtterance(..., { wordPath: sentencePath })
     resolveVadPolicy: resolveVadPolicy, // exposed so callers can see the defaults
     // Internals for the offline test bench (tone-lab). Not used by the app.
     _lab: { prepareRuns: prepareRuns, refineRun: refineRun, wordAnchor: wordAnchor, resolveWordPath: resolveWordPath,
