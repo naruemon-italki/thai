@@ -31,11 +31,16 @@ lists every word that was **fixed** or **broken**.
 | Group | What | Words |
 |---|---|---|
 | native | 16 speakers saying one syllable in all 5 tones (`Female1..11`, `Male1..5`) | 80 |
+| native, holdout | 4 more such speakers (`Female12..15`), added AFTER the v2 model was trained | 20 |
 | native | partner: `mid/low/falling/high/rising_female.mp3` | 18 |
 | native | native male: `*_male.mp3` | 25 |
 | learner | beginner learner: `*_male-2.mp3` (labels = the tone he *intended*) | 14 |
+| learner, app | attempts exported from the app with "Save attempt" (used as-is, judged at the profile centre in the file name) | 1 |
 | volume | `Female7_maa-LOUD` (same file, +7 dB) | 5 |
 | examples | the 19 example-button mp3s + their baked contours | 19 |
+
+To add an app attempt, list it under `L1app` (or a new `kind: 'takes'` speaker)
+in `corpus.mjs` with the tone that was intended.
 
 Every speaker is calibrated **the app's way** (three mid-tone captures through
 the engine's own `calibrationWord` / `finalizeCalibration`, including the
@@ -56,24 +61,28 @@ noise before it and auto-stop after it, exactly as on a phone, at 48 kHz and
 
 ## Results
 
-`results/compare-v1-v2.txt` is the full before/after. Headline (123 native
-words, 48 kHz):
+`results/compare-v1-v2.txt` is the full before/after. Headline (143 native
+words from 22 speakers, 48 kHz):
 
 | | v1 | v2 |
 |---|---|---|
-| accuracy at calibrated centre | 99 (80.5%) | 118 (95.9%) |
-| … unseen speakers (leave-one-speaker-out) | — | 116 (94.3%) |
-| calibration off by −1 / +1 st | 86 / 98 | 115 / 117 |
-| calibration off by −2 / +2 st | 66 / 90 | 106 / 113 |
-| speakers robust to ±1 st calibration error | 3 / 18 | 11 / 18 |
-| calibrations an octave (or more) wrong | 2 / 20 | 0 / 20 |
-| wrong answers shown as "Clear" | 13 of 24 | 2 of 5 |
-| Challenge: wrong tone scoring Good or better | 9.8% | 0.6% |
-| Challenge: right tone scoring Good or better | 87% | 94% |
-| pitch frames > 3 st off Praat | 3.98% | 0.61% |
+| accuracy at calibrated centre | 118 (82.5%) | 138 (96.5%) |
+| … the 4 holdout speakers the v2 model never saw | 19 / 20 | 20 / 20 |
+| … every speaker unseen (leave-one-speaker-out over all 22) | — | 136 (95.1%) |
+| calibration off by −1 / +1 st | 99 / 117 | 135 / 137 |
+| calibration off by −2 / +2 st | 76 / 107 | 123 / 133 |
+| calibrations an octave (or more) wrong | 2 / 24 | 0 / 24 |
+| wrong answers shown as "Clear" | 14 of 25 | 2 of 5 |
+| Challenge: wrong tone scoring Good or better | 9.3% | 0.5% |
+| Challenge: right tone scoring Good or better | 88% | 95% |
+| pitch frames > 3 st off Praat (first 20 speakers) | 3.98% | 0.61% |
 
-The v2 model was trained on these natives, so 118 is partly in-sample; the
-leave-one-speaker-out figure (116) is the honest estimate for a new voice.
+Decisions recorded by experiments (October 2026, after the holdout test):
+- Retraining on all 22 speakers changed nothing measurable (138/143 either
+  way, one word fixed and one broken), so the tested model was kept.
+- Heavier-tailed class models (`experiments/student-t.mjs`) did not change
+  native accuracy and only softened in-between learner productions from
+  ~99% to ~88%, so the Gaussian model was kept.
 
 ## Retraining the model
 

@@ -27,8 +27,9 @@ for (const SR of [48000, 44100]) {
   const E = loadEngine(ENGINE, SR);
   for (const sp of SPEAKERS) {
     if (sp.group === 'volume') continue;           // a louder copy of F7, not a new voice
-    const { toks, takes, calTakes, spare } = speakerSet(sp, SR);
-    const profile = await calibrate(E, calTakes, spare);
+    if (process.env.EXCLUDE_HOLDOUT && sp.set === 'holdout') continue;   // keep unseen voices unseen
+    const { toks, takes, calTakes, spare, fixed } = speakerSet(sp, SR);
+    const profile = fixed || await calibrate(E, calTakes, spare);
     if (!profile) { console.error('calibration failed', sp.id, SR); continue; }
     for (let i = 0; i < toks.length; i++) {
       const r = await E.capture(takes[i], profile.centerHz);

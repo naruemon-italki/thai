@@ -46,8 +46,8 @@ for (const SR of SRS) {
   const scoreTarget = loadChallengeScorer(CHALLENGE);
   const run = out.runs[SR] = { speakers: {}, examples: [], singles: {} };
   for (const sp of SPEAKERS) {
-    const { toks, takes, calTakes, spare } = speakerSet(sp, SR);
-    const profile = await calibrate(E, calTakes, spare);
+    const { toks, takes, calTakes, spare, fixed } = speakerSet(sp, SR);
+    const profile = fixed || await calibrate(E, calTakes, spare);
     const rec = run.speakers[sp.id] = { group: sp.group, set: sp.set, file: sp.file || sp.suffix, profile, tokens: [] };
     if (!profile) { process.stderr.write(`${SR} ${sp.id}: calibration FAILED\n`); continue; }
     for (let i = 0; i < toks.length; i++) {

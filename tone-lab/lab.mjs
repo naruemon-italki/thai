@@ -39,11 +39,11 @@ export async function calibrate(E, takes, spare = []) {
 // calibration takes and spare mid words for a "say one more" request.
 export function speakerSet(sp, SR) {
   const toks = speakerTokens(sp, SR);
-  const takes = toks.map((t, i) => asTake(t.pcm, SR, t.startMs, t.endMs, { seed: i + 1 }));
+  const takes = toks.map((t, i) => t.raw ? t.pcm : asTake(t.pcm, SR, t.startMs, t.endMs, { seed: i + 1 }));
   const calToks = calibrationTokens(sp, toks);
   const calTakes = calToks.map(t => takes[toks.indexOf(t)]);
   const spare = toks.filter(t => t.label === 'mid' && !calToks.includes(t)).map(t => takes[toks.indexOf(t)]);
-  return { toks, takes, calTakes, spare };
+  return { toks, takes, calTakes, spare, fixed: sp.fixedCentre ? { centerHz: sp.fixedCentre } : null };
 }
 
 export { SPEAKERS };

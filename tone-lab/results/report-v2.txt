@@ -1,23 +1,23 @@
-v2  (../tone-trainer.js, 2026-10-02T09:59:16.880Z)
-  Native accuracy @44.1k: 118/123 (95.9%)   by tone mid 25/25, low 22/25, falling 22/24, high 25/25, rising 24/24   original 10 speakers 49/50, new 69/73
-  Native accuracy @48k: 118/123 (95.9%)   by tone mid 25/25, low 22/25, falling 23/24, high 24/25, rising 24/24   original 10 speakers 48/50, new 70/73
-  Calibration off by (st):  -2:106  -1.5:114  -1:115  -0.5:116  0:118  +0.5:118  +1:117  +1.5:115  +2:113   (of 123)
-  Speakers with every word right for any calibration error within ±1 st: 11/18
-  Same verdict at 44.1k and 48k: 139/142 (97.9%)
+v2b  (../tone-trainer.js, 2026-10-02T11:32:03.578Z)
+  Native accuracy @44.1k: 138/143 (96.5%)   by tone mid 29/29, low 26/29, falling 26/28, high 29/29, rising 28/28   original 10 speakers 49/50, new 69/73, holdout 20/20
+  Native accuracy @48k: 138/143 (96.5%)   by tone mid 29/29, low 26/29, falling 27/28, high 28/29, rising 28/28   original 10 speakers 48/50, new 70/73, holdout 20/20
+  Calibration off by (st):  -2:123  -1.5:133  -1:135  -0.5:136  0:138  +0.5:138  +1:137  +1.5:135  +2:133   (of 143)
+  Speakers with every word right for any calibration error within ±1 st: 15/22
+  Same verdict at 44.1k and 48k: 160/163 (98.2%)
   Volume (Female7 vs +7 dB copy): 5/5 same verdict  quiet [mid,low,falling,high,rising]  loud [mid,low,falling,high,rising]
-  Confidence: right 0.95, wrong 0.68;  wrong answers shown as "Clear": 2/5;  right answers shown as "Unsure": 0/118
-  Challenge, tone they said:  mean 91.95%, Good+ 94.3%, Great+ 91.1%
-  Challenge, a different tone: mean 1.99%, Good+ 0.6%, Great+ 0.4%   (level-vs-level: mean 5.14%, Good+ 1.3%)
+  Confidence: right 0.95, wrong 0.68;  wrong answers shown as "Clear": 2/5;  right answers shown as "Unsure": 0/138
+  Challenge, tone they said:  mean 92.5%, Good+ 95.1%, Great+ 92.3%
+  Challenge, a different tone: mean 1.85%, Good+ 0.5%, Great+ 0.3%   (level-vs-level: mean 4.89%, Good+ 1.1%)
   Example buttons (baked): 19/19 correct, 19 Clear 
   Example mp3s analysed live (calibrated set): 10/11 yoo:low->mid
-  Learner (intended tone), centre 128 Hz: 12/14 agree   M>M M>M M>M L>L L>L L>L F>F F>F H>H H>H H>F R>H R>R R>R
+  Learner (intended tone), centre 128 Hz: 12/15 agree   M>M M>M M>M L>L L>L L>L F>F F>F H>H H>H H>F R>H R>R R>R R>H
 
   said \ heard    mid  low fall high risi none
-  mid              25    0    0    0    0    0
-  low               3   22    0    0    0    0
-  falling           0    0   23    1    0    0
-  high              1    0    0   24    0    0
-  rising            0    0    0    0   24    0
+  mid              29    0    0    0    0    0
+  low               3   26    0    0    0    0
+  falling           0    0   27    1    0    0
+  high              1    0    0   28    0    0
+  rising            0    0    0    0   28    0
 
 Per word @48k: strip = calibration offset -2..+2 st ('#' correct, else letter heard; '|' = real calibration)
   F1   native  centre 254.1 Hz
@@ -122,6 +122,30 @@ Per word @48k: strip = calibration offset -2..+2 st ('#' correct, else letter he
        falling  ####|#####  -> falling  conf 1
        high     ####|#####  -> high     conf 1
        rising   ####|#####  -> rising   conf 1
+  F12  native  centre 216.8 Hz
+       mid      F###|#####  -> mid      conf 0.93
+       low      ####|#####  -> low      conf 0.94
+       falling  ####|#####  -> falling  conf 1
+       high     ####|#####  -> high     conf 0.97
+       rising   ####|#####  -> rising   conf 1
+  F13  native  centre 217.8 Hz
+       mid      ####|#####  -> mid      conf 0.94
+       low      M###|#####  -> low      conf 0.94
+       falling  ####|#####  -> falling  conf 1
+       high     ####|#####  -> high     conf 0.97
+       rising   ####|#####  -> rising   conf 1
+  F14  native  centre 225.3 Hz
+       mid      ####|#####  -> mid      conf 0.92
+       low      ####|#####  -> low      conf 1
+       falling  ####|#####  -> falling  conf 1
+       high     ####|#####  -> high     conf 0.97
+       rising   ####|#####  -> rising   conf 1
+  F15  native  centre 222.0 Hz
+       mid      ####|#####  -> mid      conf 0.94
+       low      MM##|#####  -> low      conf 0.89
+       falling  ####|#####  -> falling  conf 1
+       high     ####|#####  -> high     conf 0.94
+       rising   ####|#####  -> rising   conf 1
   PF   native  centre 170.2 Hz
        mid      ####|#####  -> mid      conf 0.94
        mid      ####|####L  -> mid      conf 0.88
@@ -182,3 +206,5 @@ Per word @48k: strip = calibration offset -2..+2 st ('#' correct, else letter he
        rising   HHHH|HHHHH  -> high     conf 0.94
        rising   HHHH|#####  -> rising   conf 0.5
        rising   ####|#####  -> rising   conf 0.96
+  L1app learner centre 138.0 Hz
+       rising   HHHH|HHHHH  -> high     conf 0.99

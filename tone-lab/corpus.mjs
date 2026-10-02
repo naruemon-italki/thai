@@ -34,10 +34,20 @@ export const SPEAKERS = [
   { id: 'F10', file: 'Female10_maa', kind: '5tone', group: 'native', set: 'new' },
   { id: 'F11', file: 'Female11_gaa', kind: '5tone', group: 'native', set: 'new' },
   { id: 'M5', file: 'Male5_tee', kind: '5tone', group: 'native', set: 'new' },
+  // Added after the v2 model was trained: never seen by it, so their score is
+  // an honest test of a new voice (set 'holdout').
+  { id: 'F12', file: 'Female12_paa', kind: '5tone', group: 'native', set: 'holdout' },
+  { id: 'F13', file: 'Female13_mee', kind: '5tone', group: 'native', set: 'holdout' },
+  { id: 'F14', file: 'Female14_kaao', kind: '5tone', group: 'native', set: 'holdout' },
+  { id: 'F15', file: 'Female15_gaa', kind: '5tone', group: 'native', set: 'holdout' },
   { id: 'PF', name: 'partner', kind: 'pertone', group: 'native', set: 'new', suffix: 'female' },
   { id: 'NM', name: 'native male', kind: 'pertone', group: 'native', set: 'new', suffix: 'male' },
   { id: 'L1', name: 'learner (beginner)', kind: 'pertone', group: 'learner', set: 'new', suffix: 'male-2',
     note: 'usually calibrates around 140 Hz in the app' },
+  // Attempts exported from the app with "Save attempt" (raw capture buffer,
+  // used as-is), judged at the profile centre in the file name.
+  { id: 'L1app', name: 'learner, app attempts', kind: 'takes', group: 'learner', set: 'app', fixedCentre: 138,
+    takes: [['tone_trainer_138_high_1801.wav', 'rising', 'pom (ผม) - app said high']] },
 ];
 
 // Single native words used by the Trainer's example buttons. `src` groups
@@ -65,6 +75,13 @@ function segsOf(pcm, sr, file, opts) {
 // Every word of one speaker: [{ spk, group, label, idx, pcm, startMs, endMs }]
 export function speakerTokens(sp, sr) {
   const out = [];
+  if (sp.kind === 'takes') {
+    sp.takes.forEach(([file, label, note], i) => {
+      const pcm = decode(AUDIO + file, sr);
+      out.push({ spk: sp.id, group: sp.group, label, idx: i, file, note, pcm, raw: true, startMs: 0, endMs: pcm.length / sr * 1000 });
+    });
+    return out;
+  }
   if (sp.kind === '5tone') {
     const pcm = load(sp.file, sr);
     const segs = segsOf(pcm, sr, sp.file, sp);
@@ -83,6 +100,7 @@ export function speakerTokens(sp, sr) {
 
 // The words this speaker would say during calibration (three mid-tone words).
 export function calibrationTokens(sp, toks) {
+  if (sp.fixedCentre) return [];
   const mids = toks.filter(t => t.label === 'mid');
   return sp.kind === '5tone' ? [mids[0], mids[0], mids[0]] : mids.slice(0, 3);
 }
