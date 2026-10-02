@@ -13,6 +13,16 @@
    so the five Thai tones land at their true height, and draw on a canvas. The
    audio never leaves the AnalyserNode — nothing is uploaded or stored.
 
+   ENGINE v2 (tone-lab, see tone-lab/README.md for the before/after):
+     • single-word pitch path that can no longer save a calibration an octave
+       off or follow a subharmonic for a whole word (resolveWordPath),
+     • the word is the run with the most speech ENERGY, not the most frames,
+     • a statistical tone model learned from native speakers replaces the
+       hand-tuned scoring rules, with calibration error built in,
+     • calibration asks for an extra word when the first three disagree.
+   The sentence path used by the Tongue Twister is unchanged (verified
+   byte-for-byte by tone-lab/twister-invariance.mjs).
+
    Talks to the rest of the app through exactly three window touchpoints:
      window.state, window.saveStorage, window.tts
    and exposes exactly two hooks back: window.enterTone, window.teardownTone.
@@ -377,6 +387,19 @@ import { PitchDetector } from './pitchy.js';
     { thai: 'ดี',  rom: 'dee',  gloss: '“good”' }
   ];
   const CAL_WORD_COUNT = CAL_WORDS.length;
+  // Calibration v2: if the three words disagree by more than CAL_MAX_SPREAD_ST
+  // (a cough, a word said up high, or a tracking slip), ask for one more mid
+  // word, up to CAL_MAX_WORDS in all. The centre is the median of the word
+  // medians, so with four or five words a single odd one no longer moves it.
+  // Measured on 20 speakers: three words from one speaker typically agree to
+  // within 0.2-0.5 st, so 1.5 st only triggers on a genuinely bad take.
+  const CAL_EXTRA_WORDS = [
+    { thai: 'นา',  rom: 'naa',  gloss: '“rice field”' },
+    { thai: 'กิน', rom: 'gin',  gloss: '“to eat”' }
+  ];
+  const CAL_MAX_WORDS = CAL_WORD_COUNT + CAL_EXTRA_WORDS.length;
+  const CAL_MAX_SPREAD_ST = 1.5;
+  function calWordAt(i) { return i < CAL_WORD_COUNT ? CAL_WORDS[i] : CAL_EXTRA_WORDS[i - CAL_WORD_COUNT]; }
   const CAL_SUCCESS_MS = 700;        // success feedback duration (sound + green flash) before
                                      // advancing to the next calibration word; record button is
                                      // frozen+greyed for this window so nothing is tapped mid-cue.
@@ -520,8 +543,7 @@ import { PitchDetector } from './pitchy.js';
   let selectedProfileId = null;      // selected in the picker (may differ until Start)
   let mode = 'trainer';              // 'trainer' | 'calibrate' — what the mic loop is doing
   let calWordIdx = 0;                // which calibration WORD we're on (0..N-1)
-  let calWordMedians = [];           // per-word median Hz (one entry per finished word)
-  let calAllFrames = [];             // all cleaned frames across words (for the 10/90 range)
+  let calWords = [];                 // finished calibration words: { medianHz, hz[] } (see calibrationWord)
   let calName = '';                  // name entered for the new profile
   let calRecalId = null;             // when recalibrating, the existing profile id
   let calCancelled = false;          // set when the user backs out mid-word, so the
@@ -644,7 +666,7 @@ import { PitchDetector } from './pitchy.js';
     $('tone-cal-rec-btn').addEventListener('click', onCalRecordTap);
     $('tone-cal-listen').addEventListener('click', () => {
       try {
-        if (window.tts) window.tts.speak(CAL_WORDS[calWordIdx].thai, $('tone-cal-listen'));
+        if (window.tts) window.tts.speak(calWordAt(calWordIdx).thai, $('tone-cal-listen'));
       } catch (e) {}
     });
     $('tone-cal-done-ok').addEventListener('click', () => finishCalModal());
@@ -1179,6 +1201,7 @@ import { PitchDetector } from './pitchy.js';
         // errors from the very first frame, instead of waiting for three
         // accepted frames to build a reference (which could themselves be wrong).
         centreHint: (activeProfile && activeProfile.centerHz > 0) ? activeProfile.centerHz : 0,
+        wordMode: true,
         onFrame: onLiveFrame,
         onEnd: onCaptureEnd
       });
@@ -1224,6 +1247,13 @@ import { PitchDetector } from './pitchy.js';
       frozen = true;
       elClearBtn.hidden = false;
       reportDetection();
+      // A word far outside the profile's register: say so, because every
+      // verdict depends on that centre and the learner cannot see it.
+      const off = activeProfile ? profileMismatchSt(core, captureCentre) : 0;
+      if (Math.abs(off) > PROFILE_MISMATCH_ST) {
+        setStatus('That word was ' + Math.round(Math.abs(off)) + ' semitones ' + (off > 0 ? 'above' : 'below') +
+                  ' your voice profile. If this keeps happening, go back and tap Recalibrate.', 'conf-unsure');
+      }
       logDebugAttempt(core, detectedTone);
     } else {
       trimmedPoints = null;
@@ -1383,14 +1413,16 @@ import { PitchDetector } from './pitchy.js';
   //     100Hz man, and MPM on 2.3 periods locks onto subharmonics.
   //   • Constraining the period SEARCH is what removes harmonic errors, rather
   //     than trying to repair them afterwards.
-  function analysisPlanFor(centreHz, sampleRate) {
+  //  `hiSt` lets a single-word capture search higher than SEARCH_HI (see
+  //  WORD_SEARCH_HI); omitted, the plan is exactly the v1 plan.
+  function analysisPlanFor(centreHz, sampleRate, hiSt) {
     const hintHz = centreHz > 0 ? centreHz : 170;
     const want = ANALYSIS_PERIODS * sampleRate / hintHz;
     const winLen = want <= 1024 ? 1024 : (want <= 2048 ? 2048 : 4096);
     let minHz = F0_MIN, maxHz = F0_MAX;
     if (centreHz > 0) {
       minHz = Math.max(F0_MIN, centreHz * Math.pow(2, SEARCH_LO / 12));
-      maxHz = Math.min(F0_MAX, centreHz * Math.pow(2, SEARCH_HI / 12));
+      maxHz = Math.min(F0_MAX, centreHz * Math.pow(2, (hiSt > 0 ? hiSt : SEARCH_HI) / 12));
     }
     return { winLen, minHz, maxHz };
   }
@@ -1537,6 +1569,181 @@ import { PitchDetector } from './pitchy.js';
   }
 
   // =========================================================
+  //  SINGLE-WORD PITCH PATH (engine v2)
+  //  -------------------------------------------------------
+  //  Used by extractContour() only — i.e. the Trainer, the Challenge and
+  //  calibration. The sentence path (extractUtterance, used by the Tongue
+  //  Twister) still runs resolveOctavePath() exactly as before.
+  //
+  //  Measured against Praat on 142 words from 20 speakers (tone-lab), the v1
+  //  path put 4.0% of contour frames more than 3 semitones off (v2: 0.6%),
+  //  almost all of them whole BLOCKS at an octave (or a third) from the truth:
+  //
+  //   • Calibration has no centre, so the band is 70-600 Hz and the octave
+  //     path was anchored on the median of the live greedy picks. One noisy
+  //     frame before the word seeded that greedy chain at 110 Hz for a 275 Hz
+  //     voice, the chain followed the third subharmonic (92 Hz) all the way,
+  //     and the profile was saved 19 semitones low. Another voice (strong 2nd
+  //     harmonic) was saved an octave HIGH. Every later attempt by those
+  //     speakers was then judged against a wrong centre.
+  //   • The subharmonic test (SUBHARM_RATIO 0.88) also fires on the TRUE
+  //     pitch of voices whose 2nd harmonic is strong — common in men — and the
+  //     path then spent whole stretches an octave up.
+  //   • A leap of an octave cost about as much as the subharmonic penalty
+  //     saved over ~15 frames, so long wrong blocks were affordable.
+  //
+  //  The fixes, each small: anchor calibration on the STRONGEST periodicity
+  //  (not on a greedy chain), mark subharmonics only when the rival is nearly
+  //  as strong (and check the 3rd as well as the 2nd), and charge a fixed
+  //  extra cost for any leap no voice can make in one hop.
+  // =========================================================
+  const WORD_SUB_RATIO = 0.985;      // rival at 2x/3x must be (nearly) as strong as the candidate
+  const WORD_LEAP_ST = 4.0;          // a hop larger than this (per 10 ms) is not phonation...
+  const WORD_LEAP_COST = 3.0;        // ...and pays this on top of the per-semitone cost
+  const ANCHOR_MIN_V = 0.80;         // frames this clearly periodic vote for the anchor
+  // End-of-word trims applied to single words (refineRun applies all three
+  // for the sentence path's final run, unchanged).
+  const WORD_TRIMS = { creak: true, release: true, reversal: true };
+  const WORD_SEARCH_HI = 14;         // single words search 2 st higher than SEARCH_HI: measured,
+                                     // a native rising tone peaked +12.3 st above her centre, and
+                                     // with the v1 ceiling its last frames could only be tracked
+                                     // as a subharmonic.
+
+  // Robust register of a recording with no calibrated centre: the median, over
+  // the loud and clearly periodic frames, of each frame's strongest NSDF peak.
+  // The strongest peak is the true period far more often than any harmonic or
+  // subharmonic, and a median of them cannot be dragged by a few noisy frames.
+  function wordAnchor(frames) {
+    const rms = frames.map(f => f.rms || 0);
+    const gate = 0.25 * percentile(rms, 0.90);
+    const picks = [];
+    for (const f of frames) {
+      if (!f.cands || !f.cands.length || (f.rms || 0) < gate) continue;
+      let b = f.cands[0];
+      for (const c of f.cands) if (c.v > b.v) b = c;
+      if (b.v >= ANCHOR_MIN_V) picks.push(b.hz);
+    }
+    return picks.length >= 3 ? median(picks) : 0;
+  }
+
+  // The path may also leave frames at the very START and END of the capture
+  // unvoiced, at a price that is low for quiet, weakly periodic frames and high
+  // for loud, clearly voiced ones. v1 forced the path through every frame that
+  // had any candidate, so the first frame of a word decided the octave: a
+  // native male's word began with one faint frame whose only candidate was the
+  // octave above, and the path stayed there for 140 ms because leaving it cost
+  // more than the error. A falling tone's last, barely periodic frames did the
+  // same at the other end, pulling the whole tail up an octave. Inside the
+  // word only up to WORD_GAP_SKIP weak frames in a row may be stepped over,
+  // and an octave across such a gap still pays the leap cost, so this cannot
+  // be used to hop octaves mid-word.
+  const EDGE_SKIP_V0 = 0.35;         // periodicity at the candidate floor (NSDF_MIN) is free to skip...
+  const EDGE_SKIP_W_V = 3.0;         // ...above it each unit of NSDF costs this
+  const EDGE_SKIP_W_E = 2.0;         // ...plus this times the frame's share of the loud level
+  const EDGE_KEEP_V = 0.70;          // a frame at least this periodic...
+  const EDGE_KEEP_E = 0.15;          // ...and this loud (share of p90) can never be skipped
+  const WORD_GAP_SKIP = 2;           // inside a word, at most this many weak frames in a row
+                                     // may be stepped over (same price as an edge skip)
+
+  function resolveWordPath(frames, centreHz) {
+    const semi = hz => 12 * Math.log2(hz / centreHz);
+    const near = (a, b) => Math.abs(12 * Math.log2(a / b)) < 1.2;
+    const loud = percentile(frames.map(f => f.rms || 0), 0.90) || 1;
+    const nodes = frames.map(f => {
+      if (!f.cands || !f.cands.length) return [];
+      return f.cands.map(c => {
+        let sub = 0;
+        for (const d of f.cands) {
+          if (d === c || d.v < WORD_SUB_RATIO * c.v) continue;
+          if (near(d.hz, 2 * c.hz) || near(d.hz, 3 * c.hz)) sub = Math.max(sub, Math.min(1, d.v / Math.max(1e-6, c.v)));
+        }
+        const sv = semi(c.hz);
+        const outside = sv < SEARCH_LO ? (SEARCH_LO - sv) : (sv > WORD_SEARCH_HI ? (sv - WORD_SEARCH_HI) : 0);
+        return { hz: c.hz, s: sv, emit: OCT_W_NSDF * (1 - c.v) + OCT_W_BAND * outside + OCT_W_SUBHARM * sub };
+      });
+    });
+    const idx = [];
+    for (let i = 0; i < nodes.length; i++) if (nodes[i].length) idx.push(i);
+    if (idx.length < 2) return frames;
+    const skip = idx.map(i => {
+      const f = frames[i];
+      let vmax = 0;
+      for (const c of f.cands) if (c.v > vmax) vmax = c.v;
+      const share = Math.min(1, (f.rms || 0) / loud);
+      // Clearly voiced AND reasonably loud: this is the word, never an edge to
+      // drop. Without this a genuinely fast final rise (130 -> 196 Hz in 50 ms
+      // through two weak frames) was cheaper to cut off than to climb.
+      if (vmax >= EDGE_KEEP_V && share >= EDGE_KEEP_E) return Infinity;
+      return EDGE_SKIP_W_V * Math.max(0, vmax - EDGE_SKIP_V0) + EDGE_SKIP_W_E * share;
+    });
+
+    // State layout per frame: [0..k-1] candidates, k = "not started", k+1 = "ended".
+    // A voiced state may also be reached from a voiced state up to
+    // WORD_GAP_SKIP frames back, stepping over weak frames in between (they
+    // become unvoiced). Measured: one faint frame in the middle of a breathy
+    // rising tone offered only the octave above, and with no way round it the
+    // path preferred to END the word there — losing the whole rise.
+    const PRE = j => nodes[idx[j]].length, POST = j => nodes[idx[j]].length + 1;
+    const costs = [nodes[idx[0]].map(nd => nd.emit).concat([skip[0], Infinity])];
+    const back = [null];                        // back[j][a] = [frameIndex j', state]
+    for (let j = 1; j < idx.length; j++) {
+      const cur = nodes[idx[j]], K = cur.length;
+      const cost = new Array(K + 2).fill(Infinity);
+      const bp = new Array(K + 2).fill(null);
+      const prevC = costs[j - 1];
+      for (let a = 0; a < K; a++) {
+        cost[a] = prevC[PRE(j - 1)] + cur[a].emit; bp[a] = [j - 1, PRE(j - 1)];
+        let gapCost = 0;
+        for (let g = 1; g <= WORD_GAP_SKIP + 1 && j - g >= 0; g++) {
+          if (g > 1) gapCost += skip[j - g + 1];      // the frame stepped over
+          if (!isFinite(gapCost)) break;
+          const jp = j - g, pn = nodes[idx[jp]], pc = costs[jp];
+          const dt = frames[idx[j]].t - frames[idx[jp]].t;
+          const loosen = Math.min(6, Math.max(1, dt / HOP_MS));
+          // A gap lets the voice move further, but not by an octave: the
+          // leap limit grows by 1 st per extra 10 ms rather than in
+          // proportion to the gap, which made an octave over 30 ms look like
+          // ordinary movement.
+          const leapAt = WORD_LEAP_ST + (loosen - 1);
+          for (let b = 0; b < pn.length; b++) {
+            const jump = Math.abs(cur[a].s - pn[b].s);
+            const c = pc[b] + gapCost + OCT_W_JUMP * jump / loosen + (jump > leapAt ? WORD_LEAP_COST : 0) + cur[a].emit;
+            if (c < cost[a]) { cost[a] = c; bp[a] = [jp, b]; }
+          }
+        }
+      }
+      cost[K] = prevC[PRE(j - 1)] + skip[j]; bp[K] = [j - 1, PRE(j - 1)];
+      cost[K + 1] = prevC[POST(j - 1)] + skip[j]; bp[K + 1] = [j - 1, POST(j - 1)];
+      const pn = nodes[idx[j - 1]];
+      for (let b = 0; b < pn.length; b++) {
+        if (prevC[b] + skip[j] < cost[K + 1]) { cost[K + 1] = prevC[b] + skip[j]; bp[K + 1] = [j - 1, b]; }
+      }
+      costs.push(cost); back.push(bp);
+    }
+    const last = costs[idx.length - 1];
+    let best = 0;
+    for (let a = 1; a < last.length; a++) if (last[a] < last[best]) best = a;
+    const pick = new Array(idx.length).fill(-1);   // -1 = stepped over (unvoiced)
+    let j = idx.length - 1, a = best;
+    while (j >= 0) {
+      pick[j] = a;
+      if (j === 0) break;
+      const [jp, b] = back[j][a];
+      for (let k = jp + 1; k < j; k++) pick[k] = -1;
+      j = jp; a = b;
+    }
+
+    const out = frames.map(f => ({ t: f.t, hz: f.hz, hzD: f.hzD, rms: f.rms, cands: f.cands }));
+    let voiced = 0;
+    for (let j = 0; j < idx.length; j++) {
+      const k = pick[j], nd = nodes[idx[j]];
+      out[idx[j]].hz = (k >= 0 && k < nd.length) ? nd[k].hz : 0;
+      if (k >= 0 && k < nd.length) voiced++;
+    }
+    return voiced >= MIN_CORE_POINTS ? octaveSnap(out) : resolveOctavePath(frames, centreHz);
+  }
+
+  // =========================================================
   //  SHARED CAPTURE ENGINE
   //  -------------------------------------------------------
   //  One engine, driven by both the Tone Trainer and the Tone Challenge, so a
@@ -1651,7 +1858,10 @@ import { PitchDetector } from './pitchy.js';
         sinkNode.connect(ctx.destination);
       }
 
-      const plan = analysisPlanFor(opts.centreHint, sampleRate);
+      // wordMode: the Trainer, the Challenge and calibration capture ONE word
+      // and get the wider single-word ceiling. The Tongue Twister does not set
+      // it, so its band is unchanged.
+      const plan = analysisPlanFor(opts.centreHint, sampleRate, opts.wordMode ? WORD_SEARCH_HI : 0);
       winLen = plan.winLen;
       searchMinHz = plan.minHz;
       searchMaxHz = plan.maxHz;
@@ -2073,16 +2283,24 @@ import { PitchDetector } from './pitchy.js';
   //  therefore factored into prepareRuns() and shared, so extractContour() and
   //  extractUtterance() cannot drift apart the way the Challenge's private copy
   //  of the capture loop once drifted from the Trainer's.
-  function prepareRuns(frames, liveThreshold, centreHint) {
+  //  `wordPath` (single words only) swaps in resolveWordPath() and the robust
+  //  wordAnchor(); without it this is byte-for-byte the v1 behaviour that the
+  //  sentence path relies on.
+  function prepareRuns(frames, liveThreshold, centreHint, wordPath) {
     if (!frames || frames.length < MIN_CORE_POINTS) return null;
 
     // 0. Re-solve the octave choice with the whole recording in hand. The live
     //    pass had to commit frame by frame; here we can see that (say) a halved
     //    creaky tail is inconsistent with everything before it.
     if (frames.some(f => f.cands && f.cands.length)) {
-      const voiced = frames.filter(f => f.hz > 0).map(f => f.hz);
-      const anchor = centreHint > 0 ? centreHint : (voiced.length ? median(voiced) : 0);
-      if (anchor > 0) frames = resolveOctavePath(frames, anchor);
+      if (wordPath) {
+        const anchor = centreHint > 0 ? centreHint : wordAnchor(frames);
+        if (anchor > 0) frames = resolveWordPath(frames, anchor);
+      } else {
+        const voiced = frames.filter(f => f.hz > 0).map(f => f.hz);
+        const anchor = centreHint > 0 ? centreHint : (voiced.length ? median(voiced) : 0);
+        if (anchor > 0) frames = resolveOctavePath(frames, anchor);
+      }
     }
 
     // 1. Re-derive the noise floor from the WHOLE capture, not just its opening
@@ -2170,15 +2388,33 @@ import { PitchDetector } from './pitchy.js';
   }
 
   function extractContour(frames, liveThreshold, centreHint) {
-    const prep = prepareRuns(frames, liveThreshold, centreHint);
+    const prep = prepareRuns(frames, liveThreshold, centreHint, true);
     if (!prep) return null;
 
-    // 3. Keep the run with the most voiced frames. Picking the BEST run rather
-    //    than the first is what makes a false start harmless.
-    let best = prep.runs[0];
-    for (const r of prep.runs) if (r.count > best.count) best = r;
+    // 3. Keep the run that carries the most SPEECH ENERGY. Picking the best run
+    //    rather than the first is what makes a false start harmless; weighing
+    //    it by energy rather than by frame count (v1) is what stops a steady
+    //    background hum from winning. Measured: a 200 ms vowel at full voice
+    //    lost to 340 ms of 92 Hz room hum 18 dB quieter, because the hum had
+    //    more voiced frames, and the hum's flat line was then scored as the
+    //    word. Energy is summed as RMS (amplitude), so loudness counts but a
+    //    single loud click cannot outweigh a real syllable.
+    let best = prep.runs[0], bestE = -1;
+    for (const r of prep.runs) {
+      let e = 0;
+      for (let i = r.start; i <= r.end; i++) if (prep.frames[i].hz > 0) e += prep.frames[i].rms || 0;
+      if (e > bestE) { bestE = e; best = r; }
+    }
 
-    return refineRun(prep.frames, best, prep.thresh, centreHint, true);
+    // Calibration has no centre; give the end-of-word trims the robust anchor
+    // instead, so they behave the same as they will in practice.
+    const hint = centreHint > 0 ? centreHint : wordAnchor(prep.frames);
+    let pts = refineRun(prep.frames, best, prep.thresh, hint, false);
+    if (!pts) return null;
+    if (WORD_TRIMS.creak) pts = trimTerminalCreak(pts, hint);
+    if (WORD_TRIMS.release) pts = trimTerminalRelease(pts, hint);
+    if (WORD_TRIMS.reversal) pts = trimTerminalReversal(pts);
+    return pts.length >= MIN_CORE_POINTS ? pts : null;
   }
 
   /* ---- Whole-utterance extraction ---------------------------------------
@@ -2492,6 +2728,214 @@ import { PitchDetector } from './pitchy.js';
     }));
     return extractContour(frames, thresholdRms, centreHint);
   }
+  // =========================================================
+  //  STATISTICAL TONE MODEL (engine v2)
+  //  -------------------------------------------------------
+  //  Replaces the hand-written scoring rules (classifyToneRules, kept below
+  //  for comparison and as a fallback) with a small model LEARNED from native
+  //  recordings. Measured in tone-lab with leave-one-speaker-out testing, i.e.
+  //  every speaker judged by a model that never heard them:
+  //
+  //                          calibration off by  -2   -1    0   +1   +2 st
+  //      v1 rules (v1 front end)                  66   86   99   98   90  /123
+  //      this model, unseen speakers             109  113  116  116  112  /123
+  //  (123 native words, 18 speakers, 48 kHz; TONE_MODEL.eval holds the same
+  //  figures for the model actually embedded.)
+  //
+  //  HOW IT WORKS. The cleaned contour is converted to semitones from the
+  //  speaker's calibrated centre, stretched to 20 evenly spaced points, and
+  //  summarised by its first four cosine (DCT) coefficients:
+  //      x0  average height        (the only one that depends on calibration)
+  //      x1  overall slope         (+ falls, - rises)
+  //      x2  curvature             (+ dip-then-rise, - rise-then-fall)
+  //      x3  finer S-shape
+  //  Each tone is a Gaussian cloud in that 4-D space, learned from natives.
+  //  The answer is the posterior probability of each tone, so "confidence" is
+  //  a real probability. Checked on unseen speakers: of the answers given at
+  //  >= 80% (shown as "Clear") 111/113 were right, at >= 95% 77/78.
+  //
+  //  CALIBRATION ERROR IS BUILT IN. A centre that is off by d semitones moves
+  //  x0 by exactly d and nothing else, so the model adds calSigma^2 to every
+  //  tone's x0 variance: it judges the word as if the centre could be off by
+  //  about that much. This replaces the Challenge's old best-of-7 centre
+  //  sweep, which let a native mid word score 97% on a HIGH target.
+  //
+  //  The numbers between the markers are written by tone-lab/train.mjs. Do
+  //  not edit them by hand; retrain instead (see tone-lab/README.md).
+  // =========================================================
+  const CLASSIFIER = 'model';        // 'model' (v2) | 'rules' (v1 behaviour, for comparison)
+  /* @tone-model:begin */
+  const TONE_MODEL = {"id":"tm-2026-10-02", "tones":["mid", "low", "falling", "high", "rising"], "features":"DCT 0-3 of the semitone contour (re calibrated centre), 20 time-normalised points", "trainedOn":"246 contours = 123 native words x (48k, 44.1k), 18 speakers", "mu":[[-0.1442,0.1958,-0.0915,0.123],[-4.4215,0.9204,0.2521,0.146],[3.378,1.9018,-1.4792,0.4617],[3.1808,-1.4681,0.4001,-0.0509],[-2.2613,-1.8096,2.0792,-0.3708]], "cov":[[[1.5818,-0.2466,-0.0323,-0.0038],[-0.2466,0.3612,-0.0252,0.0219],[-0.0323,-0.0252,0.1614,-0.0248],[-0.0038,0.0219,-0.0248,0.1158]],[[3.4239,-0.4053,-0.2125,-0.0166],[-0.4053,0.4075,-0.0008,0.0012],[-0.2125,-0.0008,0.1708,-0.0153],[-0.0166,0.0012,-0.0153,0.1027]],[[3.2183,-0.7843,0.1274,0.0243],[-0.7843,0.9579,-0.1419,0.0288],[0.1274,-0.1419,0.3038,-0.0739],[0.0243,0.0288,-0.0739,0.1645]],[[3.3225,-0.3628,-0.2393,-0.0122],[-0.3628,0.4881,0.0308,-0.0073],[-0.2393,0.0308,0.2105,-0.0233],[-0.0122,-0.0073,-0.0233,0.1441]],[[3.5304,-0.5848,-0.2774,0.0333],[-0.5848,0.5839,0.0207,-0.056],[-0.2774,0.0207,0.2564,-0.04],[0.0333,-0.056,-0.04,0.2301]]], "temperature":1, "calSigma":{"trainer":0.7, "challenge":1}, "eval":{"method":"leave-one-speaker-out, 18 native speakers, 123 words", "accuracy48k":[109,113,116,116,112], "accuracy44k":117, "shifts":[-2,-1,0,1,2], "reliability":[{"atLeast":0.95, "right":77, "of":78},{"atLeast":0.8, "right":111, "of":113},{"atLeast":0.55, "right":116, "of":123}]}};
+  /* @tone-model:end */
+  const MODEL_POINTS = 20;           // contour resampled to this many points
+  const MODEL_COEFFS = 4;            // DCT coefficients used as features
+  const MODEL_CLAMP_ST = 15;         // semitone values clamped to +/- this before fitting
+  const ATYPICAL_Q = 13.3;           // squared Mahalanobis distance (chi2, 4 dof, p = 0.01):
+                                     // beyond this the contour is unlike any native tone, so
+                                     // confidence is scaled down instead of trusting the softmax
+
+  // Contour -> feature vector. Shared by the app and by tone-lab/train.mjs, so
+  // training and use cannot compute features differently.
+  function toneFeatures(core, centreHz) {
+    const n = core.length;
+    const s = new Array(n), t = new Array(n);
+    for (let i = 0; i < n; i++) {
+      s[i] = Math.max(-MODEL_CLAMP_ST, Math.min(MODEL_CLAMP_ST, 12 * Math.log2(core[i].hz / centreHz)));
+      t[i] = core[i].t;
+    }
+    const K = MODEL_POINTS, v = new Array(K);
+    const t0 = t[0], t1 = t[n - 1];
+    let j = 0;
+    for (let k = 0; k < K; k++) {
+      const tk = t0 + (t1 - t0) * k / (K - 1);
+      while (j < n - 2 && t[j + 1] < tk) j++;
+      const a = t[j], b = t[Math.min(n - 1, j + 1)];
+      const f = b > a ? Math.min(1, Math.max(0, (tk - a) / (b - a))) : 0;
+      v[k] = s[j] + (s[Math.min(n - 1, j + 1)] - s[j]) * f;
+    }
+    const x = [];
+    for (let c = 0; c < MODEL_COEFFS; c++) {
+      let acc = 0;
+      for (let i = 0; i < K; i++) acc += v[i] * Math.cos(Math.PI * c * (i + 0.5) / K);
+      x.push(acc / K);
+    }
+    return x;
+  }
+
+  function matInv(M) {
+    const n = M.length, A = M.map((r, i) => r.concat(M.map((_, j) => (i === j ? 1 : 0))));
+    for (let c = 0; c < n; c++) {
+      let p = c;
+      for (let r = c + 1; r < n; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
+      const tmp = A[c]; A[c] = A[p]; A[p] = tmp;
+      const d = A[c][c];
+      for (let k = 0; k < 2 * n; k++) A[c][k] /= d;
+      for (let r = 0; r < n; r++) if (r !== c) { const f = A[r][c]; for (let k = 0; k < 2 * n; k++) A[r][k] -= f * A[c][k]; }
+    }
+    return A.map(r => r.slice(n));
+  }
+  function matLogDet(M) {
+    const n = M.length, A = M.map(r => r.slice());
+    let ld = 0;
+    for (let c = 0; c < n; c++) {
+      let p = c;
+      for (let r = c + 1; r < n; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
+      const tmp = A[c]; A[c] = A[p]; A[p] = tmp;
+      ld += Math.log(Math.abs(A[c][c]));
+      for (let r = c + 1; r < n; r++) { const f = A[r][c] / A[c][c]; for (let k = c; k < n; k++) A[r][k] -= f * A[c][k]; }
+    }
+    return ld;
+  }
+
+  // Precision matrices for a given calibration tolerance, cached per sigma.
+  const modelCache = {};
+  function modelFor(model, calSigma) {
+    const key = (model.id || 'm') + ':' + calSigma;
+    if (modelCache[key]) return modelCache[key];
+    const P = [], ld = [];
+    for (let c = 0; c < model.cov.length; c++) {
+      const S = model.cov[c].map(r => r.slice());
+      S[0][0] += calSigma * calSigma;
+      P.push(matInv(S)); ld.push(matLogDet(S));
+    }
+    return (modelCache[key] = { P, ld });
+  }
+
+  // Posterior probability of each tone for a feature vector. `model` defaults
+  // to the embedded TONE_MODEL; tone-lab passes its own during cross-validation.
+  function tonePosteriorsX(x, calSigma, model) {
+    model = model || TONE_MODEL;
+    const M = modelFor(model, calSigma);
+    const ll = [], q = [];
+    for (let c = 0; c < model.mu.length; c++) {
+      const d = x.map((v, i) => v - model.mu[c][i]);
+      let qq = 0;
+      for (let a = 0; a < d.length; a++) for (let b = 0; b < d.length; b++) qq += d[a] * M.P[c][a][b] * d[b];
+      q.push(qq);
+      ll.push((-0.5 * qq - 0.5 * M.ld[c]) / (model.temperature || 1));
+    }
+    const mx = Math.max.apply(null, ll);
+    const e = ll.map(v => Math.exp(v - mx));
+    const z = e.reduce((a, b) => a + b, 0);
+    return { probs: e.map(v => v / z), q };
+  }
+  function tonePosteriors(core, centreHz, calSigma, model) {
+    const x = toneFeatures(core, centreHz);
+    const r = tonePosteriorsX(x, calSigma, model);
+    r.x = x;
+    return r;
+  }
+
+  // The three readout tiers. With a real probability behind it, "Clear" now
+  // means the model is at least 80% sure; below 55% it says "Unsure".
+  function confidenceTier(c) {
+    if (CLASSIFIER !== 'model' || !TONE_MODEL) return c >= 0.6 ? 'clear' : (c >= 0.35 ? 'likely' : 'unsure');
+    return c >= 0.8 ? 'clear' : (c >= 0.55 ? 'likely' : 'unsure');
+  }
+
+  function classifyTone(core, centreHz) {
+    if (CLASSIFIER !== 'model' || !TONE_MODEL) return classifyToneRules(core, centreHz);
+    if (!core || core.length < MIN_CORE_POINTS || !(centreHz > 0)) return null;
+    const r = tonePosteriors(core, centreHz, TONE_MODEL.calSigma.trainer);
+    const order = r.probs.map((p, i) => i).sort((a, b) => r.probs[b] - r.probs[a]);
+    const top = order[0];
+    // A contour far from every native tone (a cough, a laugh, two syllables)
+    // still gets SOME winner from the softmax; scale its confidence down so the
+    // readout says "Unsure" rather than presenting a guess as clear.
+    const atypical = r.q[top] > ATYPICAL_Q ? Math.max(0.3, ATYPICAL_Q / r.q[top]) : 1;
+    const probs = {};
+    TONE_ORDER.forEach((k, i) => { probs[k] = +r.probs[i].toFixed(3); });
+    // Diagnostics: the v1 feature set (used by the debug log) plus the model's.
+    let legacy = {};
+    try { legacy = computeToneScores(core, centreHz).m; } catch (e) {}
+    return {
+      tone: TONE_ORDER[top],
+      confidence: r.probs[top] * atypical,
+      runnerUp: TONE_ORDER[order[1]],
+      probs,
+      m: Object.assign({}, legacy, { centreHz, n: core.length, features: r.x.map(v => +v.toFixed(2)),
+                                     mahalanobis: +r.q[top].toFixed(2), scores: probs })
+    };
+  }
+
+  // How far, in semitones, the middle of a word sits from the calibrated
+  // centre. Across 123 native words the largest was 9.1 st (a deep low tone);
+  // an ordinary word 12 st away almost always means the profile belongs to
+  // someone else, or was saved an octave off by the v1 calibration bug.
+  const PROFILE_MISMATCH_ST = 10.5;
+  function profileMismatchSt(core, centreHz) {
+    if (!core || !core.length || !(centreHz > 0)) return 0;
+    return 12 * Math.log2(median(core.map(p => p.hz)) / centreHz);
+  }
+
+  // Score how well a contour matches a SPECIFIC target tone (Tone Challenge).
+  // The percentage is the model's probability that the word was the target
+  // tone, judged with the Challenge's (wider) calibration tolerance — so a
+  // slightly-off profile no longer costs points, and no candidate centre is
+  // "shopped for" the way the old sweep did. Returns the same shape as before:
+  // { percent (0..100), tone (winner), isTarget, runnerUp, m }.
+  function scoreToneAttempt(core, centreHz, targetTone) {
+    if (CLASSIFIER !== 'model' || !TONE_MODEL) return scoreToneAttemptRules(core, centreHz, targetTone);
+    const ti = TONE_ORDER.indexOf(targetTone);
+    if (!core || core.length < MIN_CORE_POINTS || ti < 0 || !(centreHz > 0)) {
+      return { percent: 0, tone: null, isTarget: false, runnerUp: null, m: null };
+    }
+    const r = tonePosteriors(core, centreHz, TONE_MODEL.calSigma.challenge);
+    const order = r.probs.map((p, i) => i).sort((a, b) => r.probs[b] - r.probs[a]);
+    // Only a contour far from EVERY tone (not a tone at all) loses points for
+    // being unusual. Distance from the target alone would punish a learner
+    // who exaggerates the right shape, which is exactly what teachers ask for.
+    const qMin = Math.min.apply(null, r.q);
+    const atypical = qMin > 2 * ATYPICAL_Q ? Math.max(0.5, 2 * ATYPICAL_Q / qMin) : 1;
+    const percent = Math.round(100 * r.probs[ti] * atypical);
+    const probs = {};
+    TONE_ORDER.forEach((k, i) => { probs[k] = +r.probs[i].toFixed(3); });
+    return { percent, tone: TONE_ORDER[order[0]], isTarget: order[0] === ti,
+             runnerUp: TONE_ORDER[order[1]],
+             m: { centreHz, n: core.length, features: r.x.map(v => +v.toFixed(2)), scores: probs } };
+  }
+
+  // v1 RULE-BASED CLASSIFIER (kept for comparison; CLASSIFIER = 'rules').
   // Classify a trimmed contour into one of the five Thai tones.
   //
   // TWO-STAGE decision (this is the key design):
@@ -2507,7 +2951,7 @@ import { PitchDetector } from './pitchy.js';
   //
   // Drift is calibration-independent (a sag is a sag regardless of centre), which
   // makes the low/mid call less fragile to an imperfect calibration centre.
-  function classifyTone(core, centreHz) {
+  function classifyToneRules(core, centreHz) {
     if (!core || core.length < 4) return null;
     const { sc, m } = computeToneScores(core, centreHz);
 
@@ -2855,7 +3299,7 @@ import { PitchDetector } from './pitchy.js';
   //   • margin        — how decisively the target beat (or lost to) the next tone
   // A clean on-target tone that clearly wins reads high; an ambiguous one that
   // barely loses reads mid; a contour dominated by a different tone reads low.
-  function scoreToneAttempt(core, centreHz, targetTone) {
+  function scoreToneAttemptRules(core, centreHz, targetTone) {
     if (!core || core.length < 4 || !TONE_REFS[targetTone]) {
       return { percent: 0, tone: null, isTarget: false, runnerUp: null, m: null };
     }
@@ -2886,24 +3330,23 @@ import { PitchDetector } from './pitchy.js';
     const ref = TONE_REFS[detectedTone.tone];
     const c = detectedTone.confidence;
 
-    // Three confidence tiers from the score margin.
-    //   >= 0.6  Clear   — confident
-    //   >= 0.35 Likely  — probable but not certain
-    //   <  0.35 Unsure  — ambiguous; the contour didn't strongly favour one tone
+    // Three confidence tiers (see confidenceTier): Clear / Likely / Unsure.
+    // With the v2 model `c` is the probability of the shown tone.
+    const t = confidenceTier(c);
     let tier, tierClass;
-    if (c >= 0.6)      { tier = 'Clear';  tierClass = 'conf-clear'; }
-    else if (c >= 0.35){ tier = 'Likely'; tierClass = 'conf-likely'; }
-    else               { tier = 'Unsure'; tierClass = 'conf-unsure'; }
+    if (t === 'clear')       { tier = 'Clear';  tierClass = 'conf-clear'; }
+    else if (t === 'likely') { tier = 'Likely'; tierClass = 'conf-likely'; }
+    else                     { tier = 'Unsure'; tierClass = 'conf-unsure'; }
 
     // Big readout: the tone name, ONCE (with the Thai name).
     const big = $('tone-detected');
     if (big) {
       big.textContent = ref.label + '  ' + ref.th;
-      big.className = 'tone-detected show' + (c < 0.35 ? ' uncertain' : '');
+      big.className = 'tone-detected show' + (t === 'unsure' ? ' uncertain' : '');
     }
 
     // Second line: confidence, not a repeat of the tone.
-    if (c < 0.35) {
+    if (t === 'unsure') {
       setStatus('Confidence: ' + tier + ' — could also be ' +
         TONE_REFS[detectedTone.runnerUp].label.toLowerCase() + '. Try again?', tierClass);
     } else {
@@ -3273,8 +3716,7 @@ import { PitchDetector } from './pitchy.js';
     calName = '';
     // Fresh calibration run: start at word 1 with empty accumulators.
     calWordIdx = 0;
-    calWordMedians = [];
-    calAllFrames = [];
+    calWords = [];
     // Reset steps.
     $('tone-cal-step-name').classList.toggle('hidden', !!recalId);
     $('tone-cal-step-record').classList.toggle('hidden', !recalId);
@@ -3298,7 +3740,7 @@ import { PitchDetector } from './pitchy.js';
   // The Thai is wrapped in .th-particle so it's tap-to-hear where the device has
   // Thai TTS (graceful no-op otherwise).
   function renderCalWord() {
-    const w = CAL_WORDS[calWordIdx];
+    const w = calWordAt(calWordIdx);
     if (!w) return;
     const thaiEl = $('tone-cal-thai');
     if (thaiEl) {
@@ -3312,7 +3754,9 @@ import { PitchDetector } from './pitchy.js';
     const romEl = $('tone-cal-rom'); if (romEl) romEl.textContent = w.rom;
     const glossEl = $('tone-cal-gloss'); if (glossEl) glossEl.textContent = w.gloss;
     const prog = $('tone-cal-progress');
-    if (prog) prog.textContent = 'Word ' + (calWordIdx + 1) + ' of ' + CAL_WORD_COUNT;
+    if (prog) prog.textContent = calWordIdx < CAL_WORD_COUNT
+      ? 'Word ' + (calWordIdx + 1) + ' of ' + CAL_WORD_COUNT
+      : 'One more word';
     setCalStatus('Tap the Record button and say the word.', '');
   }
 
@@ -3339,8 +3783,7 @@ import { PitchDetector } from './pitchy.js';
     if (!calName) return;
     // Begin the word cycle fresh from the first one.
     calWordIdx = 0;
-    calWordMedians = [];
-    calAllFrames = [];
+    calWords = [];
     $('tone-cal-step-name').classList.add('hidden');
     $('tone-cal-step-record').classList.remove('hidden');
     renderCalWord();
@@ -3382,6 +3825,7 @@ import { PitchDetector } from './pitchy.js';
       await getCapture().start({
         // No centre hint here: measuring the centre is the whole point.
         centreHint: 0,
+        wordMode: true,
         onFrame: (info) => {
           setCalStatus(info.inSpeech ? 'Listening\u2026 (speaking)' : 'Listening\u2026 say the word.', 'recording');
         },
@@ -3405,28 +3849,20 @@ import { PitchDetector } from './pitchy.js';
     }
   }
 
-  // A calibration word finished. Extract its contour with the shared offline
-  // pipeline, take its median as this word's mid level, and advance.
+  // A calibration word finished. Measure it with the shared pure step
+  // (calibrationWord), then either move on, ask for one more word, or save.
   function onCalCaptureEnd(result) {
     running = false;
     mode = 'trainer';
     resetCalRecordBtn();
     if (calCancelled) { calCancelled = false; return; }
 
-    // During calibration the centre is what we are measuring, so there is no
-    // profile to lean on — but once the first word is done its median is a good
-    // anchor for the ones that follow.
-    const calHint = calWordMedians.length ? median(calWordMedians) : 0;
-    const cleaned = extractContour(result.frames, result.thresholdRms, calHint);
-    if (!cleaned || cleaned.length < MIN_CORE_POINTS) {
+    const w = calibrationWord(result.frames, result.thresholdRms, calWords);
+    if (!w) {
       setCalStatus('Didn\u2019t catch that clearly. Tap once and say the word again.', '');
       return;
     }
-
-    const hzFrames = cleaned.map(p => p.hz);
-    const wordMedian = median(hzFrames);
-    calWordMedians.push(wordMedian);
-    calAllFrames = calAllFrames.concat(hzFrames);
+    calWords.push(w);
 
     // Success feedback: play the same place-word sound (at its configured volume)
     // and flash a green edge on the word card. Both are optional aids \u2014 the sound
@@ -3436,21 +3872,35 @@ import { PitchDetector } from './pitchy.js';
     try { if (typeof window.playSound === 'function') window.playSound('snd-sentence-put'); } catch (e) {}
     flashCalSuccess();
 
-    const lastWord = (calWordIdx >= CAL_WORD_COUNT - 1);
     setCalRecBusy(true);
     setTimeout(() => {
       // If the modal was closed/cancelled during the pause, do nothing.
       const modal = $('tone-cal-modal');
       if (!modal || modal.classList.contains('hidden')) { setCalRecBusy(false); return; }
       setCalRecBusy(false);
-      if (!lastWord) {
+      if (calWords.length < CAL_WORD_COUNT) {
         calWordIdx++;
         renderCalWord();
         const n = CAL_WORD_COUNT, i = calWordIdx + 1;
         setCalStatus('Got it! Word ' + i + ' of ' + n + ' \u2014 tap once and say it.', '');
-      } else {
-        finalizeCalibration();
+        return;
       }
+      const fin = finalizeCalibration(calWords);
+      if (fin.needMore) {
+        calWordIdx++;
+        renderCalWord();
+        setCalStatus('Those didn\u2019t quite match \u2014 one more word, please. Say it in your normal voice.', '');
+        return;
+      }
+      if (fin.failed) {
+        // Something went thin overall \u2014 restart the whole short set.
+        calWordIdx = 0;
+        calWords = [];
+        renderCalWord();
+        setCalStatus('Didn\u2019t catch enough clear speech. Let\u2019s try the words again.', '');
+        return;
+      }
+      saveCalibration(fin.profile);
     }, CAL_SUCCESS_MS);
   }
 
@@ -3483,37 +3933,61 @@ import { PitchDetector } from './pitchy.js';
     b.disabled = !!busy;
   }
 
-  // Compute the profile from the per-word medians. Centre = median of the three
-  // word medians (robust to one off word). Range = 10th/90th percentile of all
+  // ---- Calibration maths (pure, shared with tone-lab) ----------------------
+  // One calibration word: its cleaned contour and median. Each word is
+  // measured on its own (v1 anchored words 2 and 3 on word 1, which carried a
+  // bad first take into the others); the consistency check in
+  // finalizeCalibration is what catches a bad take now.
+  function calibrationWord(frames, thresholdRms) {
+    const cleaned = extractContour(frames, thresholdRms, 0);
+    if (!cleaned || cleaned.length < MIN_CORE_POINTS) return null;
+    const hz = cleaned.map(p => p.hz);
+    return { medianHz: median(hz), hz };
+  }
+
+  // Words so far -> { needMore } | { failed } | { profile }.
+  // Centre = median of the word medians. Range = 10th/90th percentile of all
   // cleaned frames pooled, for the visual reference band.
-  function finalizeCalibration() {
-    if (calWordMedians.length < CAL_WORD_COUNT || calAllFrames.length < CAL_MIN_SAMPLES) {
-      // Something went thin overall — restart the whole short set (3 words).
-      calWordIdx = 0;
-      calWordMedians = [];
-      calAllFrames = [];
-      renderCalWord();
-      setCalStatus('Didn\u2019t catch enough clear speech. Let\u2019s try the words again.', '');
-      return;
+  //  Accepted as soon as at least CAL_WORD_COUNT words agree to within
+  //  CAL_MAX_SPREAD_ST of the median word; only the agreeing words set the
+  //  centre, so one odd take (a word said on the wrong tone, a cough) is
+  //  simply outvoted once an extra word has been recorded.
+  function finalizeCalibration(words) {
+    if (!words || words.length < CAL_WORD_COUNT) return { needMore: true, reason: 'count' };
+    const meds = words.map(w => w.medianHz).sort((a, b) => a - b);
+    const mid = median(meds);
+    const agree = words.filter(w => Math.abs(12 * Math.log2(w.medianHz / mid)) <= CAL_MAX_SPREAD_ST);
+    if (agree.length < CAL_WORD_COUNT && words.length < CAL_MAX_WORDS) {
+      return { needMore: true, reason: 'spread' };
     }
-
-    const centerHz = median(calWordMedians.slice().sort((a, b) => a - b));
-    const sorted = calAllFrames.slice().sort((a, b) => a - b);
+    const use = agree.length >= CAL_WORD_COUNT ? agree : words;
+    const umeds = use.map(w => w.medianHz).sort((a, b) => a - b);
+    const spreadSt = 12 * Math.log2(umeds[umeds.length - 1] / umeds[0]);
+    const all = [];
+    use.forEach(w => { for (const h of w.hz) all.push(h); });
+    if (all.length < CAL_MIN_SAMPLES) return { failed: true };
+    const centerHz = median(umeds);
+    const sorted = all.slice().sort((a, b) => a - b);
     const pct = (q) => sorted[Math.min(sorted.length - 1, Math.max(0, Math.floor(q * (sorted.length - 1))))];
-    const lowHz = pct(0.10);
-    const highHz = pct(0.90);
+    return { profile: { centerHz, lowHz: pct(0.10), highHz: pct(0.90), calVersion: 2,
+                        calWords: words.length, calWordsUsed: use.length, calSpreadSt: +spreadSt.toFixed(2) } };
+  }
 
+  // Store a finished calibration in a new or the recalibrated profile.
+  function saveCalibration(cal) {
+    const centerHz = cal.centerHz, lowHz = cal.lowHz, highHz = cal.highHz;
     const st = window.state;
     if (!st) return;
     if (calRecalId) {
       const p = getProfiles().find(x => x.id === calRecalId);
-      if (p) { p.centerHz = centerHz; p.lowHz = lowHz; p.highHz = highHz; }
+      if (p) { p.centerHz = centerHz; p.lowHz = lowHz; p.highHz = highHz; p.calVersion = cal.calVersion; }
     } else {
       if (getProfiles().length >= MAX_PROFILES) { finishCalModal(); return; }
       const prof = {
         id: 'tp_' + Math.random().toString(36).slice(2, 9),
         name: calName,
         centerHz, lowHz, highHz,
+        calVersion: cal.calVersion,
         createdAt: Date.now()
       };
       st.toneProfiles = getProfiles().concat([prof]);
@@ -3527,7 +4001,7 @@ import { PitchDetector } from './pitchy.js';
     $('tone-cal-step-done').classList.remove('hidden');
     const msg = $('tone-cal-done-msg');
     if (msg) msg.textContent = (calRecalId ? 'Updated' : 'Saved') +
-      ' “' + calName + '”. Centre pitch ~' + Math.round(centerHz) + ' Hz.';
+      ' \u201c' + calName + '\u201d. Centre pitch ~' + Math.round(centerHz) + ' Hz.';
   }
 
   // ---- Public hooks (called by the app's navigate machinery) ----
@@ -3572,10 +4046,25 @@ import { PitchDetector } from './pitchy.js';
   // mechanical, low-risk plumbing) and calls these pure functions for the
   // accuracy-critical parts. Nothing here touches the trainer's DOM or state.
   window.toneDsp = {
+    // Engine generation. 2 = statistical tone model + v2 single-word front end.
+    engineVersion: 2,
     // Acoustic model
-    computeScores: computeToneScores,     // (core, centreHz) -> { sc, m }
-    classify: classifyTone,               // (core, centreHz) -> { tone, confidence, ... }
+    computeScores: computeToneScores,     // v1 rule scores (diagnostics) -> { sc, m }
+    classify: classifyTone,               // (core, centreHz) -> { tone, confidence, runnerUp, probs, m }
     scoreAttempt: scoreToneAttempt,       // (core, centreHz, targetTone) -> { percent, tone, isTarget, ... }
+    // scoreAttempt already allows for calibration error (TONE_MODEL.calSigma),
+    // so callers must NOT shop for a better centre on top of it.
+    scoreAttemptHandlesCalibration: !!(CLASSIFIER === 'model' && TONE_MODEL),
+    classifyRules: classifyToneRules,     // v1 classifier, for comparison
+    scoreAttemptRules: scoreToneAttemptRules,
+    confidenceTier: confidenceTier,       // confidence -> 'clear' | 'likely' | 'unsure'
+    toneFeatures: toneFeatures,           // (core, centreHz) -> model feature vector
+    tonePosteriorsX: tonePosteriorsX,     // (x, calSigma, model?) -> { probs, q }
+    TONE_MODEL: TONE_MODEL,
+    // Calibration steps, exactly as the modal runs them (tone-lab uses these).
+    calibrationWord: calibrationWord,     // (frames, thresholdRms) -> { medianHz, hz[] } | null
+    finalizeCalibration: finalizeCalibration, // (words) -> { needMore } | { failed } | { profile }
+    profileMismatchSt: profileMismatchSt, // (core, centreHz) -> semitones the word sits from the centre
     // Capture cleaning — offline segmentation + smoothing + de-spiking.
     extractContour: extractContour,       // (frames, thresholdRms) -> core | null
     cleanCapture: cleanCaptureCore,       // legacy alias: (points, thresholdRms) -> core | null
@@ -3596,6 +4085,9 @@ import { PitchDetector } from './pitchy.js';
     // keeps every run instead of the loudest one. Callers MUST pass centreHint.
     extractUtterance: extractUtterance,
     resolveVadPolicy: resolveVadPolicy, // exposed so callers can see the defaults
+    // Internals for the offline test bench (tone-lab). Not used by the app.
+    _lab: { prepareRuns: prepareRuns, refineRun: refineRun, wordAnchor: wordAnchor, resolveWordPath: resolveWordPath,
+            wordTrims: WORD_TRIMS },
     // Pitch detector factory (Pitchy is a module import, unreachable from a
     // classic script; kept for any external caller that still wants one).
     createDetector: function (fftSize) {
