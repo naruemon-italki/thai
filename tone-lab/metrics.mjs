@@ -23,7 +23,7 @@ export function summarise(R) {
       const a = T.filter(t => t.label === tone);
       S.accuracy[sr].byTone[tone] = `${a.filter(t => t.tone === tone).length}/${a.length}`;
     }
-    for (const set of ['original', 'new', 'holdout']) {
+    for (const set of ['original', 'new', 'holdout', 'new2']) {
       const a = T.filter(t => t.set === set);
       S.accuracy[sr].bySet[set] = `${a.filter(t => t.tone === t.label).length}/${a.length}`;
     }

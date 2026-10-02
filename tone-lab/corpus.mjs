@@ -47,7 +47,15 @@ export const SPEAKERS = [
   // Attempts exported from the app with "Save attempt" (raw capture buffer,
   // used as-is), judged at the profile centre in the file name.
   { id: 'L1app', name: 'learner, app attempts', kind: 'takes', group: 'learner', set: 'app', fixedCentre: 138,
-    takes: [['tone_trainer_138_high_1801.wav', 'rising', 'pom (ผม) - app said high']] },
+    takes: [['tone_trainer_138_high_1801.wav', 'rising', 'pom (ผม) - app said high'],
+            ['mistake-1.wav', 'rising', 'maa (หมา dog) - partner heard "dog"; v2.0 said high'],
+            ['mistake-2.wav', 'high', 'maa (ม้า horse) intended; v2.0 said falling - unconfirmed'],
+            ['mistake-3.wav', 'rising', 'chan (ฉัน); v2.0 said high']] },
+  // Partner's slow lesson-style readings of two short rising words. Clean
+  // recordings, so they get the usual lead-in noise (wrap); judged at her
+  // corpus calibration (PF, 170 Hz).
+  { id: 'PFw', name: 'partner, extra words', kind: 'takes', group: 'native', set: 'new2', fixedCentre: 170, wrap: true,
+    takes: [['pom.mp3', 'rising', 'pom (ผม)'], ['chan.mp3', 'rising', 'chan (ฉัน)']] },
 ];
 
 // Single native words used by the Trainer's example buttons. `src` groups
@@ -78,7 +86,7 @@ export function speakerTokens(sp, sr) {
   if (sp.kind === 'takes') {
     sp.takes.forEach(([file, label, note], i) => {
       const pcm = decode(AUDIO + file, sr);
-      out.push({ spk: sp.id, group: sp.group, label, idx: i, file, note, pcm, raw: true, startMs: 0, endMs: pcm.length / sr * 1000 });
+      out.push({ spk: sp.id, group: sp.group, label, idx: i, file, note, pcm, raw: !sp.wrap, startMs: 0, endMs: pcm.length / sr * 1000 });
     });
     return out;
   }
@@ -105,4 +113,6 @@ export function calibrationTokens(sp, toks) {
   return sp.kind === '5tone' ? [mids[0], mids[0], mids[0]] : mids.slice(0, 3);
 }
 
-export function singleWord(id, sr) { return load(id, sr); }
+// The example-button recordings, from the folder the app plays them from
+// (the root chan.mp3 is now the partner's own recording).
+export function singleWord(id, sr) { return load('audio/tone-words/' + id, sr); }

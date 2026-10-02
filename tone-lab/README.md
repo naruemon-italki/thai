@@ -17,7 +17,7 @@ against the frozen v1 baseline.
 ```sh
 cd tone-lab
 LABEL=new node run.mjs                                    # ~2 min -> out/results-new.json
-node report.mjs results/results-v2.json out/results-new.json   # before/after + every changed word
+node report.mjs results/results-v2.1.json out/results-new.json # before/after + every changed word
 node twister-invariance.mjs                               # Tongue Twister path must stay identical
 node ui-flow.mjs                                          # drives the real calibration modal + Trainer UI
 ```
@@ -35,9 +35,10 @@ lists every word that was **fixed** or **broken**.
 | native | partner: `mid/low/falling/high/rising_female.mp3` | 18 |
 | native | native male: `*_male.mp3` | 25 |
 | learner | beginner learner: `*_male-2.mp3` (labels = the tone he *intended*) | 14 |
-| learner, app | attempts exported from the app with "Save attempt" (used as-is, judged at the profile centre in the file name) | 1 |
+| native | partner: `pom.mp3`, `chan.mp3` (slow, lesson-style rising tones; set `new2`, not used for training) | 2 |
+| learner, app | attempts exported from the app with "Save attempt" (used as-is, judged at the profile centre in the file name): `tone_trainer_138_high_1801.wav`, `mistake-1/2/3.wav` | 4 |
 | volume | `Female7_maa-LOUD` (same file, +7 dB) | 5 |
-| examples | the 19 example-button mp3s + their baked contours | 19 |
+| examples | the 19 example-button mp3s (`audio/tone-words/`) + their baked contours | 19 |
 
 To add an app attempt, list it under `L1app` (or a new `kind: 'takes'` speaker)
 in `corpus.mjs` with the tone that was intended.
@@ -77,6 +78,52 @@ words from 22 speakers, 48 kHz):
 | Challenge: right tone scoring Good or better | 88% | 95% |
 | pitch frames > 3 st off Praat (first 20 speakers) | 3.98% | 0.61% |
 
+### v2.1: rising tones that turn up early
+
+Native speakers hold a rising tone low until ~65% of the word and only then
+go up. Learners usually turn up much earlier (at 35-50%), and the v2 model,
+which had never seen such a rise, called a 12-15 st climb from well below
+the centre "high" (`mistake-1.wav`, which the partner heard as หมา "dog";
+`mistake-3.wav`; the earlier pom). v2.1 trains the rising class on two extra
+copies of every native rising tone with its time axis warped so the turn
+comes earlier (u → u^1.4 and u^1.8: turn at ~55% and ~46%). The copies shape
+only the rising class: the other four tones' models are bit-for-bit those of
+v2, and training uses the same 18 speakers, so the 5 later voices stay an
+honest test (`experiments/rise-shape.mjs` has the search).
+
+`results/compare-v2-v2.1.txt` (both engines on the current corpus):
+
+| | v2 | v2.1 |
+|---|---|---|
+| native words right at the calibrated centre (145) | 140 | 140, the same words |
+| … unseen speakers (leave-one-speaker-out, 23 speakers) | 138 | 138 |
+| calibration off by −1 / +1 st | 137 / 139 | 137 / 139 |
+| calibration off by −2 / +2 st | 124 / 135 | 123 / 134 |
+| Challenge: right tone Good+ / wrong tone Good+ | 95.2% / 0.5% | 95.2% / 0.5% |
+| example buttons right and Clear | 19 / 19 | 19 / 19 |
+| learner rising attempts read as rising (6) | 2 | 6 |
+| learner high / falling attempts unchanged | | yes |
+| Tongue Twister (168 syllables) | 138 | 138, no attempt changed |
+
+The cost: one native high tone that starts low (Female3) reads as rising
+when the calibration is 1.5-2 st too high; one native rising tone (Female13)
+reads as high at −2 st, and two other native words go the other way.
+
+The learner's app attempts at his 138 Hz profile (48 kHz):
+
+| attempt | intended | v2 | v2.1 |
+|---|---|---|---|
+| `tone_trainer_138_high_1801.wav` (pom) | rising | high 99% Clear | rising 70% Likely |
+| `mistake-1.wav` (หมา) | rising | high 65% Likely | rising 96% Clear |
+| `mistake-2.wav` (ม้า) | high | falling 97% Clear | falling 97% Clear |
+| `mistake-3.wav` (ฉัน) | rising | high 67% Likely | rising 99% Clear |
+
+`mistake-2` is left as falling on purpose: the voice rises to +9.5 st and
+then drops 7.8 st *at full loudness* (within 2 dB of the loudest point, so
+it is not a trailing release the trimmer missed). No native high tone in the
+corpus drops more than 2.2 st from its peak, while native falling tones with
+exactly this rise-then-fall shape exist (Female10, Male4).
+
 Decisions recorded by experiments (October 2026, after the holdout test):
 - Retraining on all 22 speakers changed nothing measurable (138/143 either
   way, one word fixed and one broken), so the tested model was kept.
@@ -93,8 +140,11 @@ node train.mjs           # also writes the model into ../tone-trainer.js and mod
 
 Retrain whenever the front end (pitch path, trimming, calibration) changes, or
 new native recordings are added to `corpus.mjs`. Only `group: 'native'`
-speakers are used for training. Features come from the engine's own
-`toneFeatures()`, so training and the app cannot disagree.
+speakers are used for training, and by default only the 18 that v2 was built
+from (`ALL_SPEAKERS=1` adds the holdout sets). Every native rising tone is
+also added time-warped (v2.1; `AUG_GAMMA=` with nothing after it trains
+without). Features come from the engine's own `toneFeatures()`, so training
+and the app cannot disagree.
 
 ## Other tools
 
@@ -104,15 +154,20 @@ speakers are used for training. Features come from the engine's own
 - `dbg.mjs SPK IDX CENTRE` — one word's raw frames and runs
 - `fidelity.mjs` — the frozen v1 engine re-derives the baked example contours
   (proves the bench reproduces the app)
+- `experiments/dump-contours.mjs` + `experiments/rise-shape.mjs` — the
+  augmentation search behind v2.1 (seconds per variant once the contours are
+  dumped)
 - `experiments/classifier-search.mjs` — the feature/model search behind v2
   (needs `TRIMS=creak,release,reversal NOSWEEP=1 SRS=48000 LABEL=t_all node run.mjs`
   and the same with `SRS=44100 LABEL=t_all44`)
 
 ## Baseline
 
-`baseline/v1/` holds the engine and Challenge exactly as they were before v2,
-and `results/results-v1.json` their results on the full corpus. Compare any
-future version against `results/results-v2.json` (or v1).
+`baseline/v1/` and `baseline/v2/` hold the engine and Challenge exactly as
+they were before v2 and before v2.1; `results/results-v1.json`,
+`results/results-v2.json` (the corpus as it was then) and
+`results/results-v2-corpus2.json` (v2 on the current corpus) their results.
+Compare any future version against `results/results-v2.1.json`.
 
 ## Tongue Twister bench (`twister/`)
 

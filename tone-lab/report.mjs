@@ -11,7 +11,7 @@ const L = { mid: 'M', low: 'L', falling: 'F', high: 'H', rising: 'R' };
 
 function lines(S) {
   const a = S.accuracy, o = [];
-  for (const sr of Object.keys(a)) o.push(`Native accuracy @${sr / 1000}k: ${a[sr].correct}/${a[sr].total} (${a[sr].pct}%)   by tone ${Object.entries(a[sr].byTone).map(([k, v]) => k + ' ' + v).join(', ')}   original 10 speakers ${a[sr].bySet.original}, new ${a[sr].bySet.new}, holdout ${a[sr].bySet.holdout}`);
+  for (const sr of Object.keys(a)) o.push(`Native accuracy @${sr / 1000}k: ${a[sr].correct}/${a[sr].total} (${a[sr].pct}%)   by tone ${Object.entries(a[sr].byTone).map(([k, v]) => k + ' ' + v).join(', ')}   original 10 speakers ${a[sr].bySet.original}, new ${a[sr].bySet.new}, holdout ${a[sr].bySet.holdout}` + (a[sr].bySet.new2 && a[sr].bySet.new2 !== "0/0" ? `, partner extra words ${a[sr].bySet.new2}` : ""));
   o.push(`Calibration off by (st):  ${S.robustness.map(r => (r.offset > 0 ? '+' : '') + r.offset + ':' + r.correct).join('  ')}   (of ${S.robustness[0].total})`);
   o.push(`Speakers with every word right for any calibration error within ±1 st: ${S.robustSpeakers.within1st}/${S.robustSpeakers.total}`);
   if (S.sampleRateAgreement) o.push(`Same verdict at 44.1k and 48k: ${S.sampleRateAgreement.same}/${S.sampleRateAgreement.total} (${S.sampleRateAgreement.pct}%)`);

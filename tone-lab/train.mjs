@@ -10,6 +10,13 @@
 // Features are computed by the engine's own toneFeatures(), so training and
 // the app cannot disagree about what a contour "looks like". The learner is
 // never used for training.
+//
+// Augmentation: every native rising tone is also added with its time axis
+// warped so the turn up comes earlier (experiments/rise-shape.mjs). Natives
+// stay low until ~65% of the word; learners typically turn at 35-50%, which
+// a native still hears as rising (the partner heard mistake-1.wav as "dog").
+// The copies shape only the rising class: the pooled part of every class's
+// covariance is computed from real words alone.
 import fs from 'node:fs';
 import { loadEngine } from './engine.mjs';
 import { SPEAKERS, calibrate, speakerSet } from './lab.mjs';
@@ -19,6 +26,11 @@ const ENGINE = HERE + '../tone-trainer.js';
 const DRY = process.argv.includes('--dry');
 const TONES = ['mid', 'low', 'falling', 'high', 'rising'];
 const OPTS = { qda: 0.5, shrink: 0.05 };        // chosen by experiments/classifier-search.mjs
+const AUG = { tone: 'rising',                    // chosen by experiments/rise-shape.mjs
+  gamma: (process.env.AUG_GAMMA ?? '1.4,1.8').split(',').filter(Boolean).map(Number) };   // AUG_GAMMA= : none
+// What happened at relative time u now happens at u^gamma (gamma > 1: earlier).
+const warpCore = (core, g) => { const t0 = core[0].t, D = core[core.length - 1].t - t0;
+  return core.map(p => Object.assign({}, p, { t: t0 + D * Math.pow((p.t - t0) / D, g) })); };
 const CAL_SIGMA = { trainer: 0.7, challenge: 1.0 };
 
 // ---- 1. contours -> features ------------------------------------------------
@@ -27,7 +39,9 @@ for (const SR of [48000, 44100]) {
   const E = loadEngine(ENGINE, SR);
   for (const sp of SPEAKERS) {
     if (sp.group === 'volume') continue;           // a louder copy of F7, not a new voice
-    if (process.env.EXCLUDE_HOLDOUT && sp.set === 'holdout') continue;   // keep unseen voices unseen
+    // Keep unseen voices unseen: the shipped model is trained on the 18 speakers
+    // v2 was built from; the sets recorded later stay an honest test.
+    if (!process.env.ALL_SPEAKERS && (sp.set === 'holdout' || sp.set === 'new2')) continue;
     const { toks, takes, calTakes, spare, fixed } = speakerSet(sp, SR);
     const profile = fixed || await calibrate(E, calTakes, spare);
     if (!profile) { console.error('calibration failed', sp.id, SR); continue; }
@@ -35,7 +49,10 @@ for (const SR of [48000, 44100]) {
       const r = await E.capture(takes[i], profile.centerHz);
       const core = E.dsp.extractContour(r.frames, r.thresholdRms, profile.centerHz);
       if (!core) { console.error('no contour', sp.id, i, SR); continue; }
-      data.push({ spk: sp.id, group: sp.group, sr: SR, i, y: TONES.indexOf(toks[i].label), x: E.dsp.toneFeatures(core, profile.centerHz) });
+      const row = { spk: sp.id, group: sp.group, sr: SR, i, y: TONES.indexOf(toks[i].label) };
+      data.push({ ...row, x: E.dsp.toneFeatures(core, profile.centerHz) });
+      if (sp.group === 'native' && toks[i].label === AUG.tone)
+        for (const g of AUG.gamma) data.push({ ...row, aug: true, x: E.dsp.toneFeatures(warpCore(core, g), profile.centerHz) });
     }
   }
   process.stderr.write(`features @${SR} done\n`);
@@ -47,14 +64,16 @@ const post = (x, sigma, model) => E.dsp.tonePosteriorsX(x, sigma, model);
 let fold = 0;
 function fit(rows, temperature = 1) {
   const F = rows[0].x.length;
-  const mu = TONES.map((_, c) => {
-    const r = rows.filter(d => d.y === c);
+  const meanOf = rs => TONES.map((_, c) => {
+    const r = rs.filter(d => d.y === c);
     return Array.from({ length: F }, (_, f) => r.reduce((a, d) => a + d.x[f], 0) / r.length);
   });
+  const real = rows.filter(d => !d.aug);
+  const mu = meanOf(rows), muReal = meanOf(real);
   const covOf = c => {
-    const r = rows.filter(d => c < 0 || d.y === c);
+    const r = c < 0 ? real : rows.filter(d => d.y === c), m = c < 0 ? muReal : mu;
     const S = Array.from({ length: F }, () => new Array(F).fill(0));
-    for (const d of r) for (let a = 0; a < F; a++) for (let b = 0; b < F; b++) S[a][b] += (d.x[a] - mu[d.y][a]) * (d.x[b] - mu[d.y][b]);
+    for (const d of r) for (let a = 0; a < F; a++) for (let b = 0; b < F; b++) S[a][b] += (d.x[a] - m[d.y][a]) * (d.x[b] - m[d.y][b]);
     return S.map(row => row.map(v => v / r.length));
   };
   const pooled = covOf(-1);
@@ -69,7 +88,7 @@ function fit(rows, temperature = 1) {
   return { id: 'fold' + (fold++), mu, cov, temperature, calSigma: CAL_SIGMA };
 }
 const argmax = a => a.indexOf(Math.max(...a));
-const natives = data.filter(d => d.group === 'native');
+const natives = data.filter(d => d.group === 'native');      // incl. the warped copies (training only)
 const speakers = [...new Set(natives.map(d => d.spk))];
 
 // ---- 3. leave-one-speaker-out ---------------------------------------------
@@ -77,7 +96,7 @@ function loso(temperature) {
   const rows = [];
   for (const spk of speakers) {
     const model = fit(natives.filter(d => d.spk !== spk), temperature);
-    for (const d of natives.filter(d => d.spk === spk)) rows.push({ d, model });
+    for (const d of natives.filter(d => d.spk === spk && !d.aug)) rows.push({ d, model });
   }
   return rows;
 }
@@ -121,10 +140,11 @@ for (const r of rows.filter(r => r.d.sr === 48000)) {
 const final = fit(natives, bestT);
 const r4 = v => Math.round(v * 1e4) / 1e4;
 const MODEL = {
-  id: 'tm-' + new Date().toISOString().slice(0, 10),
+  id: 'tm-' + new Date().toISOString().slice(0, 10) + (AUG.gamma.length ? '-rw' + AUG.gamma.join('-') : ''),
   tones: TONES,
   features: 'DCT 0-3 of the semitone contour (re calibrated centre), 20 time-normalised points',
-  trainedOn: `${natives.length} contours = ${natives.length / 2} native words x (48k, 44.1k), ${speakers.length} speakers`,
+  trainedOn: `${natives.filter(d => !d.aug).length} contours = ${natives.filter(d => !d.aug).length / 2} native words x (48k, 44.1k), ${speakers.length} speakers`,
+  augmentation: `+${natives.filter(d => d.aug).length} ${AUG.tone} contours time-warped u -> u^${AUG.gamma.join('/')} (the rise comes earlier)`,
   mu: final.mu.map(r => r.map(r4)),
   cov: final.cov.map(m => m.map(r => r.map(r4))),
   temperature: bestT,

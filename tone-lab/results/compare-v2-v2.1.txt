@@ -1,0 +1,48 @@
+BEFORE: v2 (re-run on the round-5 corpus) (baseline/v2/tone-trainer.js)
+  Native accuracy @44.1k: 140/145 (96.6%)   by tone mid 29/29, low 26/29, falling 26/28, high 29/29, rising 30/30   original 10 speakers 49/50, new 69/73, holdout 20/20, partner extra words 2/2
+  Native accuracy @48k: 140/145 (96.6%)   by tone mid 29/29, low 26/29, falling 27/28, high 28/29, rising 30/30   original 10 speakers 48/50, new 70/73, holdout 20/20, partner extra words 2/2
+  Calibration off by (st):  -2:124  -1.5:134  -1:137  -0.5:138  0:140  +0.5:140  +1:139  +1.5:137  +2:135   (of 145)
+  Speakers with every word right for any calibration error within ±1 st: 16/23
+  Same verdict at 44.1k and 48k: 165/168 (98.2%)
+  Volume (Female7 vs +7 dB copy): 5/5 same verdict  quiet [mid,low,falling,high,rising]  loud [mid,low,falling,high,rising]
+  Confidence: right 0.95, wrong 0.68;  wrong answers shown as "Clear": 2/5;  right answers shown as "Unsure": 0/140
+  Challenge, tone they said:  mean 92.5%, Good+ 95.2%, Great+ 92.4%
+  Challenge, a different tone: mean 1.86%, Good+ 0.5%, Great+ 0.3%   (level-vs-level: mean 4.89%, Good+ 1.1%)
+  Example buttons (baked): 19/19 correct, 19 Clear 
+  Example mp3s analysed live (calibrated set): 10/11 yoo:low->mid
+  Learner (intended tone), centre 128 Hz: 12/18 agree   M>M M>M M>M L>L L>L L>L F>F F>F H>H H>H H>F R>H R>R R>R R>H R>H H>F R>H
+
+AFTER:  v2.1 (../tone-trainer.js)
+  Native accuracy @44.1k: 140/145 (96.6%)   by tone mid 29/29, low 26/29, falling 26/28, high 29/29, rising 30/30   original 10 speakers 49/50, new 69/73, holdout 20/20, partner extra words 2/2
+  Native accuracy @48k: 140/145 (96.6%)   by tone mid 29/29, low 26/29, falling 27/28, high 28/29, rising 30/30   original 10 speakers 48/50, new 70/73, holdout 20/20, partner extra words 2/2
+  Calibration off by (st):  -2:123  -1.5:135  -1:137  -0.5:138  0:140  +0.5:141  +1:139  +1.5:136  +2:134   (of 145)
+  Speakers with every word right for any calibration error within ±1 st: 16/23
+  Same verdict at 44.1k and 48k: 166/168 (98.8%)
+  Volume (Female7 vs +7 dB copy): 5/5 same verdict  quiet [mid,low,falling,high,rising]  loud [mid,low,falling,high,rising]
+  Confidence: right 0.95, wrong 0.67;  wrong answers shown as "Clear": 2/5;  right answers shown as "Unsure": 0/140
+  Challenge, tone they said:  mean 92.39%, Good+ 95.2%, Great+ 92.4%
+  Challenge, a different tone: mean 1.89%, Good+ 0.5%, Great+ 0.3%   (level-vs-level: mean 4.89%, Good+ 1.1%)
+  Example buttons (baked): 19/19 correct, 19 Clear 
+  Example mp3s analysed live (calibrated set): 10/11 yoo:low->mid
+  Learner (intended tone), centre 128 Hz: 16/18 agree   M>M M>M M>M L>L L>L L>L F>F F>F H>H H>H H>F R>R R>R R>R R>R R>R H>F R>R
+
+Confusion BEFORE
+  said \ heard    mid  low fall high risi none
+  mid              29    0    0    0    0    0
+  low               3   26    0    0    0    0
+  falling           0    0   27    1    0    0
+  high              1    0    0   28    0    0
+  rising            0    0    0    0   30    0
+Confusion AFTER
+  said \ heard    mid  low fall high risi none
+  mid              29    0    0    0    0    0
+  low               3   26    0    0    0    0
+  falling           0    0   27    1    0    0
+  high              1    0    0   28    0    0
+  rising            0    0    0    0   30    0
+
+Words whose verdict changed @48k (4 fixed, 0 broken, 0 wrong→other wrong):
+  fixed   L1   learner rising_male-2      #0 said rising   high     -> rising
+  fixed   L1app learner tone_trainer_138_high_1801.wav #0 said rising   high     -> rising
+  fixed   L1app learner mistake-1.wav      #1 said rising   high     -> rising
+  fixed   L1app learner mistake-3.wav      #3 said rising   high     -> rising
