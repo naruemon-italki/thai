@@ -3,7 +3,9 @@
 import fs from 'node:fs';
 import { loadEngine, decode, asTake } from './engine.mjs';
 import { AUDIO } from './corpus.mjs';
-const ENGINE = new URL('../tone-trainer.js', import.meta.url).pathname;
+// The baked TONE_WORDS contours were produced by the v1 front end, so the
+// check runs the frozen v1 engine by default (ENGINE=... to override).
+const ENGINE = process.env.ENGINE || new URL('./baseline/v1/tone-trainer.js', import.meta.url).pathname;
 const src = fs.readFileSync(ENGINE, 'utf8');
 const words = [...src.matchAll(/\{ id: '(\w+)',\s+tone: '(\w+)'.*?centreHz: ([\d.]+),\s+points: (\[\[.*?\]\]) \}/gs)]
   .map(m => ({ id: m[1], tone: m[2], centre: +m[3], pts: JSON.parse(m[4]) }));

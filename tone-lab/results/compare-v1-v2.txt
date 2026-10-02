@@ -1,0 +1,66 @@
+BEFORE: v1 (baseline/v1/tone-trainer.js)
+  Native accuracy @44.1k: 101/123 (82.1%)   by tone mid 21/25, low 19/25, falling 20/24, high 20/25, rising 21/24   original 10 speakers 45/50, new 56/73
+  Native accuracy @48k: 99/123 (80.5%)   by tone mid 19/25, low 19/25, falling 19/24, high 21/25, rising 21/24   original 10 speakers 44/50, new 55/73
+  Calibration off by (st):  -2:66  -1.5:76  -1:86  -0.5:95  0:99  +0.5:98  +1:98  +1.5:93  +2:90   (of 123)
+  Speakers with every word right for any calibration error within ±1 st: 3/18
+  Same verdict at 44.1k and 48k: 135/142 (95.1%)
+  Volume (Female7 vs +7 dB copy): 5/5 same verdict  quiet [mid,low,falling,high,rising]  loud [mid,low,falling,high,rising]
+  Confidence: right 0.92, wrong 0.7;  wrong answers shown as "Clear": 13/24;  right answers shown as "Unsure": 2/99
+  Challenge, tone they said:  mean 87.14%, Good+ 87%, Great+ 85.4%
+  Challenge, a different tone: mean 15.19%, Good+ 9.8%, Great+ 6.7%   (level-vs-level: mean 14.92%, Good+ 11.3%)
+  Example buttons (baked): 19/19 correct, 19 Clear 
+  Example mp3s analysed live (calibrated set): 11/11 
+  Learner (intended tone), centre 128 Hz: 13/14 agree   M>M M>M M>M L>L L>L L>L F>F F>F H>H H>H H>F R>R R>R R>R
+
+AFTER:  v2 (../tone-trainer.js)
+  Native accuracy @44.1k: 118/123 (95.9%)   by tone mid 25/25, low 22/25, falling 22/24, high 25/25, rising 24/24   original 10 speakers 49/50, new 69/73
+  Native accuracy @48k: 118/123 (95.9%)   by tone mid 25/25, low 22/25, falling 23/24, high 24/25, rising 24/24   original 10 speakers 48/50, new 70/73
+  Calibration off by (st):  -2:106  -1.5:114  -1:115  -0.5:116  0:118  +0.5:118  +1:117  +1.5:115  +2:113   (of 123)
+  Speakers with every word right for any calibration error within ±1 st: 11/18
+  Same verdict at 44.1k and 48k: 139/142 (97.9%)
+  Volume (Female7 vs +7 dB copy): 5/5 same verdict  quiet [mid,low,falling,high,rising]  loud [mid,low,falling,high,rising]
+  Confidence: right 0.95, wrong 0.68;  wrong answers shown as "Clear": 2/5;  right answers shown as "Unsure": 0/118
+  Challenge, tone they said:  mean 91.95%, Good+ 94.3%, Great+ 91.1%
+  Challenge, a different tone: mean 1.99%, Good+ 0.6%, Great+ 0.4%   (level-vs-level: mean 5.14%, Good+ 1.3%)
+  Example buttons (baked): 19/19 correct, 19 Clear 
+  Example mp3s analysed live (calibrated set): 10/11 yoo:low->mid
+  Learner (intended tone), centre 128 Hz: 12/14 agree   M>M M>M M>M L>L L>L L>L F>F F>F H>H H>H H>F R>H R>R R>R
+
+Confusion BEFORE
+  said \ heard    mid  low fall high risi none
+  mid              19    0    4    1    1    0
+  low               3   19    2    0    1    0
+  falling           0    2   19    3    0    0
+  high              0    1    1   21    2    0
+  rising            1    1    0    1   21    0
+Confusion AFTER
+  said \ heard    mid  low fall high risi none
+  mid              25    0    0    0    0    0
+  low               3   22    0    0    0    0
+  falling           0    0   23    1    0    0
+  high              1    0    0   24    0    0
+  rising            0    0    0    0   24    0
+
+Words whose verdict changed @48k (20 fixed, 2 broken, 0 wrong→other wrong):
+  fixed   F2   native  Female2_paa        #1 said low      falling  -> low
+  fixed   F2   native  Female2_paa        #2 said falling  high     -> falling
+  fixed   F3   native  Female3_maa        #3 said high     rising   -> high
+  BROKEN  F4   native  Female4_mixed      #3 said high     high     -> mid
+  fixed   M4   native  Male4_mai          #0 said mid      rising   -> mid
+  fixed   M4   native  Male4_mai          #2 said falling  low      -> falling
+  fixed   F8   native  Female8_tua        #0 said mid      falling  -> mid
+  fixed   F8   native  Female8_tua        #1 said low      rising   -> low
+  fixed   F8   native  Female8_tua        #2 said falling  low      -> falling
+  fixed   F8   native  Female8_tua        #3 said high     low      -> high
+  fixed   F8   native  Female8_tua        #4 said rising   mid      -> rising
+  fixed   F9   native  Female9_ga         #0 said mid      high     -> mid
+  fixed   F9   native  Female9_ga         #1 said low      falling  -> low
+  fixed   F9   native  Female9_ga         #2 said falling  high     -> falling
+  fixed   F9   native  Female9_ga         #4 said rising   high     -> rising
+  fixed   F10  native  Female10_maa       #3 said high     falling  -> high
+  fixed   F10  native  Female10_maa       #4 said rising   low      -> rising
+  fixed   M5   native  Male5_tee          #0 said mid      falling  -> mid
+  fixed   PF   native  mid_female         #2 said mid      falling  -> mid
+  fixed   PF   native  high_female        #1 said high     rising   -> high
+  fixed   NM   native  mid_male           #4 said mid      falling  -> mid
+  BROKEN  L1   learner rising_male-2      #0 said rising   rising   -> high

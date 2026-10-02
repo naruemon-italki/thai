@@ -1,0 +1,184 @@
+v1  (baseline/v1/tone-trainer.js, 2026-10-02T09:17:45.092Z)
+  Native accuracy @44.1k: 101/123 (82.1%)   by tone mid 21/25, low 19/25, falling 20/24, high 20/25, rising 21/24   original 10 speakers 45/50, new 56/73
+  Native accuracy @48k: 99/123 (80.5%)   by tone mid 19/25, low 19/25, falling 19/24, high 21/25, rising 21/24   original 10 speakers 44/50, new 55/73
+  Calibration off by (st):  -2:66  -1.5:76  -1:86  -0.5:95  0:99  +0.5:98  +1:98  +1.5:93  +2:90   (of 123)
+  Speakers with every word right for any calibration error within ±1 st: 3/18
+  Same verdict at 44.1k and 48k: 135/142 (95.1%)
+  Volume (Female7 vs +7 dB copy): 5/5 same verdict  quiet [mid,low,falling,high,rising]  loud [mid,low,falling,high,rising]
+  Confidence: right 0.92, wrong 0.7;  wrong answers shown as "Clear": 13/24;  right answers shown as "Unsure": 2/99
+  Challenge, tone they said:  mean 87.14%, Good+ 87%, Great+ 85.4%
+  Challenge, a different tone: mean 15.19%, Good+ 9.8%, Great+ 6.7%   (level-vs-level: mean 14.92%, Good+ 11.3%)
+  Example buttons (baked): 19/19 correct, 19 Clear 
+  Example mp3s analysed live (calibrated set): 11/11 
+  Learner (intended tone), centre 128 Hz: 13/14 agree   M>M M>M M>M L>L L>L L>L F>F F>F H>H H>H H>F R>R R>R R>R
+
+  said \ heard    mid  low fall high risi none
+  mid              19    0    4    1    1    0
+  low               3   19    2    0    1    0
+  falling           0    2   19    3    0    0
+  high              0    1    1   21    2    0
+  rising            1    1    0    1   21    0
+
+Per word @48k: strip = calibration offset -2..+2 st ('#' correct, else letter heard; '|' = real calibration)
+  F1   native  centre 254.1 Hz
+       mid      H###|#####  -> mid      conf 1
+       low      ####|#####  -> low      conf 1
+       falling  ####|#####  -> falling  conf 1
+       high     ####|#####  -> high     conf 1
+       rising   ####|#####  -> rising   conf 1
+  F2   native  centre 234.3 Hz
+       mid      FF##|#####  -> mid      conf 0.8
+       low      FFFF|F####  -> falling  conf 0.28
+       falling  HHHH|HHHHH  -> high     conf 1
+       high     ####|#RRRR  -> high     conf 0.51
+       rising   ####|#####  -> rising   conf 0.76
+  F3   native  centre 252.6 Hz
+       mid      FFF#|#FLLL  -> mid      conf 0.8
+       low      ####|#####  -> low      conf 1
+       falling  ####|#####  -> falling  conf 1
+       high     ###R|RRRRR  -> rising   conf 0.51
+       rising   ####|#####  -> rising   conf 1
+  F4   native  centre 212.7 Hz
+       mid      FFF#|###FL  -> mid      conf 0.82
+       low      MMMM|#####  -> low      conf 0.27
+       falling  ####|#####  -> falling  conf 1
+       high     ####|#RRRR  -> high     conf 0.36
+       rising   ####|#####  -> rising   conf 1
+  F5   native  centre 226.6 Hz
+       mid      FFF#|#####  -> mid      conf 1
+       low      FFFF|#####  -> low      conf 0.37
+       falling  ####|#####  -> falling  conf 1
+       high     ####|#####  -> high     conf 1
+       rising   ####|#####  -> rising   conf 1
+  F6   native  centre 257.9 Hz
+       mid      HHH#|#####  -> mid      conf 1
+       low      FFMM|M####  -> mid      conf 0.38
+       falling  ####|###HH  -> falling  conf 1
+       high     ####|#####  -> high     conf 1
+       rising   ####|#####  -> rising   conf 0.99
+  M1   native  centre 160.0 Hz
+       mid      FFF#|#FFFF  -> mid      conf 0.92
+       low      ####|#####  -> low      conf 1
+       falling  ####|#####  -> falling  conf 1
+       high     ####|#RRRR  -> high     conf 0.7
+       rising   ####|#####  -> rising   conf 1
+  M2   native  centre 133.4 Hz
+       mid      HH##|#####  -> mid      conf 1
+       low      ####|#####  -> low      conf 1
+       falling  ####|#####  -> falling  conf 0.99
+       high     ####|###FR  -> high     conf 0.78
+       rising   ####|#####  -> rising   conf 1
+  M3   native  centre 142.4 Hz
+       mid      FF##|#####  -> mid      conf 1
+       low      M###|#####  -> low      conf 1
+       falling  ####|#####  -> falling  conf 1
+       high     ####|#####  -> high     conf 1
+       rising   ####|#####  -> rising   conf 1
+  M4   native  centre 154.5 Hz
+       mid      FRRR|RRRRR  -> rising   conf 0.78
+       low      FFF#|#####  -> low      conf 0.51
+       falling  LLLL|LLLLL  -> low      conf 1
+       high     ####|#####  -> high     conf 1
+       rising   ####|#####  -> rising   conf 0.78
+  F7   native  centre 204.2 Hz
+       mid      FFF#|#####  -> mid      conf 0.74
+       low      ####|#####  -> low      conf 1
+       falling  ####|#####  -> falling  conf 1
+       high     ####|#####  -> high     conf 1
+       rising   ####|#####  -> rising   conf 0.75
+  F7L  volume  centre 203.8 Hz
+       mid      FFF#|#####  -> mid      conf 0.71
+       low      ####|#####  -> low      conf 1
+       falling  ####|#####  -> falling  conf 1
+       high     ####|#####  -> high     conf 1
+       rising   ####|#####  -> rising   conf 0.66
+  F8   native  centre 477.4 Hz
+       mid      FFFF|FFFFL  -> falling  conf 0.29
+       low      RRRR|RRRRR  -> rising   conf 0.56
+       falling  LLLL|LLLLL  -> low      conf 1
+       high     LFFF|LLLLL  -> low      conf 0.49
+       rising   HMMM|MMMM#  -> mid      conf 0.59
+  F9   native  centre 90.5 Hz
+       mid      HHHH|HHFFF  -> high     conf 1
+       low      FFFF|FHHHH  -> falling  conf 0.46
+       falling  HHHH|HHHHH  -> high     conf 1
+       high     ####|#F###  -> high     conf 1
+       rising   MFHH|HHHHH  -> high     conf 1
+  F10  native  centre 311.3 Hz
+       mid      HH##|#####  -> mid      conf 1
+       low      FF##|#####  -> low      conf 1
+       falling  ####|#####  -> falling  conf 1
+       high     FFFF|FFFFF  -> falling  conf 0.73
+       rising   LLLL|LLLLL  -> low      conf 1
+  F11  native  centre 240.2 Hz
+       mid      HHH#|#####  -> mid      conf 0.94
+       low      ####|#####  -> low      conf 1
+       falling  ####|#####  -> falling  conf 1
+       high     ####|#####  -> high     conf 1
+       rising   ####|#####  -> rising   conf 1
+  M5   native  centre 139.1 Hz
+       mid      FFFF|F###L  -> falling  conf 0.42
+       low      ####|#####  -> low      conf 1
+       falling  ####|#####  -> falling  conf 1
+       high     ####|###RR  -> high     conf 1
+       rising   ####|#####  -> rising   conf 0.82
+  PF   native  centre 170.0 Hz
+       mid      FF##|#####  -> mid      conf 1
+       mid      FF##|###LL  -> mid      conf 0.89
+       mid      FFFF|F###F  -> falling  conf 0.47
+       mid      F###|####L  -> mid      conf 1
+       low      MMMM|M####  -> mid      conf 0.15
+       low      MMMM|#####  -> low      conf 0.39
+       low      MMMM|MM###  -> mid      conf 0.8
+       low      MMMM|#####  -> low      conf 0.28
+       falling  ####|#####  -> falling  conf 1
+       falling  ####|#####  -> falling  conf 1
+       falling  ####|#####  -> falling  conf 1
+       high     ####|##RRR  -> high     conf 0.82
+       high     #RRR|RRRRR  -> rising   conf 0.93
+       high     ####|####M  -> high     conf 1
+       high     ####|##RRR  -> high     conf 0.67
+       rising   ####|#####  -> rising   conf 1
+       rising   ####|#####  -> rising   conf 1
+       rising   ####|#####  -> rising   conf 1
+  NM   native  centre 102.9 Hz
+       mid      FFF#|#####  -> mid      conf 1
+       mid      HH##|#####  -> mid      conf 0.97
+       mid      FFF#|#####  -> mid      conf 0.94
+       mid      FH##|#####  -> mid      conf 1
+       mid      HFFF|FFFFF  -> falling  conf 1
+       low      FF##|#####  -> low      conf 0.7
+       low      ####|#####  -> low      conf 1
+       low      ####|#####  -> low      conf 1
+       low      F###|#####  -> low      conf 1
+       low      ####|#####  -> low      conf 0.97
+       falling  HHHH|HHHHH  -> high     conf 1
+       falling  H###|#####  -> falling  conf 1
+       falling  H###|#####  -> falling  conf 1
+       falling  H###|#####  -> falling  conf 1
+       falling  H###|#####  -> falling  conf 1
+       high     ####|#####  -> high     conf 0.99
+       high     ####|#####  -> high     conf 1
+       high     ####|#####  -> high     conf 1
+       high     ####|#####  -> high     conf 1
+       high     ####|#####  -> high     conf 1
+       rising   ####|#####  -> rising   conf 0.84
+       rising   F###|#####  -> rising   conf 1
+       rising   M###|#####  -> rising   conf 1
+       rising   F###|#####  -> rising   conf 0.75
+       rising   ####|#####  -> rising   conf 1
+  L1   learner centre 128.2 Hz
+       mid      ####|##LLL  -> mid      conf 0.64
+       mid      H###|#####  -> mid      conf 1
+       mid      HF##|#####  -> mid      conf 0.96
+       low      M###|#####  -> low      conf 0.94
+       low      MMM#|#####  -> low      conf 0.64
+       low      M###|#####  -> low      conf 0.79
+       falling  ####|#####  -> falling  conf 1
+       falling  ####|#####  -> falling  conf 1
+       high     ####|#####  -> high     conf 0.99
+       high     ####|#####  -> high     conf 0.9
+       high     FFFF|F##RR  -> falling  conf 1
+       rising   H###|#####  -> rising   conf 0.39
+       rising   ####|#####  -> rising   conf 0.58
+       rising   ####|#####  -> rising   conf 1

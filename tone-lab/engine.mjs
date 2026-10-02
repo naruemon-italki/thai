@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import { execFileSync } from 'node:child_process';
 
-export function loadEngine(srcPath, sampleRate = 48000) {
+export function loadEngine(srcPath, sampleRate = 48000, opts = {}) {
   let src = fs.readFileSync(srcPath, 'utf8');
   // ES-module import of Pitchy -> stub (only used by the unused createDetector).
   src = src.replace(/^import\s+\{\s*PitchDetector\s*\}\s+from\s+['"][^'"]+['"];?/m,
@@ -25,7 +25,7 @@ export function loadEngine(srcPath, sampleRate = 48000) {
     console, Math, Date, JSON, Promise, setTimeout, clearTimeout, Float32Array, Float64Array,
     Uint8Array, ArrayBuffer, DataView, Blob: class {}, URL: { createObjectURL() { return ''; } },
     navigator: { mediaDevices: { async getUserMedia() { return { getTracks() { return [{ stop() {} }]; } }; } } },
-    document: { getElementById() { return null; }, documentElement: {}, querySelectorAll() { return []; } },
+    document: opts.document || { getElementById() { return null; }, documentElement: {}, querySelectorAll() { return []; } },
     getComputedStyle() { return { getPropertyValue() { return ''; } }; },
     requestAnimationFrame(cb) { rafQueue.push(cb); return rafQueue.length; },
     cancelAnimationFrame() { rafQueue.length = 0; },
@@ -39,10 +39,12 @@ export function loadEngine(srcPath, sampleRate = 48000) {
   // Drive the real capture engine with PCM, chunked like a ScriptProcessor
   // (1024 samples) with one rAF tick per chunk. Resolves with exactly what the
   // app's onEnd receives.
-  async function capture(pcm, centreHint) {
+  // wordMode mirrors what the Trainer, Challenge and calibration pass (v2+);
+  // a v1 engine simply ignores the unknown option.
+  async function capture(pcm, centreHint, extra) {
     const cap = dsp.createCapture();
     let result = null;
-    await cap.start({ centreHint, onEnd: r => { result = r; } });
+    await cap.start(Object.assign({ centreHint, wordMode: true, onEnd: r => { result = r; } }, extra || {}));
     const CH = 1024;
     for (let i = 0; i < pcm.length && !result; i += CH) {
       const chunk = pcm.subarray(i, Math.min(pcm.length, i + CH));
@@ -53,7 +55,18 @@ export function loadEngine(srcPath, sampleRate = 48000) {
     cap.release();
     return result;
   }
-  return { dsp, capture, sandbox };
+  // Feed audio to whatever capture the APP itself started (e.g. the Trainer's
+  // own mic button), one ScriptProcessor chunk + one rAF tick at a time, until
+  // `done()` says the app has finished with it.
+  function feed(pcm, done) {
+    const CH = 1024;
+    for (let i = 0; i < pcm.length && !done(); i += CH) {
+      const chunk = pcm.subarray(i, Math.min(pcm.length, i + CH));
+      if (fake.tap && fake.tap.onaudioprocess) fake.tap.onaudioprocess({ inputBuffer: { getChannelData: () => chunk } });
+      const q = rafQueue.splice(0); for (const cb of q) cb(performance.now());
+    }
+  }
+  return { dsp, capture, sandbox, feed };
 }
 
 export function decode(file, sampleRate) {
@@ -79,7 +92,7 @@ export function noise(n, rms, seed = 1) {
 }
 
 // Split a multi-word recording into words by short-time energy.
-export function splitWords(pcm, sr, { minGapMs = 180, relDb = -32, minWordMs = 120 } = {}) {
+export function splitWords(pcm, sr, { minGapMs = 180, relDb = -32, minWordMs = 120, floorDb = 12 } = {}) {
   const hop = Math.round(sr * 0.01), win = hop * 2;
   const env = [];
   for (let i = 0; i + win <= pcm.length; i += hop) {
@@ -87,7 +100,10 @@ export function splitWords(pcm, sr, { minGapMs = 180, relDb = -32, minWordMs = 1
     env.push(Math.sqrt(s / win));
   }
   const peak = Math.max(...env);
-  const thr = peak * Math.pow(10, relDb / 20);
+  // Relative to the loudest frame, but never closer than floorDb to the
+  // recording's own background noise (p10 of the envelope).
+  const p10 = env.slice().sort((a, b) => a - b)[Math.floor(env.length * 0.1)];
+  const thr = Math.max(peak * Math.pow(10, relDb / 20), p10 * Math.pow(10, floorDb / 20));
   const segs = [];
   let cur = null;
   env.forEach((e, k) => {
@@ -109,4 +125,35 @@ export function asTake(pcm, sr, startMs, endMs, { leadMs = 450, padMs = 120, tai
   const out = noise(lead + (b - a) + tail, noiseRms, seed);
   for (let i = a; i < b; i++) out[lead + i - a] += pcm[i] * gain;
   return out;
+}
+
+// Pull the Challenge's per-target scoring function out of tone-challenge.js
+// (it lives inside that file's IIFE), together with the single-line TC_*
+// constants it reads, so the harness scores exactly what the Challenge does.
+// v1 calls it scoreWithCentreSweep(d, core, centreHz, target); later versions
+// may name it scoreForTarget and accept a 5th `profile` argument.
+export function loadChallengeScorer(path) {
+  const src = fs.readFileSync(path, 'utf8');
+  const grab = (name) => {
+    const at = src.search(new RegExp('function\\s+' + name + '\\s*\\('));
+    if (at < 0) return null;
+    let i = src.indexOf('{', at), depth = 0;
+    for (; i < src.length; i++) {
+      if (src[i] === '{') depth++;
+      else if (src[i] === '}' && --depth === 0) break;
+    }
+    return src.slice(at, i + 1);
+  };
+  const name = grab('scoreForTarget') ? 'scoreForTarget' : 'scoreWithCentreSweep';
+  const fn = grab(name);
+  if (!fn) throw new Error('no challenge scorer found in ' + path);
+  const consts = (src.match(/^\s*var TC_[A-Z0-9_]+\s*=.*;\s*$/gm) || []).join('\n');
+  return new Function(consts + '\n' + fn + '\nreturn ' + name + ';')();
+}
+
+// The baked example contours (TONE_WORDS) straight from an engine's source.
+export function bakedExamples(path) {
+  const src = fs.readFileSync(path, 'utf8');
+  return [...src.matchAll(/\{ id: '(\w+)',\s+tone: '(\w+)'.*?centreHz: ([\d.]+),\s+points: (\[\[.*?\]\]) \}/gs)]
+    .map(m => ({ id: m[1], tone: m[2], centre: +m[3], pts: JSON.parse(m[4]) }));
 }

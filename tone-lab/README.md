@@ -1,55 +1,106 @@
 # tone-lab — offline test bench for the Tone Trainer engine
 
-Runs the **real, unmodified `tone-trainer.js`** in Node, feeding it mp3s
-through a fake microphone. Nothing is re-implemented: the same capture engine,
-live VAD, octave path, contour cleaning and `classifyTone()` the app ships are
-what analyse the audio here. Calibration is simulated the way the app does it
-(three captures, `centreHint: 0`, median of word medians).
-
-Fidelity check: on the 19 example words, the harness reproduces the contours
-baked into `TONE_WORDS` to within 0.00–0.01 semitones at 44.1 kHz.
+Runs the **real `tone-trainer.js`** (and the Challenge's scoring code from
+`tone-challenge.js`) in Node, feeding the corpus mp3s through a fake
+microphone. Nothing is re-implemented: the app's own capture engine, live
+VAD, pitch path, contour cleaning, calibration steps and tone model analyse
+the audio. Any engine version can be tested, so every change is measured
+against the frozen v1 baseline.
 
 ## Requirements
 
-- Node 18+ and `ffmpeg` on the PATH (used only to decode mp3 → PCM)
-- Optional, for the Python scripts: `pip install numpy praat-parselmouth`
+- Node 18+ and `ffmpeg` on the PATH (mp3 → PCM)
+- Optional: `pip install numpy praat-parselmouth` for the Praat pitch check
 
-## Run
+## Everyday workflow
 
 ```sh
 cd tone-lab
-node fidelity.mjs          # harness == app? (re-derives the baked example contours)
-node run.mjs               # main experiment, ~2.5 min -> out/results.json
-node report.mjs            # human-readable report (see baseline/)
-node challenge-sweep.mjs   # does the Challenge's ±1.5 st centre sweep accept wrong tones?
-node export-takes.mjs      # writes each test word as WAV exactly as the engine heard it
-python3 py/praat_compare.py   # engine pitch vs Praat, frame by frame
-python3 py/proto_lda.py       # prototype statistical classifier, leave-one-speaker-out
+LABEL=new node run.mjs                                    # ~2 min -> out/results-new.json
+node report.mjs results/results-v2.json out/results-new.json   # before/after + every changed word
+node twister-invariance.mjs                               # Tongue Twister path must stay identical
+node ui-flow.mjs                                          # drives the real calibration modal + Trainer UI
 ```
 
-`ENGINE=/path/to/other/tone-trainer.js node run.mjs` tests a modified engine
-against the same corpus, and `SRS=48000` limits the run to one sample rate.
+`report.mjs` with one file prints that run in full (per-word strips across
+calibration errors); with two files it prints a before/after comparison and
+lists every word that was **fixed** or **broken**.
 
-## What run.mjs does
+## The corpus (`corpus.mjs`)
 
-For each speaker file (5 words: mid, low, falling, high, rising):
+| Group | What | Words |
+|---|---|---|
+| native | 16 speakers saying one syllable in all 5 tones (`Female1..11`, `Male1..5`) | 80 |
+| native | partner: `mid/low/falling/high/rising_female.mp3` | 18 |
+| native | native male: `*_male.mp3` | 25 |
+| learner | beginner learner: `*_male-2.mp3` (labels = the tone he *intended*) | 14 |
+| volume | `Female7_maa-LOUD` (same file, +7 dB) | 5 |
+| examples | the 19 example-button mp3s + their baked contours | 19 |
 
-1. Splits the file into words by energy (Male4 has hand-set cut points).
-2. Builds a realistic "take" per word: 450 ms of mic noise, the word, trailing
-   noise, so the live VAD, auto-stop and noise floor all behave as on a phone.
-3. Calibrates the speaker the app's way, using their own mid-tone word.
-4. Classifies all five words at that centre.
-5. Re-runs every word with the centre shifted −3…+3 semitones in 0.25 steps,
-   so you can see how much calibration error each word tolerates.
+Every speaker is calibrated **the app's way** (three mid-tone captures through
+the engine's own `calibrationWord` / `finalizeCalibration`, including the
+"one more word" request). Each word is then captured with 450 ms of room
+noise before it and auto-stop after it, exactly as on a phone, at 48 kHz and
+44.1 kHz.
 
-Both 48 kHz (most phones) and 44.1 kHz are run, because the analysis window is
-a fixed number of samples and the results differ slightly between the two.
+## Metrics (`metrics.mjs`)
 
-## Report strips
+- native accuracy at the calibrated centre, by tone, at both sample rates
+- accuracy when the calibration is off by −2 … +2 semitones
+- speakers whose every word survives any calibration error within ±1 st
+- same verdict at 44.1 vs 48 kHz; same verdict at normal vs +7 dB
+- wrong answers shown as "Clear" / right answers shown as "Unsure"
+- Tone Challenge: score for the tone actually said vs for every other tone
+- the 19 example buttons must read correct and Clear
+- learner verdicts (reported, not scored)
 
+## Results
+
+`results/compare-v1-v2.txt` is the full before/after. Headline (123 native
+words, 48 kHz):
+
+| | v1 | v2 |
+|---|---|---|
+| accuracy at calibrated centre | 99 (80.5%) | 118 (95.9%) |
+| … unseen speakers (leave-one-speaker-out) | — | 116 (94.3%) |
+| calibration off by −1 / +1 st | 86 / 98 | 115 / 117 |
+| calibration off by −2 / +2 st | 66 / 90 | 106 / 113 |
+| speakers robust to ±1 st calibration error | 3 / 18 | 11 / 18 |
+| calibrations an octave (or more) wrong | 2 / 20 | 0 / 20 |
+| wrong answers shown as "Clear" | 13 of 24 | 2 of 5 |
+| Challenge: wrong tone scoring Good or better | 9.8% | 0.6% |
+| Challenge: right tone scoring Good or better | 87% | 94% |
+| pitch frames > 3 st off Praat | 3.98% | 0.61% |
+
+The v2 model was trained on these natives, so 118 is partly in-sample; the
+leave-one-speaker-out figure (116) is the honest estimate for a new voice.
+
+## Retraining the model
+
+```sh
+node train.mjs --dry     # leave-one-speaker-out evaluation only
+node train.mjs           # also writes the model into ../tone-trainer.js and model/tone-model.json
 ```
-   high     máa   ##########RR|RRRRRRRRRRRRR  -> rising
-```
 
-One character per centre offset from −3 to +3 st; `|` marks the calibrated
-centre; `#` = correct, otherwise the first letter of the wrong answer.
+Retrain whenever the front end (pitch path, trimming, calibration) changes, or
+new native recordings are added to `corpus.mjs`. Only `group: 'native'`
+speakers are used for training. Features come from the engine's own
+`toneFeatures()`, so training and the app cannot disagree.
+
+## Other tools
+
+- `pitchcheck.mjs` — engine contour vs Praat frame by frame, and calibrated
+  centre vs Praat (needs `node export-takes.mjs && python3 py/praat_ref.py`)
+- `side.mjs SPK IDX CENTRE` — one word, engine vs Praat, with NSDF candidates
+- `dbg.mjs SPK IDX CENTRE` — one word's raw frames and runs
+- `fidelity.mjs` — the frozen v1 engine re-derives the baked example contours
+  (proves the bench reproduces the app)
+- `experiments/classifier-search.mjs` — the feature/model search behind v2
+  (needs `TRIMS=creak,release,reversal NOSWEEP=1 SRS=48000 LABEL=t_all node run.mjs`
+  and the same with `SRS=44100 LABEL=t_all44`)
+
+## Baseline
+
+`baseline/v1/` holds the engine and Challenge exactly as they were before v2,
+and `results/results-v1.json` their results on the full corpus. Compare any
+future version against `results/results-v2.json` (or v1).

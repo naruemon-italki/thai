@@ -736,8 +736,6 @@
         // The profile centre lets the tracker resolve octave errors from the
         // very first frame of the word.
         centreHint: (s && s.profile && s.profile.centerHz > 0) ? s.profile.centerHz : 0,
-        // One word per capture: use the engine's single-word search band.
-        wordMode: true,
         onFrame: onLiveFrame,
         onEnd: onCaptureEnd
       });
@@ -838,18 +836,11 @@
   var TC_CENTRE_SWEEP_TONES = { mid: true, low: true, high: true };
 
   // Returns the same shape as dsp.scoreAttempt: { percent, tone, isTarget,
-  // runnerUp, m }. Pure: no DOM, no state writes.
-  //
-  // ENGINE v2: the shared tone model now allows for calibration error itself
-  // (it judges every word as if the centre could be off by about a semitone,
-  // see TONE_MODEL.calSigma in tone-trainer.js), so the word is scored ONCE at
-  // the real centre. The sweep below is kept only for an older engine. It had
-  // a real cost: by taking the best of seven centres it let the wrong tone
-  // through — measured on native speakers, a mid word scored 97% on a HIGH
-  // target, and 6 of 60 wrong level tones passed.
-  function scoreForTarget(d, core, centreHz, target) {
+  // runnerUp, m }. For level-tone targets, tries the sweep and keeps the best
+  // shift-penalized percent; for everything else, scores once at the real
+  // centre (identical to the old behaviour). Pure: no DOM, no state writes.
+  function scoreWithCentreSweep(d, core, centreHz, target) {
     if (!d || !d.scoreAttempt) return { percent: 0, tone: null, isTarget: false, runnerUp: null, m: null };
-    if (d.scoreAttemptHandlesCalibration) return d.scoreAttempt(core, centreHz, target);
 
     // Contour tones, or a bad centre: original single-shot scoring, untouched.
     if (!TC_CENTRE_SWEEP_TONES[target] || !(centreHz > 0)) {
@@ -890,7 +881,7 @@
     if (!s || s.over) return;
     var d = dsp();
     var target = s.current.tone;
-    var res = scoreForTarget(d, core, centreHz, target);
+    var res = scoreWithCentreSweep(d, core, centreHz, target);
     var pct = Math.max(0, Math.min(100, Math.round(res.percent)));
     var tier = tierFor(pct);
 
