@@ -31,8 +31,9 @@
     lesson_8_vocab_3.mp3  homework — places   (6 words)
     lesson_8_vocab_4.mp3  homework — jobs     (8 words)
 
-  Missing images and audio fail quietly: the page hides the image and shows a
-  small "Audio not added yet" note on the player instead of breaking.
+  Missing images and audio fail quietly: the page hides the image, and a
+  player whose recording is missing says "Recording not available" (the file
+  name is in its tooltip and in the browser console) instead of breaking.
   ---------------------------------------------------------------------------
 -->
 <html lang="en">
@@ -47,6 +48,7 @@
 <meta name="theme-color" content="#fffaf0" id="meta-theme-color">
 <meta name="robots" content="noindex, nofollow">
 <title>Lesson 8 · Review — Thai Beginner Course</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23b8893a'/%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%23fffaf0' stroke-width='3' opacity='.55'/%3E%3C/svg%3E">
 <script>
   /* Defined before the images so a fast/cached failure is still caught.
      Removes the illustration and collapses its grid column, so a missing
@@ -268,20 +270,26 @@
     gap: 0.35rem;
     transition: border-color 0.15s ease, color 0.15s ease;
   }
+  /* The outline is an inset shadow, not a border. A border sits outside
+     the box the gradient is sized to, so the gradient repeated into it and
+     drew a stray 1px strip of the opposite colour along the top and bottom
+     edges — the diagonal looked broken. The stops are also half a pixel
+     apart, which keeps the diagonal smooth instead of stair-stepped. */
   .theme-opt .sw {
     width: 100%;
     height: 16px;
     border-radius: 4px;
-    border: 1px solid var(--shadow);
+    box-shadow: inset 0 0 0 1px var(--shadow);
+    background-repeat: no-repeat;
   }
   .theme-opt[aria-pressed="true"] {
     border-color: var(--accent);
     color: var(--accent);
     box-shadow: 0 0 0 1px var(--accent) inset;
   }
-  .sw-warm  { background: linear-gradient(135deg, #f5ecd9 50%, #b8893a 50%); }
-  .sw-paper { background: linear-gradient(135deg, #dee2e6 50%, #5a6b80 50%); }
-  .sw-dark  { background: linear-gradient(135deg, #1a1815 50%, #d4b87a 50%); }
+  .sw-warm  { background-image: linear-gradient(135deg, #f5ecd9 calc(50% - 0.5px), #b8893a calc(50% + 0.5px)); }
+  .sw-paper { background-image: linear-gradient(135deg, #dee2e6 calc(50% - 0.5px), #5a6b80 calc(50% + 0.5px)); }
+  .sw-dark  { background-image: linear-gradient(135deg, #1a1815 calc(50% - 0.5px), #d4b87a calc(50% + 0.5px)); }
 
   /* Font-size slider — same pill component as the app's Vocabulary menu. */
   .font-slider {
@@ -586,6 +594,24 @@
   .play-btn:hover { filter: brightness(1.07); }
   .play-btn:active { transform: scale(0.94); }
   .play-btn:disabled { cursor: not-allowed; filter: grayscale(1); opacity: 0.5; }
+  /* Loading: a turning ring in place of the play triangle. */
+  .play-btn svg.spin {
+    fill: none;
+    stroke: var(--panel);
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    stroke-dasharray: 38 16;
+    animation: play-spin 0.9s linear infinite;
+  }
+  @keyframes play-spin { to { transform: rotate(360deg); } }
+  /* Waiting for the student (pairs player, "Wait for me"): a soft ring
+     pulses out of the play button until it is tapped. */
+  .play-btn.is-waiting { animation: play-wait 1.6s ease-out infinite; }
+  @keyframes play-wait {
+    0%   { box-shadow: 0 2px 8px var(--shadow), 0 0 0 0 var(--accent); }
+    70%  { box-shadow: 0 2px 8px var(--shadow), 0 0 0 10px transparent; }
+    100% { box-shadow: 0 2px 8px var(--shadow), 0 0 0 0 transparent; }
+  }
 
   .player-body { flex: 1; min-width: 0; }
   .player-title {
@@ -597,13 +623,27 @@
   }
   .player-title .hint { font-weight: 400; color: var(--ink-soft); }
 
+  /* The seek bar. What you see is the thin 6px line (.player-track), but
+     the bar itself is a 30px tall touch zone around it: the negative
+     margins give the extra height back, so the layout is exactly what it
+     was with the 6px bar. pan-y keeps a vertical swipe that starts on the
+     bar scrolling the page; a tap or a sideways drag seeks. */
   .player-bar {
     position: relative;
+    height: 30px;
+    margin: -12px 0;
+    cursor: pointer;
+    touch-action: pan-y;
+  }
+  .player-track {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 12px;
     height: 6px;
     border-radius: 999px;
     background: var(--bg);
     border: 1px solid var(--shadow);
-    cursor: pointer;
     overflow: hidden;
   }
   .player-fill {
@@ -613,6 +653,24 @@
     background: var(--accent);
     border-radius: 999px;
   }
+  /* The handle shows the bar can be dragged; it grows while it is held. */
+  .player-knob {
+    position: absolute;
+    left: 0%;
+    top: 15px;
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 1px 4px var(--shadow-strong);
+    transition: transform 0.15s ease;
+    pointer-events: none;
+  }
+  .player-bar:hover .player-knob,
+  .player-bar.is-dragging .player-knob { transform: scale(1.3); }
+  .player-bar:focus-visible { outline: none; }
+  .player-bar:focus-visible .player-track { outline: 2px solid var(--accent); outline-offset: 2px; }
   .player-foot {
     display: flex;
     align-items: center;
@@ -620,6 +678,9 @@
     gap: 0.6rem;
     margin-top: 0.4rem;
   }
+  /* The foot's contents sit above the lower edge of the seek bar's touch
+     zone, so its buttons keep every pixel of their own. */
+  .player-foot > * { position: relative; }
   .player-time {
     font-size: 0.78rem;
     font-weight: 500;
@@ -640,6 +701,23 @@
   .mini-btn:hover { border-color: var(--accent); color: var(--accent); }
   .mini-btn[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
   .player-error { font-size: 0.78rem; color: var(--ink-soft); font-style: italic; }
+  /* Shown in place of the seek bar and the buttons when a recording
+     cannot be played. */
+  .player-msg {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.6rem;
+    margin-top: 0.15rem;
+  }
+  .player-msg[hidden] { display: none; }
+  .player-retry { flex: 0 0 auto; }
+
+  /* Fingers need bigger targets than a mouse pointer. */
+  @media (pointer: coarse) {
+    .mini-btn { min-height: 34px; padding: 0.3rem 0.75rem; }
+    .wave-select { min-height: 34px; }
+  }
 
   /* ========= WAVEFORM PLAYER (listen-and-repeat tracks) =========
      Used only where a player carries data-waveform="true". It is a
@@ -675,7 +753,9 @@
     height: 78px;
     cursor: pointer;
     border-radius: 8px;
-    touch-action: none;
+    /* Taps still seek, but a swipe that starts on the waveform scrolls
+       the page as usual instead of getting stuck on it. */
+    touch-action: manipulation;
   }
   .wave-canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   .wave-foot {
@@ -711,10 +791,32 @@
   }
   .wave-select:disabled { opacity: 0.45; cursor: not-allowed; }
   .wave-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .wave-retry { margin-left: 0.4rem; vertical-align: middle; }
 
   @media (max-width: 520px) {
     .wave-canvas { height: 64px; }
     .wave-foot { justify-content: flex-start; }
+  }
+
+  /* Phones: the buttons become one even row across the full width, with
+     the pause setting and the time on a row of their own underneath —
+     instead of wrapping wherever the text happens to run out. */
+  @media (max-width: 560px) {
+    .wave-foot { flex-wrap: wrap; gap: 0.45rem 0.35rem; }
+    .wave-foot::after { content: ""; order: 6; flex: 0 0 100%; height: 0; }
+    .wave-tools { display: contents; }
+    .wave-tools .mini-btn { order: 1; flex: 1 1 auto; text-align: center; white-space: nowrap; }
+    .wave-tools .wave-step { flex: 0 0 auto; min-width: 40px; display: inline-flex; align-items: center; justify-content: center; }
+    .wave-tools .js-replay { order: 5; flex: 0 0 auto; min-width: 40px; }
+    .wave-tools .wave-lbl { display: none; }   /* Replay shows just ↻ here, so one row holds every button */
+    .wave-gap { order: 7; }
+    .wave-time { order: 8; margin-left: auto; }
+  }
+  @media (max-width: 400px) {
+    .wave-player { padding-left: 0.85rem; padding-right: 0.85rem; }
+    .wave-tools .mini-btn { padding-left: 0.55rem; padding-right: 0.55rem; }
+    .wave-tools .wave-step,
+    .wave-tools .js-replay { min-width: 36px; }
   }
 
   /* ========= LISTENING BLOCK (image + player) ========= */
@@ -1017,6 +1119,7 @@
   }
   .vocab-list { display: grid; grid-template-columns: 1fr; gap: 0.4rem; }
   .vocab-item {
+    position: relative;
     display: grid;
     grid-template-columns: 1fr 1fr 1.2fr;
     gap: 0.5rem;
@@ -1025,15 +1128,56 @@
     border: 1px solid var(--shadow);
     border-radius: 8px;
     align-items: center;
-    transition: border-color 0.15s ease;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
   .vocab-item:hover { border-color: var(--accent); }
   .vocab-item .v-th  { font-weight: 600; color: var(--ink); font-size: calc(1.15rem * var(--tx)); line-height: 1.7; }
   .vocab-item .v-rom { font-weight: 500; color: var(--rom); font-size: calc(0.95rem * var(--tx)); }
   .vocab-item .v-en  { font-weight: 500; color: var(--ink); font-size: calc(0.95rem * var(--tx)); }
 
+  /* Once the vocabulary track is wired to the list, every row gets a speaker
+     button in a narrow first column (and the header an empty one). */
+  .vocab-head .vh-play { display: none; }
+  .vocab-head.has-audio { grid-template-columns: 34px 1fr 1fr 1.2fr; }
+  .vocab-head.has-audio .vh-play { display: block; }
+  .vocab-item.has-play { grid-template-columns: 34px 1fr 1fr 1.2fr; }
+
+  /* The word being spoken on the vocabulary track right now. */
+  .vocab-item.is-current { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+  .vocab-item.is-current::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--accent);
+    opacity: 0.07;
+    pointer-events: none;
+  }
+
+  /* Speaker button: plays just this word, cut from the vocabulary track. */
+  .vocab-play {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    border: 1px solid var(--shadow);
+    color: var(--accent);
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+  .vocab-play[hidden] { display: none; }
+  .vocab-play svg { width: 17px; height: 17px; fill: currentColor; }
+  .vocab-play:hover { border-color: var(--accent); }
+  .vocab-play:active { transform: scale(0.92); }
+  .vocab-item.is-current .vocab-play { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+  .vocab-play.is-loading svg { fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round;
+                               stroke-dasharray: 38 16; animation: play-spin 0.9s linear infinite; }
+
   /* Phones: the three columns become a stacked card — Thai leads, romanization
-     under it, English as the muted gloss. Mirrors the app's ≤480px vocab row. */
+     under it, English as the muted gloss. Mirrors the app's ≤480px vocab row.
+     The speaker button sits to the left of the card, centred. */
   @media (max-width: 560px) {
     .vocab-head { display: none; }
     .vocab-item {
@@ -1041,9 +1185,15 @@
       gap: 0.1rem;
       padding: 0.75rem 0.9rem;
     }
+    .vocab-item.has-play { grid-template-columns: 40px minmax(0, 1fr); column-gap: 0.8rem; }
+    .vocab-item.has-play .vocab-play { grid-column: 1; grid-row: 1 / span 3; width: 40px; height: 40px; }
+    .vocab-item.has-play .v-th,
+    .vocab-item.has-play .v-rom,
+    .vocab-item.has-play .v-en { grid-column: 2; }
     .vocab-item .v-en { color: var(--ink-soft); font-size: calc(0.88rem * var(--tx)); order: 3; }
     .vocab-item .v-rom { order: 2; }
     .vocab-item .v-th { order: 1; font-size: calc(1.25rem * var(--tx)); }
+    .vocab-play svg { width: 19px; height: 19px; }
   }
 
   /* ========= PREVIOUS LESSON LINK ========= */
@@ -1765,12 +1915,12 @@ document.querySelector('main').innerHTML = `
     <div class="part-head"><div class="part-eyebrow">Part 11</div><h2>Vocabulary</h2><p>All the new words and phrases from Parts 1 and 2. Listen and repeat each list aloud - use the waveform controls to replay a single word or slow the recording down.</p></div>
 
     <div class="part-head" style="margin-top:0.4rem"><h3>The core words</h3></div>
-    <div class="player" data-src="lesson_8_vocab_1.mp3" data-waveform="true" data-lead-in="1" data-words="7" data-title="Listen carefully and repeat after me" data-hint="- the core words" style="margin-bottom:1.2rem"></div>
-    <div class="vocab-head" aria-hidden="true"><span>Thai</span><span>Romanization</span><span>English</span></div><div class="vocab-list" id="vocab-list-1"></div>
+    <div class="player" data-src="lesson_8_vocab_1.mp3" data-waveform="true" data-vocab-list="vocab-list-1" data-lead-in="1" data-words="7" data-title="Listen carefully and repeat after me" data-hint="- the core words" style="margin-bottom:1.2rem"></div>
+    <div class="vocab-head" aria-hidden="true"><span class="vh-play"></span><span>Thai</span><span>Romanization</span><span>English</span></div><div class="vocab-list" id="vocab-list-1"></div>
 
     <div class="part-head" style="margin-top:1.8rem"><h3>Nouns, jobs and time words</h3></div>
-    <div class="player" data-src="lesson_8_vocab_2.mp3" data-waveform="true" data-lead-in="1" data-words="13" data-title="Listen carefully and repeat after me" data-hint="- nouns, jobs and time words" style="margin-bottom:1.2rem"></div>
-    <div class="vocab-head" aria-hidden="true"><span>Thai</span><span>Romanization</span><span>English</span></div><div class="vocab-list" id="vocab-list-2"></div>
+    <div class="player" data-src="lesson_8_vocab_2.mp3" data-waveform="true" data-vocab-list="vocab-list-2" data-lead-in="1" data-words="13" data-title="Listen carefully and repeat after me" data-hint="- nouns, jobs and time words" style="margin-bottom:1.2rem"></div>
+    <div class="vocab-head" aria-hidden="true"><span class="vh-play"></span><span>Thai</span><span>Romanization</span><span>English</span></div><div class="vocab-list" id="vocab-list-2"></div>
 
   </section>
 
@@ -1786,13 +1936,13 @@ document.querySelector('main').innerHTML = `
     </div>
 
     <div class="part-head" style="margin-top:1.8rem"><h3>Places</h3></div>
-    <div class="player" data-src="lesson_8_vocab_3.mp3" data-waveform="true" data-lead-in="1" data-words="6" data-title="Listen carefully and repeat after me" data-hint="- places" style="margin-bottom:1.2rem"></div>
-    <div class="vocab-head" aria-hidden="true"><span>Thai</span><span>Romanization</span><span>English</span></div><div class="vocab-list" id="vocab-list-3"></div>
+    <div class="player" data-src="lesson_8_vocab_3.mp3" data-waveform="true" data-vocab-list="vocab-list-3" data-lead-in="1" data-words="6" data-title="Listen carefully and repeat after me" data-hint="- places" style="margin-bottom:1.2rem"></div>
+    <div class="vocab-head" aria-hidden="true"><span class="vh-play"></span><span>Thai</span><span>Romanization</span><span>English</span></div><div class="vocab-list" id="vocab-list-3"></div>
     <p class="hw-brief" style="margin-top:1rem">Several of these are built from smaller pieces you can reuse: <span class="th-inline">โรง</span> <span class="rom-inline">rohng</span> is a building, so <span class="th-inline">โรงหนัง</span> is a "movie building" and <span class="th-inline">โรงพยาบาล</span> a "nurse building". <span class="th-inline">ร้าน</span> <span class="rom-inline">ráan</span> is a shop, <span class="th-inline">ขาย</span> <span class="rom-inline">kăai</span> is "to sell" and <span class="th-inline">ยา</span> <span class="rom-inline">yaa</span> is "medicine" - so a pharmacy is a "medicine-selling shop".</p>
 
     <div class="part-head" style="margin-top:1.8rem"><h3>Jobs</h3></div>
-    <div class="player" data-src="lesson_8_vocab_4.mp3" data-waveform="true" data-lead-in="1" data-words="8" data-title="Listen carefully and repeat after me" data-hint="- jobs" style="margin-bottom:1.2rem"></div>
-    <div class="vocab-head" aria-hidden="true"><span>Thai</span><span>Romanization</span><span>English</span></div><div class="vocab-list" id="vocab-list-4"></div>
+    <div class="player" data-src="lesson_8_vocab_4.mp3" data-waveform="true" data-vocab-list="vocab-list-4" data-lead-in="1" data-words="8" data-title="Listen carefully and repeat after me" data-hint="- jobs" style="margin-bottom:1.2rem"></div>
+    <div class="vocab-head" aria-hidden="true"><span class="vh-play"></span><span>Thai</span><span>Romanization</span><span>English</span></div><div class="vocab-list" id="vocab-list-4"></div>
     <p class="hw-brief" style="margin-top:1rem">Same trick here: <span class="th-inline">พนักงาน</span> <span class="rom-inline">pá-nák ngaan</span> means "staff / employee", and <span class="th-inline">คน</span> <span class="rom-inline">kon</span> means "person" - so a driver is a "person who drives" and a vendor is a "person who sells".</p>
   </section>
 
@@ -1872,11 +2022,19 @@ document.querySelector('main').innerHTML = `
   }
 
 
+  /* The speaker buttons start hidden and are switched on when the
+     vocabulary track's player is wired to this list (see linkVocab further
+     down). If the track then turns out NOT to hold exactly one word per
+     row — a re-recording with a different word count — they are hidden
+     again, so a button can never play the wrong word. */
+  var ICON_SPEAKER = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>';
+
   function renderVocab(id, data) {
     var el = document.getElementById(id);
     if (!el) return;
     el.innerHTML = data.map(function (v) {
       return '<div class="vocab-item">' +
+               '<button type="button" class="vocab-play" aria-label="Listen: ' + esc(v.rom) + '" title="Listen" hidden>' + ICON_SPEAKER + '</button>' +
                '<span class="v-th">'  + esc(v.th)  + '</span>' +
                '<span class="v-rom">' + esc(v.rom) + '</span>' +
                '<span class="v-en">'  + esc(v.en)  + '</span>' +
@@ -1890,27 +2048,65 @@ document.querySelector('main').innerHTML = `
 
 
   /* =========================================================
+     PAIR CUES — where each English prompt and Thai answer sits in
+     an English → Thai track (players with data-pairs="true").
+
+     A pairs track cannot be read automatically the way the
+     listen-and-repeat track is: an English prompt such as "Hello
+     (male speaker)" has a breath in the middle, and the pause in
+     which the student answers is barely longer than that breath.
+     So the timings are written down here, once, in seconds.
+
+       intro   the spoken instructions before the first pair
+       pairs   [English start, English end, Thai start, Thai end]
+
+     This lesson has no English → Thai track, so the table is
+     empty. It stays because the waveform player reads it.
+     ========================================================= */
+  var PAIR_CUES = {};
+
+  /* =========================================================
      AUDIO PLAYERS
      Each .player[data-src] becomes a full player. Only one clip
      plays at a time. A missing file degrades to a disabled
      button plus a short note rather than a silent dead control.
 
-     Playback is a plain HTMLAudioElement — no Web Audio graph, no
-     silence trimming, no rate changes except the explicit 0.75×
-     button — so a clip always plays back at its true length.
+     WHERE THE SOUND COMES FROM — downloaded whole, played from memory
 
-     AUDIO_VERSION is appended to every request as ?v=… Browsers
-     cache mp3s aggressively, so bump this string whenever you
-     re-record or re-export a file and students will get the new
-     one instead of the copy already sitting in their cache.
+     Jumping around in a STREAMED file needs the server to answer
+     "Range" requests (206 Partial Content). Cloudflare does not
+     always do that: a file its cache does not hold yet comes back
+     whole, as a plain 200, and the browser then treats the clip as
+     not seekable at all — every click on the bar restarts it from
+     0:00, even on a six-second clip that has fully arrived. A file
+     played from memory (a Blob URL) can always be jumped around,
+     whatever the server does.
+
+     So every recording is fetched whole, once, and played from that
+     copy. A player starts fetching its file when it comes near the
+     screen (the short clips are small, so play is then instant), or
+     at the latest on the first press. Play pressed while the file
+     is still arriving shows a turning ring and starts by itself
+     once it is in.
+
+     If the download cannot be done at all (a page opened straight
+     from disk over file://, a browser without fetch), the simple
+     player streams the file exactly as before. A file the server
+     says does not exist shows "Recording not available"; a dropped
+     connection shows "Try again" instead of disabling the player.
      ========================================================= */
-  var AUDIO_VERSION = '1';
-
   var ICON_PLAY  = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
   var ICON_PAUSE = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+  var ICON_LOAD  = '<svg class="spin" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/></svg>';
 
   var players = [];
 
+  /* Pause every player except this one. */
+  function stopOthers(api) {
+    for (var i = 0; i < players.length; i++) {
+      if (players[i] !== api) players[i].pause();
+    }
+  }
 
   function fmt(t) {
     if (!isFinite(t) || t < 0) t = 0;
@@ -1918,10 +2114,197 @@ document.querySelector('main').innerHTML = `
     return m + ':' + (s < 10 ? '0' : '') + s;
   }
 
+  /* iPhones: Web Audio normally obeys the ring/silent switch, so with the
+     switch on silent the waveform players would play nothing while the
+     simple players play fine. Declaring the page a "playback" app — what
+     a music or podcast app is — makes both behave the same. Browsers
+     without the Audio Session API simply skip this. */
+  try {
+    if (navigator.audioSession && 'type' in navigator.audioSession) navigator.audioSession.type = 'playback';
+  } catch (e) {}
+
+  /* ---- downloads: one per file, shared by everything that asks ----
+     A failed download carries a kind:
+       'missing'  the server has no such file (404, or a web page sent in
+                  its place)
+       'network'  it could not be fetched just now
+       'local'    downloading is not possible here (file://, no fetch) */
+  var audioJobs = {};
+
+  function audioError(kind, msg) {
+    var e = new Error(msg);
+    e.kind = kind;
+    return e;
+  }
+
+  /* The whole file, as one plain request (no Range header), with progress.
+     urgent: the student is waiting for this one — it is asked for at high
+     priority, while files fetched ahead of time go at low priority, so on
+     a slow line they do not hold up the one that was actually pressed.
+     (Browsers that do not know fetch priorities simply ignore them.) */
+  function downloadAudio(url, onProgress, urgent) {
+    if (typeof fetch !== 'function' || !window.Blob || location.protocol === 'file:') {
+      return Promise.reject(audioError('local', 'downloading is not possible here'));
+    }
+    return fetch(url, { credentials: 'same-origin', priority: urgent ? 'high' : 'low' }).then(function (res) {
+      var type = String(res.headers.get('content-type') || '').toLowerCase();
+      if (res.status === 404 || res.status === 410 || (res.ok && type.indexOf('text/html') === 0)) {
+        throw audioError('missing', 'HTTP ' + res.status + (type ? ' ' + type : ''));
+      }
+      if (!res.ok) throw audioError('network', 'HTTP ' + res.status);
+      var enc = String(res.headers.get('content-encoding') || '').toLowerCase();
+      var total = (!enc || enc === 'identity') ? (Number(res.headers.get('content-length')) || 0) : 0;
+      var mime = type.indexOf('audio/') === 0 ? type.split(';')[0] : 'audio/mpeg';
+      if (!res.body || !res.body.getReader) {
+        return res.blob().then(function (b) { return { blob: b, total: total, mime: mime }; });
+      }
+      var reader = res.body.getReader(), chunks = [], got = 0;
+      return (function pump() {
+        return reader.read().then(function (r) {
+          if (r.done) return { blob: new Blob(chunks, { type: mime }), total: total, mime: mime };
+          chunks.push(r.value);
+          got += r.value.byteLength;
+          if (onProgress) onProgress(got, total);
+          return pump();
+        });
+      })();
+    }).then(function (x) {
+      if (x.total && x.blob.size !== x.total) throw audioError('network', 'incomplete download');
+      if (!x.blob.size) throw audioError('missing', 'empty file');
+      return x.blob.type ? x.blob : new Blob([x.blob], { type: x.mime });
+    }).catch(function (err) {
+      throw (err && err.kind) ? err : audioError('network', String((err && err.message) || err));
+    });
+  }
+
+  function getAudio(url, onProgress, urgent) {
+    var job = audioJobs[url];
+    if (!job) {
+      job = audioJobs[url] = { listeners: [] };
+      job.promise = downloadAudio(url, function (got, total) {
+        for (var i = 0; i < job.listeners.length; i++) {
+          try { job.listeners[i](got, total); } catch (e) {}
+        }
+      }, urgent).then(function (blob) {
+        job.listeners = [];
+        return blob;
+      }, function (err) {
+        delete audioJobs[url];        /* so "Try again" really tries again */
+        throw err;
+      });
+    }
+    if (onProgress) job.listeners.push(onProgress);
+    return job.promise;
+  }
+
+  function blobBytes(blob) {
+    return blob.arrayBuffer ? blob.arrayBuffer() : new Response(blob).arrayBuffer();
+  }
+
+  /* ---- start fetching a player's file when it comes near the screen ---- */
+  var nearObserver = null;
+  try {
+    if ('IntersectionObserver' in window) {
+      nearObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (!en.isIntersecting) return;
+          nearObserver.unobserve(en.target);
+          var fn = en.target._whenNear;
+          en.target._whenNear = null;
+          if (fn) fn();
+        });
+      }, { rootMargin: '600px 0px' });
+    }
+  } catch (e) { nearObserver = null; }
+
+  /* Without an observer this does nothing: the file then loads on the
+     first press instead. */
+  function whenNear(el, fn) {
+    if (!nearObserver) return;
+    el._whenNear = fn;
+    nearObserver.observe(el);
+  }
+
+  /* ---- lock screen, notification and earbud controls (Media Session) ----
+     Without this a phone shows a bare file name, or nothing, for whatever
+     is playing. Now it shows the recording's title with the lesson under
+     it. The player that last started playing owns these controls. */
+  var MS = ('mediaSession' in navigator) ? navigator.mediaSession : null;
+  var msOwner = null, msArt = null;
+  var LESSON_LABEL = (function () {
+    var t = document.querySelector('.tb-lesson');
+    return (t && t.textContent.replace(/\s+/g, ' ').trim()) || document.title;
+  })();
+
+  /* The page's own icon (the golden circle), drawn as a PNG: lock screens
+     want a real image rather than an SVG. */
+  function msArtwork() {
+    if (msArt) return msArt;
+    msArt = [];
+    try {
+      var c = document.createElement('canvas'), n = 512;
+      c.width = c.height = n;
+      var g = c.getContext('2d');
+      g.fillStyle = '#b8893a';
+      g.beginPath();
+      g.arc(n / 2, n / 2, n * 30 / 64, 0, Math.PI * 2);
+      g.fill();
+      g.globalAlpha = 0.55;
+      g.strokeStyle = '#fffaf0';
+      g.lineWidth = n * 3 / 64;
+      g.beginPath();
+      g.arc(n / 2, n / 2, n * 22 / 64, 0, Math.PI * 2);
+      g.stroke();
+      msArt = [{ src: c.toDataURL('image/png'), sizes: n + 'x' + n, type: 'image/png' }];
+    } catch (e) {}
+    return msArt;
+  }
+
+  /* c: { title, play(), pause(), seek(t), pos(), dur(), rate(), playing(),
+          prev() and next() — optional } */
+  function msClaim(c) {
+    if (!MS) return;
+    msOwner = c;
+    try {
+      if (typeof MediaMetadata !== 'undefined') {
+        MS.metadata = new MediaMetadata({
+          title: c.title, artist: LESSON_LABEL, album: 'Thai Beginner Course', artwork: msArtwork()
+        });
+      }
+    } catch (e) {}
+    var acts = {
+      play:          function () { c.play(); },
+      pause:         function () { c.pause(); },
+      stop:          function () { c.pause(); },
+      seekbackward:  function (d) { c.seek(c.pos() - ((d && d.seekOffset) || 5)); },
+      seekforward:   function (d) { c.seek(c.pos() + ((d && d.seekOffset) || 5)); },
+      seekto:        function (d) { if (d && isFinite(d.seekTime)) c.seek(d.seekTime); },
+      previoustrack: c.prev ? function () { c.prev(); } : null,
+      nexttrack:     c.next ? function () { c.next(); } : null
+    };
+    Object.keys(acts).forEach(function (a) {
+      try { MS.setActionHandler(a, acts[a]); } catch (e) {}
+    });
+    msUpdate(c);
+  }
+
+  function msUpdate(c) {
+    if (!MS || msOwner !== c) return;
+    try { MS.playbackState = c.playing() ? 'playing' : 'paused'; } catch (e) {}
+    try {
+      var d = c.dur();
+      if (MS.setPositionState && isFinite(d) && d > 0) {
+        MS.setPositionState({ duration: d, playbackRate: c.rate() || 1, position: Math.max(0, Math.min(d, c.pos())) });
+      }
+    } catch (e) {}
+  }
+
+  /* ---- the simple player: short clips, and the fallback for the others ---- */
   function buildPlayer(el) {
     var src   = el.getAttribute('data-src');
     var title = el.getAttribute('data-title') || 'Audio';
     var hint  = el.getAttribute('data-hint') || '';
+    var url   = audioUrl(src);
 
     el.innerHTML =
       '<button type="button" class="play-btn" aria-label="Play: ' + esc(title) + '">' + ICON_PLAY + '</button>' +
@@ -1930,7 +2313,8 @@ document.querySelector('main').innerHTML = `
           (hint ? ' <span class="hint">' + esc(hint) + '</span>' : '') +
         '</div>' +
         '<div class="player-bar" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">' +
-          '<div class="player-fill"></div>' +
+          '<div class="player-track"><div class="player-fill"></div></div>' +
+          '<div class="player-knob"></div>' +
         '</div>' +
         '<div class="player-foot">' +
           '<span class="player-time">0:00 / 0:00</span>' +
@@ -1939,88 +2323,283 @@ document.querySelector('main').innerHTML = `
             '<button type="button" class="mini-btn js-replay" title="Play from the start">↻ Replay</button>' +
           '</span>' +
         '</div>' +
+        '<div class="player-msg" hidden>' +
+          '<span class="player-error"></span>' +
+          '<button type="button" class="mini-btn player-retry" hidden>↻ Try again</button>' +
+        '</div>' +
       '</div>';
 
     var audio  = new Audio();
-    audio.preload = 'metadata';
+    audio.preload = 'auto';   /* it is only ever given the downloaded copy, or the stream fallback */
     /* Pinned explicitly so nothing can inherit or retain a changed rate:
        only the 0.75× button below ever moves it. */
     audio.defaultPlaybackRate = 1;
     audio.playbackRate = 1;
     if ('preservesPitch' in audio) audio.preservesPitch = true;
-    audio.src = src + (AUDIO_VERSION ? (src.indexOf('?') < 0 ? '?v=' : '&v=') + AUDIO_VERSION : '');
 
     var btn    = el.querySelector('.play-btn');
     var bar    = el.querySelector('.player-bar');
     var fill   = el.querySelector('.player-fill');
+    var knob   = el.querySelector('.player-knob');
     var time   = el.querySelector('.player-time');
+    var foot   = el.querySelector('.player-foot');
+    var msg    = el.querySelector('.player-msg');
+    var msgTxt = el.querySelector('.player-error');
+    var retryB = el.querySelector('.player-retry');
     var slow   = el.querySelector('.js-slow');
     var replay = el.querySelector('.js-replay');
 
-    var api = { audio: audio, pause: function () { audio.pause(); } };
+    /* source: ''        nothing fetched yet
+               'loading' the file is on its way
+               'blob'    playing from the downloaded copy (the normal case)
+               'stream'  streaming the file itself (the fallback)
+               'error'   it cannot be played; the message says why */
+    var source = '', blobUrl = '';
+    var wantPlay = false;     /* play was pressed while the file was still on its way */
+    var buffering = false;    /* streaming only: playback is waiting for data */
+    var drag = null;          /* a press on the seek bar: { id, r } */
+    var btnIcon = '';
+
+    var api = { pause: function () { wantPlay = false; audio.pause(); paintBtn(); } };
     players.push(api);
 
-    function paint() {
-      var d = audio.duration;
-      var pct = (isFinite(d) && d > 0) ? (audio.currentTime / d) * 100 : 0;
-      fill.style.width = pct + '%';
-      bar.setAttribute('aria-valuenow', Math.round(pct));
-      time.textContent = fmt(audio.currentTime) + ' / ' + fmt(isFinite(d) ? d : 0);
+    function ready() { return source === 'blob' || source === 'stream'; }
+    function isPlaying() { return !audio.paused && !audio.ended; }
+    function dur() { var d = audio.duration; return (isFinite(d) && d > 0) ? d : 0; }
+
+    var ms = {
+      title: title,
+      play: function () { start(); },
+      pause: function () { api.pause(); },
+      seek: function (t) { seekTo(t); },
+      pos: function () { return audio.currentTime || 0; },
+      dur: dur,
+      rate: function () { return audio.playbackRate || 1; },
+      playing: isPlaying
+    };
+
+    /* ---- the file ---- */
+    function prepare() {
+      if (source) return;
+      source = 'loading';
+      getAudio(url, null, wantPlay).then(function (blob) {
+        if (source !== 'loading') return;
+        try { blobUrl = URL.createObjectURL(blob); } catch (e) { useStream(); return; }
+        use('blob', blobUrl);
+      }, function (err) {
+        if (source !== 'loading') return;
+        if (err && err.kind === 'missing') fail('missing');
+        else useStream();
+      });
+    }
+    function useStream() { use('stream', url); }
+    function use(kind, u) {
+      source = kind;
+      audio.src = u;
+      try { audio.load(); } catch (e) {}
+      paint();
+      paintBtn();
+      if (wantPlay) { wantPlay = false; start(); }
+    }
+    function dropBlob() {
+      if (blobUrl) { try { URL.revokeObjectURL(blobUrl); } catch (e) {} blobUrl = ''; }
     }
 
-    function stopOthers() {
-      players.forEach(function (p) { if (p !== api) p.pause(); });
+    /* iOS lets a sound start only from inside a tap. When the tap comes
+       before the file has arrived, load() on the still-empty element lets
+       Safari treat this element as started by the student, so it can play
+       by itself once the download is in. If it still refuses, the button
+       simply shows ▶ again and the next tap plays. */
+    function unlock() {
+      if (!audio.getAttribute('src')) { try { audio.load(); } catch (e) {} }
     }
 
-    btn.addEventListener('click', function () {
-      if (audio.paused) { stopOthers(); audio.play().catch(function () {}); }
-      else { audio.pause(); }
-    });
+    function start() {
+      if (!ready()) { wantPlay = true; prepare(); paintBtn(); return; }
+      stopOthers(api);
+      var p = audio.play();
+      if (p && p.catch) p.catch(function () { paintBtn(); });
+      msClaim(ms);
+    }
 
-    audio.addEventListener('play',  function () { btn.innerHTML = ICON_PAUSE; btn.setAttribute('aria-label', 'Pause'); });
-    audio.addEventListener('pause', function () { btn.innerHTML = ICON_PLAY;  btn.setAttribute('aria-label', 'Play: ' + title); });
-    audio.addEventListener('ended', function () { audio.currentTime = 0; paint(); });
-    audio.addEventListener('timeupdate', paint);
-    audio.addEventListener('loadedmetadata', paint);
+    function fail(kind) {
+      source = 'error';
+      wantPlay = false;
+      buffering = false;
+      dropBlob();
+      el.classList.add('is-error');
+      bar.style.display = 'none';
+      foot.style.display = 'none';
+      msg.hidden = false;
+      msgTxt.title = src;
+      if (kind === 'missing') {
+        btn.disabled = true;
+        msgTxt.textContent = 'Recording not available';
+        retryB.hidden = true;
+      } else {
+        msgTxt.textContent = 'Couldn’t load the audio — check your connection.';
+        retryB.hidden = false;
+      }
+      if (window.console && console.warn) {
+        console.warn('[player] ' + src + (kind === 'missing' ? ' could not be found.' : ' could not be loaded.'));
+      }
+      paintBtn();
+    }
+
+    function retry() {
+      el.classList.remove('is-error');
+      bar.style.display = '';
+      foot.style.display = '';
+      msg.hidden = true;
+      btn.disabled = false;
+      audio.removeAttribute('src');
+      source = '';
+      wantPlay = true;
+      prepare();
+      paintBtn();
+    }
 
     audio.addEventListener('error', function () {
-      el.classList.add('is-error');
-      btn.disabled = true;
-      bar.style.display = 'none';
-      el.querySelector('.player-foot').innerHTML =
-        '<span class="player-error">Audio not added yet (' + esc(src) + ')</span>';
+      if (!audio.getAttribute('src')) return;   /* the empty element from unlock(): nothing to report */
+      if (source === 'blob') { dropBlob(); useStream(); return; }   /* a copy it cannot play: try the file itself */
+      if (source === 'stream') fail('network');
     });
 
-    function seekTo(clientX) {
-      var r = bar.getBoundingClientRect();
-      var ratio = Math.min(1, Math.max(0, (clientX - r.left) / r.width));
-      if (isFinite(audio.duration)) { audio.currentTime = ratio * audio.duration; paint(); }
+    /* ---- painting ---- */
+    function paint() {
+      var d = dur();
+      var t = drag ? drag.r * d : audio.currentTime;
+      var pct = d ? Math.max(0, Math.min(100, (t / d) * 100)) : 0;
+      fill.style.width = pct + '%';
+      knob.style.left = pct + '%';
+      bar.setAttribute('aria-valuenow', Math.round(pct));
+      time.textContent = fmt(t) + ' / ' + fmt(d);
     }
-    bar.addEventListener('click', function (e) { seekTo(e.clientX); });
+
+    function paintBtn() {
+      var loading = (wantPlay && source === 'loading') || (buffering && isPlaying());
+      var key = loading ? 'load' : (isPlaying() ? 'pause' : 'play');
+      if (key !== btnIcon) {
+        btnIcon = key;
+        btn.innerHTML = key === 'load' ? ICON_LOAD : (key === 'pause' ? ICON_PAUSE : ICON_PLAY);
+      }
+      btn.setAttribute('aria-label', key === 'load' ? 'Loading: ' + title : (key === 'pause' ? 'Pause' : 'Play: ' + title));
+    }
+
+    audio.addEventListener('play',  function () { paintBtn(); msUpdate(ms); });
+    audio.addEventListener('pause', function () { buffering = false; paintBtn(); msUpdate(ms); });
+    audio.addEventListener('ended', function () { audio.currentTime = 0; paint(); paintBtn(); msUpdate(ms); });
+    audio.addEventListener('waiting', function () { if (source === 'stream') { buffering = true; paintBtn(); } });
+    audio.addEventListener('playing', function () { buffering = false; paintBtn(); });
+    audio.addEventListener('timeupdate', paint);
+    audio.addEventListener('loadedmetadata', paint);
+    audio.addEventListener('durationchange', paint);
+    audio.addEventListener('seeked', function () { msUpdate(ms); });
+    audio.addEventListener('ratechange', function () { msUpdate(ms); });
+
+    /* ---- the play button ---- */
+    btn.addEventListener('click', function () {
+      unlock();
+      if (source === 'error') { stopOthers(api); retry(); return; }
+      if (!ready()) {
+        wantPlay = !wantPlay;
+        if (wantPlay) { stopOthers(api); prepare(); }
+        paintBtn();
+        return;
+      }
+      if (isPlaying()) audio.pause(); else start();
+    });
+
+    retryB.addEventListener('click', function () { unlock(); stopOthers(api); retry(); });
+
+    /* ---- the seek bar: tap anywhere, or drag the handle ---- */
+    function ratioAt(clientX) {
+      var r = bar.getBoundingClientRect();
+      return r.width ? Math.min(1, Math.max(0, (clientX - r.left) / r.width)) : 0;
+    }
+    function seekTo(t) {
+      var d = dur();
+      if (!d) { prepare(); return; }
+      audio.currentTime = Math.max(0, Math.min(d, t));
+      paint();
+      msUpdate(ms);
+    }
+    function endDrag() {
+      drag = null;
+      bar.classList.remove('is-dragging');
+    }
+
+    if (window.PointerEvent) {
+      bar.addEventListener('pointerdown', function (e) {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        if (!dur()) { prepare(); return; }
+        if (e.pointerType === 'mouse') e.preventDefault();   /* no text selection while dragging */
+        drag = { id: e.pointerId, r: ratioAt(e.clientX) };
+        bar.classList.add('is-dragging');
+        try { bar.setPointerCapture(e.pointerId); } catch (x) {}
+        paint();
+      });
+      bar.addEventListener('pointermove', function (e) {
+        if (!drag || e.pointerId !== drag.id) return;
+        drag.r = ratioAt(e.clientX);
+        paint();
+      });
+      bar.addEventListener('pointerup', function (e) {
+        if (!drag || e.pointerId !== drag.id) return;
+        var r = ratioAt(e.clientX);
+        endDrag();
+        seekTo(r * dur());
+      });
+      /* A swipe that turned into scrolling the page: leave the position alone. */
+      bar.addEventListener('pointercancel', function () { if (drag) { endDrag(); paint(); } });
+    } else {
+      bar.addEventListener('click', function (e) { seekTo(ratioAt(e.clientX) * dur()); });
+    }
     bar.addEventListener('keydown', function (e) {
-      if (!isFinite(audio.duration)) return;
-      if (e.key === 'ArrowRight') { audio.currentTime = Math.min(audio.duration, audio.currentTime + 2); paint(); e.preventDefault(); }
-      if (e.key === 'ArrowLeft')  { audio.currentTime = Math.max(0, audio.currentTime - 2); paint(); e.preventDefault(); }
+      if (!dur()) return;
+      if (e.key === 'ArrowRight') { seekTo(audio.currentTime + 2); e.preventDefault(); }
+      if (e.key === 'ArrowLeft')  { seekTo(audio.currentTime - 2); e.preventDefault(); }
     });
 
     slow.addEventListener('click', function () {
       var on = slow.getAttribute('aria-pressed') === 'true';
       slow.setAttribute('aria-pressed', on ? 'false' : 'true');
       audio.playbackRate = on ? 1 : 0.75;
+      try { audio.defaultPlaybackRate = audio.playbackRate; } catch (e) {}
     });
 
     replay.addEventListener('click', function () {
-      stopOthers();
+      unlock();
+      stopOthers(api);
+      if (!ready()) { wantPlay = true; prepare(); paintBtn(); return; }
       audio.currentTime = 0;
-      audio.play().catch(function () {});
+      start();
     });
 
+    whenNear(el, prepare);
     paint();
+    paintBtn();
   }
 
   /* =========================================================
-     WAVEFORM PLAYER — listen-and-repeat tracks only.
-     Opt a player in with data-waveform="true".
+     AUDIO CACHE VERSION
+     Appended to audio requests as ?v=… so a re-exported mp3
+     reaches students instead of the copy already sitting in
+     their browser cache.
+
+     Every player on this page reads it, as on the Lesson 2, 4,
+     6 and 7 pages. Bump this string whenever you re-record or
+     re-export a file.
+     ========================================================= */
+  var AUDIO_VERSION = '1';
+
+  function audioUrl(src) {
+    return src + (AUDIO_VERSION ? (src.indexOf('?') < 0 ? '?v=' : '&v=') + AUDIO_VERSION : '');
+  }
+
+  /* =========================================================
+     WAVEFORM PLAYER — the long tracks: listen-and-repeat, and
+     English → Thai pairs. Opt a player in with data-waveform="true".
 
      WHY THIS IS DIFFERENT FROM THE PLAYER ABOVE
 
@@ -2041,15 +2620,28 @@ document.querySelector('main').innerHTML = `
      bitrate, and long quiet passages cannot be skipped by the
      browser's media pipeline.
 
-     Everything degrades safely. If fetch or decoding fails for
-     any reason — opening this page straight from disk over
-     file:// will do it, because fetch is CORS-blocked there —
-     the element quietly falls back to the streaming player above
-     and the student still gets working audio.
+     The file is downloaded when the player comes near the screen
+     (see WHERE THE SOUND COMES FROM above), with the progress shown
+     in the status line; ▶ pressed meanwhile starts by itself.
+
+     Everything degrades safely. If the file cannot be downloaded
+     here at all (a page opened straight from disk over file://)
+     or cannot be decoded, the element quietly falls back to the
+     simple player above and the student still gets working audio.
+     A missing file says so; a dropped connection offers "Try again".
 
      SUPPORTED ATTRIBUTES
 
        data-waveform="true"   turns this player on. Required.
+       data-pairs="true"      optional. An English → Thai track:
+                              stepped through pair by pair, from
+                              the timings in PAIR_CUES (which this
+                              shape of track needs — see there),
+                              with "Thinking time" in place of
+                              "Pause length".
+       data-vocab-list="id"   optional. Wires the speaker buttons
+                              of that word list to this track (see
+                              WORD LIST ↔ VOCABULARY TRACK below).
        data-lead-in="1"|"0"   optional. Forces the first phrase to
                               be treated as a spoken instruction
                               ("1") or as a real word ("0"). Left
@@ -2311,21 +2903,75 @@ document.querySelector('main').innerHTML = `
   }
   /* ==== END SLOW PLAYBACK ==== */
 
+  /* ==== PAIR CUES → items (pure function — no DOM, no audio context) ====
+     Turns the PAIR_CUES entry for a track into the same kind of item list
+     the segmentation above produces, with the same breathing room around
+     each phrase, plus a kind on every item: 'lead' for the spoken
+     instructions, then 'en' and 'th' in turn. Returns [] — a plain
+     waveform with nothing to step through — when the timings are missing,
+     out of order, or do not fit the recording. */
+  function cueItems(src, dur) {
+    var c = PAIR_CUES[String(src).split('?')[0]];
+    var raw = [], i;
+    if (c && c.pairs && c.pairs.length) {
+      if (c.intro) raw.push({ s: +c.intro[0], e: +c.intro[1], k: 'lead' });
+      for (i = 0; i < c.pairs.length; i++) {
+        var p = c.pairs[i] || [];
+        raw.push({ s: +p[0], e: +p[1], k: 'en' }, { s: +p[2], e: +p[3], k: 'th' });
+      }
+    }
+    var ok = raw.length > 0;
+    for (i = 0; ok && i < raw.length; i++) {
+      if (!(raw[i].s >= 0 && raw[i].e > raw[i].s && raw[i].e <= dur + 0.05)) ok = false;
+      if (i && raw[i].s < raw[i - 1].e) ok = false;
+    }
+    if (!ok) {
+      if (window.console && console.warn) console.warn('[wave-player] ' + src + ': no usable PAIR_CUES timings for this recording.');
+      return [];
+    }
+    var PAD_IN = 0.12, PAD_OUT = 0.20;
+    return raw.map(function (p, k) {
+      var prevEnd   = k > 0 ? raw[k - 1].e : 0;
+      var nextStart = k < raw.length - 1 ? raw[k + 1].s : dur;
+      return {
+        s: Math.max(0,   p.s - Math.min(PAD_IN,  (p.s - prevEnd)   / 2)),
+        e: Math.min(dur, p.e + Math.min(PAD_OUT, (nextStart - p.e) / 2)),
+        k: p.k
+      };
+    });
+  }
+  /* ==== END PAIR CUES ==== */
+
   function buildWavePlayer(el) {
     var ctx = audioCtx();
-    if (!ctx || !window.fetch || !window.Float32Array) { buildPlayer(el); return; }
+    if (!ctx || !window.fetch || !window.Float32Array || location.protocol === 'file:') { buildPlayer(el); return; }
 
     var src   = el.getAttribute('data-src');
     var title = el.getAttribute('data-title') || 'Audio';
     var hint  = el.getAttribute('data-hint') || '';
-    var url   = src + (AUDIO_VERSION ? (src.indexOf('?') < 0 ? '?v=' : '&v=') + AUDIO_VERSION : '');
+    var url   = audioUrl(src);
     var gapId = 'wave-gap-' + (++waveSeq);
+
+    /* Pairs mode (data-pairs="true", English → Thai tracks). The track is
+       stepped through pair by pair, from the timings in PAIR_CUES, and the
+       pause setting becomes "Thinking time": it lengthens only the pause
+       between an English prompt and its Thai answer — the one the student
+       answers in — or, set to "Wait for me", holds the player there until
+       the student taps ▶. */
+    var PAIRS = el.getAttribute('data-pairs') === 'true';
+    var U = PAIRS
+      ? { one: 'pair', many: 'pairs', loop: '↺ Loop pair', gap: 'Thinking time',
+          gapTitle: 'How long to wait after each English prompt before the Thai answer',
+          options: [['0', 'as recorded'], ['4', '4s'], ['6', '6s'], ['8', '8s'], ['wait', 'Wait for me']] }
+      : { one: 'word', many: 'words', loop: '↺ Loop word', gap: 'Pause length',
+          gapTitle: 'How much silence to leave after each word for you to repeat it',
+          options: [['0', 'as recorded'], ['4', '4s'], ['5', '5s'], ['7', '7s'], ['10', '10s']] };
 
     el.classList.remove('player');
     el.classList.add('wave-player');
     el.innerHTML =
       '<div class="wave-head">' +
-        '<button type="button" class="play-btn" aria-label="Play: ' + esc(title) + '" disabled>' + ICON_PLAY + '</button>' +
+        '<button type="button" class="play-btn" aria-label="Play: ' + esc(title) + '">' + ICON_PLAY + '</button>' +
         '<div class="wave-head-text">' +
           '<div class="wave-title">' + esc(title) +
             (hint ? ' <span class="hint">' + esc(hint) + '</span>' : '') +
@@ -2340,22 +2986,18 @@ document.querySelector('main').innerHTML = `
       '<div class="wave-foot">' +
         '<span class="wave-time js-time">0:00 / 0:00</span>' +
         '<span class="wave-tools">' +
-          '<button type="button" class="mini-btn wave-step js-prev" title="Previous word" aria-label="Previous word" disabled>' + ICON_PREV + '</button>' +
-          '<button type="button" class="mini-btn wave-step js-next" title="Next word" aria-label="Next word" disabled>' + ICON_NEXT + '</button>' +
-          '<button type="button" class="mini-btn js-loop" aria-pressed="false" title="Repeat the current word over and over" disabled>↺ Loop word</button>' +
+          '<button type="button" class="mini-btn wave-step js-prev" title="Previous ' + U.one + '" aria-label="Previous ' + U.one + '" disabled>' + ICON_PREV + '</button>' +
+          '<button type="button" class="mini-btn wave-step js-next" title="Next ' + U.one + '" aria-label="Next ' + U.one + '" disabled>' + ICON_NEXT + '</button>' +
+          '<button type="button" class="mini-btn js-loop" aria-pressed="false" title="Repeat the current ' + U.one + ' over and over" disabled>' + U.loop + '</button>' +
           '<button type="button" class="mini-btn js-slow" aria-pressed="false" title="Play at 75% speed" disabled>0.75×</button>' +
           '<span class="wave-gap">' +
-            '<label class="wave-gap-label" for="' + gapId + '">Pause length</label>' +
+            '<label class="wave-gap-label" for="' + gapId + '">' + U.gap + '</label>' +
             '<select class="wave-select js-gap" id="' + gapId + '" ' +
-                    'title="How much silence to leave after each word for you to repeat it" disabled>' +
-              '<option value="0">as recorded</option>' +
-              '<option value="4">4s</option>' +
-              '<option value="5">5s</option>' +
-              '<option value="7">7s</option>' +
-              '<option value="10">10s</option>' +
+                    'title="' + U.gapTitle + '" disabled>' +
+              U.options.map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('') +
             '</select>' +
           '</span>' +
-          '<button type="button" class="mini-btn js-replay" title="Play from the start" disabled>↻ Replay</button>' +
+          '<button type="button" class="mini-btn js-replay" title="Play from the start" aria-label="Replay" disabled>↻<span class="wave-lbl"> Replay</span></button>' +
         '</span>' +
       '</div>';
 
@@ -2371,9 +3013,11 @@ document.querySelector('main').innerHTML = `
     var replay = el.querySelector('.js-replay');
 
     /* ---- state ----
-       items  every detected phrase, the spoken instruction included
-       words  the phrases the student actually repeats — this is what
-              the counter, the ⏮/⏭ buttons and Loop word work on
+       items  every phrase, the spoken instruction included. In pairs mode
+              each item also has a kind: 'lead', 'en' or 'th'.
+       words  what the student steps through — the counter, the ⏮/⏭
+              buttons and Loop work on these. A word in the listen-and-
+              repeat track; in pairs mode a whole pair, { s, e, en, th }.
        lead   1 when items[0] is an instruction, 0 when it is word 1 */
     var origBuffer = null, origItems = [], roomTone = null;
     var slowBuffer = null, slowItems = null;      /* built on first use, then kept */
@@ -2384,44 +3028,157 @@ document.querySelector('main').innerHTML = `
     var rate = 1, loopIdx = -1, raf = 0;
     var SLOW_RATE = 0.75;
 
+    /* ---- loading and waiting ---- */
+    var loadState = '';          /* '' · 'loading' · 'ready' · 'missing' · 'network' */
+    var loaded = { got: 0, total: 0 };
+    var wantPlay = false;        /* ▶ pressed while the file was still on its way */
+    var wantWord = -1;           /* a word-list speaker pressed meanwhile */
+    var waitMode = false;        /* pairs: Thinking time is "Wait for me" */
+    var waiting = -1;            /* pairs: the pair whose Thai answer is held back */
+    var lastMark = -2, btnIcon = '';
+
     var api = {
-      audio: null,
-      pause: function () { if (playing) stop(false); }
+      pause: function () {
+        wantPlay = false;
+        wantWord = -1;
+        if (playing) stop(false); else if (!buffer) paintLoading();
+      },
+      onWord: null,     /* linkVocab: the word being spoken now, or -1 */
+      onReady: null,    /* linkVocab: the track is in, with this many words */
+      onFail: null,     /* linkVocab: the file could not be loaded */
+      onGone: null      /* linkVocab: this player gave up and fell back */
     };
     players.push(api);
+    el._wave = api;
 
-    /* ---- load ---- */
-    fetch(url)
-      .then(function (r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.arrayBuffer();
-      })
-      .then(function (ab) {
-        return new Promise(function (resolve, reject) {
-          var p = ctx.decodeAudioData(ab, resolve, reject);
-          if (p && p.then) p.then(resolve, reject);
+    var ms = {
+      title: title,
+      play: function () { if (!playing) toggle(); },
+      pause: function () { api.pause(); },
+      seek: function (t) { if (buffer) seek(t); },
+      pos: function () { return pos(); },
+      dur: function () { return buffer ? buffer.duration : 0; },
+      rate: function () { return 1; },
+      playing: function () { return playing; },
+      prev: function () { jump(-1); },
+      next: function () { jump(1); }
+    };
+
+    /* ---- load ----
+       Starts when the player comes near the screen, or on the first press
+       of ▶ (or of a word-list speaker) if that comes first. */
+    function load() {
+      if (loadState === 'loading' || loadState === 'ready' || loadState === 'missing') return;
+      loadState = 'loading';
+      loaded = { got: 0, total: 0 };
+      paintLoading();
+      getAudio(url, function (got, total) {
+        loaded.got = got;
+        loaded.total = total;
+        paintLoading();
+      }, wantPlay || wantWord >= 0)
+        .then(blobBytes)
+        .then(function (ab) {
+          return new Promise(function (resolve, reject) {
+            var p = ctx.decodeAudioData(ab, resolve, reject);
+            if (p && p.then) p.then(resolve, reject);
+          });
+        })
+        .then(onDecoded)
+        .catch(function (err) {
+          var kind = err && err.kind;
+          if (kind === 'missing' || kind === 'network') failed(kind);
+          else fallback();     /* nothing to download with here, or a file Web Audio cannot decode */
         });
-      })
-      .then(onDecoded)
-      .catch(fallback);
+    }
+
+    function failed(kind) {
+      loadState = kind;
+      wantPlay = false;
+      wantWord = -1;
+      btn.disabled = kind === 'missing';
+      if (window.console && console.warn) {
+        console.warn('[wave-player] ' + src + (kind === 'missing' ? ' could not be found.' : ' could not be loaded.'));
+      }
+      if (api.onFail) api.onFail(kind);
+      if (kind === 'missing' && api.onGone) api.onGone();
+      paintLoading();
+    }
+
+    function retryLoad() {
+      if (loadState !== 'network') return;
+      loadState = '';
+      btn.disabled = false;
+      wantPlay = true;
+      load();
+    }
 
     function fallback() {
       var i = players.indexOf(api);
       if (i >= 0) players.splice(i, 1);
+      el._wave = null;
+      if (api.onGone) api.onGone();
       el.classList.remove('wave-player');
       el.classList.add('player');
       el.innerHTML = '';
       buildPlayer(el);
     }
 
+    /* While the file is on its way: the status line counts up and a thin
+       line fills across the waveform's place. */
+    function paintLoading() {
+      if (buffer) return;
+      if (loadState === 'missing') {
+        sub.textContent = 'Recording not available';
+        sub.title = src;
+      } else if (loadState === 'network') {
+        sub.innerHTML = 'Couldn’t load the audio — check your connection.' +
+                        '<button type="button" class="mini-btn wave-retry">↻ Try again</button>';
+      } else {
+        var pct = loaded.total ? Math.min(99, Math.floor((loaded.got / loaded.total) * 100)) : 0;
+        sub.textContent = (loaded.total ? 'Loading audio… ' + pct + '%' : 'Loading audio…') +
+                          ((wantPlay || wantWord >= 0) ? ' — it starts by itself' : '');
+      }
+      drawLoading();
+      paintBtn();
+    }
+
+    function drawLoading() {
+      var dpr  = window.devicePixelRatio || 1;
+      var wCss = canvas.clientWidth;
+      if (!wCss) return;
+      var W = Math.round(wCss * dpr), H = Math.round((canvas.clientHeight || 78) * dpr);
+      if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+      var g = canvas.getContext('2d');
+      g.clearRect(0, 0, W, H);
+      if (loadState === 'missing') return;
+      var lane = Math.round(14 * dpr), mid = lane + (H - lane) / 2, h = 4 * dpr;
+      var frac = (loadState === 'loading' && loaded.total) ? Math.min(1, loaded.got / loaded.total) : 0;
+      g.fillStyle = cssVar('--accent', '#b8893a');
+      g.globalAlpha = 0.18;
+      roundRect(g, 0, mid - h / 2, W, h, h / 2);
+      g.fill();
+      if (frac > 0) {
+        g.globalAlpha = 0.85;
+        roundRect(g, 0, mid - h / 2, Math.max(h, W * frac), h, h / 2);
+        g.fill();
+      }
+      g.globalAlpha = 1;
+    }
+
     function onDecoded(buf) {
       origBuffer = toMono(buf);
-      origItems  = analyseSegments(origBuffer.getChannelData(0), origBuffer.sampleRate);
+      if (PAIRS) {
+        origItems = cueItems(src, origBuffer.duration);
+        lead = (origItems.length && origItems[0].k === 'lead') ? 1 : 0;
+      } else {
+        origItems = analyseSegments(origBuffer.getChannelData(0), origBuffer.sampleRate);
 
-      var forced = el.getAttribute('data-lead-in');
-      if (forced === '1' || forced === 'true')       lead = origItems.length > 1 ? 1 : 0;
-      else if (forced === '0' || forced === 'false') lead = 0;
-      else                                           lead = detectLeadIn(origItems) ? 1 : 0;
+        var forced = el.getAttribute('data-lead-in');
+        if (forced === '1' || forced === 'true')       lead = origItems.length > 1 ? 1 : 0;
+        else if (forced === '0' || forced === 'false') lead = 0;
+        else                                           lead = detectLeadIn(origItems) ? 1 : 0;
+      }
 
       roomTone    = grabRoomTone(origBuffer, origItems);
 
@@ -2439,6 +3196,7 @@ document.querySelector('main').innerHTML = `
       gainNode = ctx.createGain();
       gainNode.connect(ctx.destination);
 
+      loadState = 'ready';
       btn.disabled = false;
       slowB.disabled = false;
       replay.disabled = false;
@@ -2448,15 +3206,30 @@ document.querySelector('main').innerHTML = `
         loopB.disabled = false;
         gapSel.disabled = !roomTone;
       }
-      waveRedraws.push(render);
       render();
+      paintBtn();
+      if (api.onReady) api.onReady(words.length);
+
+      if (wantWord >= 0) { var w = wantWord; wantWord = -1; wantPlay = false; playWord(w); }
+      else if (wantPlay) { wantPlay = false; play(); }
     }
 
     function setSegments(buf, list) {
       buffer = buf;
       items  = list.slice();
-      words  = items.slice(lead);
+      words  = unitsOf(items);
       peaks  = null;
+    }
+
+    /* Listen-and-repeat: every item after the instruction is a word.
+       Pairs: each English item and the Thai item after it make one pair. */
+    function unitsOf(list) {
+      if (!PAIRS) return list.slice(lead);
+      var out = [];
+      for (var i = lead; i + 1 < list.length; i += 2) {
+        out.push({ s: list[i].s, e: list[i + 1].e, en: list[i], th: list[i + 1] });
+      }
+      return out;
     }
 
     /* Mixing to mono keeps every later step simple, and these are voice
@@ -2507,7 +3280,8 @@ document.querySelector('main').innerHTML = `
       var L = srcList();
       return (lead && L.length > 1) ? (L[1].s - L[0].e) : 0;
     }
-    function gapNow() { return parseFloat(gapSel.value) || 0; }
+    /* "Wait for me" keeps the recorded pauses: it stops instead of stretching. */
+    function gapNow() { return (PAIRS && gapSel.value === 'wait') ? 0 : (parseFloat(gapSel.value) || 0); }
 
     /* Building the slowed copy blocks for a few hundred milliseconds, so
        the status line is updated and the controls greyed out first, and
@@ -2528,7 +3302,7 @@ document.querySelector('main').innerHTML = `
         /* The stretch is uniform, so every boundary simply moves out by
            the same factor — no need to hunt for the words again. */
         slowItems = origItems.map(function (it) {
-          return { s: it.s / SLOW_RATE, e: it.e / SLOW_RATE };
+          return { s: it.s / SLOW_RATE, e: it.e / SLOW_RATE, k: it.k };
         });
         for (var k = 0; k < held.length; k++) held[k].disabled = false;
         done();
@@ -2537,13 +3311,23 @@ document.querySelector('main').innerHTML = `
 
     /* ---- rebuild with a different pause length ----
        The instruction keeps its own short gap: the student is not
-       repeating it, so stretching it to 10 s would just be dead air. */
+       repeating it, so stretching it to 10 s would just be dead air.
+       In pairs mode only the pause after each English prompt changes;
+       the one after the Thai answer stays as recorded. */
     function rebuild(gapSec) {
       var wasPlaying = playing;
       var keepWord = words.length ? Math.max(0, wordIndexNear(pos())) : -1;
       if (playing) stop(false);
+      waiting = -1;
 
       var base = srcBuf(), list = srcList(), leadGap = srcLeadGap();
+
+      function gapAfter(i) {
+        if (lead && i === 0) return leadGap;
+        if (!PAIRS) return gapSec;
+        if (list[i].k === 'en') return gapSec;
+        return (i + 1 < list.length ? list[i + 1].s : base.duration) - list[i].e;
+      }
 
       if (!gapSec || !roomTone || !list.length) {
         setSegments(base, list);
@@ -2553,8 +3337,7 @@ document.querySelector('main').innerHTML = `
         var lead0 = Math.round(0.15 * sr);
         var i, total = lead0;
         for (i = 0; i < list.length; i++) {
-          var gapAfter = (lead && i === 0) ? leadGap : gapSec;
-          total += Math.round((list[i].e - list[i].s) * sr) + Math.round(gapAfter * sr);
+          total += Math.round((list[i].e - list[i].s) * sr) + Math.round(gapAfter(i) * sr);
         }
         var nb = ctx.createBuffer(1, total, sr);
         var out = nb.getChannelData(0);
@@ -2566,8 +3349,8 @@ document.querySelector('main').innerHTML = `
           var a = Math.round(list[i].s * sr);
           var b = Math.round(list[i].e * sr);
           out.set(d.subarray(a, b), w);
-          ns.push({ s: w / sr, e: (w + (b - a)) / sr });
-          w += (b - a) + Math.round(((lead && i === 0) ? leadGap : gapSec) * sr);
+          ns.push({ s: w / sr, e: (w + (b - a)) / sr, k: list[i].k });
+          w += (b - a) + Math.round(gapAfter(i) * sr);
         }
         setSegments(nb, ns);
       }
@@ -2587,7 +3370,13 @@ document.querySelector('main').innerHTML = `
        after its replacement has already started, and the player stops
        itself and jumps to 0:00 — which is exactly what the ⏭ button
        used to do. Identity is checked per node; there is deliberately
-       no shared "was this deliberate?" flag to get out of step. */
+       no shared "was this deliberate?" flag to get out of step.
+
+       A node can also be told where to stop (node._until): one word
+       played from the word list, or — in pairs mode with "Wait for
+       me" — the end of an English prompt. It is stopped there sample-
+       exactly by the audio clock, and the player parks at that spot
+       instead of running to the end and jumping back to 0:00. */
     /* Looping runs a little way past the end of the word — roughly
        180 ms, so the repeat lands after a short breath rather than
        snapping straight back onto the next consonant. The tail is
@@ -2610,10 +3399,11 @@ document.querySelector('main').innerHTML = `
       if (!buffer) return 0;
       if (!playing) return startOffset;
       var t = startOffset + (ctx.currentTime - startedAt);
-      if (loopIdx >= 0 && words[loopIdx]) {
+      if (loopIdx >= 0 && words[loopIdx] && source && source.loop) {
         var a = words[loopIdx].s, b = loopEnd(loopIdx), len = b - a;
         if (len > 0 && t > b) t = a + ((t - a) % len);
       }
+      if (source && typeof source._until === 'number' && t > source._until) t = source._until;
       return Math.max(0, Math.min(buffer.duration, t));
     }
 
@@ -2627,26 +3417,38 @@ document.querySelector('main').innerHTML = `
       }
     }
 
-    function stop(reset) {
-      if (playing) startOffset = pos();
+    function stop(reset, at) {
+      if (playing) startOffset = (typeof at === 'number') ? at : pos();
       dropSource();
       playing = false;
       if (reset) startOffset = 0;
-      btn.innerHTML = ICON_PLAY;
-      btn.setAttribute('aria-label', 'Play: ' + title);
       cancelAnimationFrame(raf);
+      paintBtn();
       render();
+      msUpdate(ms);
     }
 
-    function play(from) {
-      if (!buffer) return;
-      /* buildPlayer keeps its own stopOthers() private to its closure, so
-         this walks the shared registry directly. */
-      for (var pi = 0; pi < players.length; pi++) {
-        if (players[pi] !== api) players[pi].pause();
+    /* The audio context may only be woken from inside a tap on iPhones,
+       so every tap wakes it straight away — even while the file is still
+       downloading — and the sound can then start by itself later. */
+    function unlockCtx() {
+      try { if (ctx.state !== 'running' && ctx.resume) ctx.resume(); } catch (e) {}
+    }
+
+    /* Pairs, "Wait for me": the end of the next English prompt ahead. */
+    function nextWaitPoint(t) {
+      for (var i = 0; i < words.length; i++) {
+        if (words[i].en.e > t + 0.02) return words[i].en.e;
       }
-      if (ctx.state === 'suspended' && ctx.resume) ctx.resume();
+      return null;
+    }
+
+    function play(from, until) {
+      if (!buffer) return;
+      stopOthers(api);
+      unlockCtx();
       dropSource();
+      waiting = -1;
 
       var at = (typeof from === 'number') ? from : startOffset;
       if (at >= buffer.duration - 0.02) at = 0;
@@ -2656,23 +3458,57 @@ document.querySelector('main').innerHTML = `
       /* Always 1: slowing down is done by rebuilding the audio, never by
          resampling it, so the speaker's pitch never moves. */
       node.playbackRate.value = 1;
-      if (loopIdx >= 0 && words[loopIdx]) {
+      var end = (typeof until === 'number') ? until : null;
+      var loopW = (loopIdx >= 0 && words[loopIdx]) ? words[loopIdx] : null;
+      if (loopW && !(PAIRS && waitMode)) {
         node.loop = true;
-        node.loopStart = words[loopIdx].s;
+        node.loopStart = loopW.s;
         node.loopEnd = loopEnd(loopIdx);
         if (at < node.loopStart || at > node.loopEnd) at = node.loopStart;
+        end = null;
+      } else if (end === null && PAIRS && waitMode) {
+        if (loopW) {
+          /* Looping a pair while waiting: English, wait, Thai, round again. */
+          if (at < loopW.s || at > loopEnd(loopIdx)) at = loopW.s;
+          end = (at < loopW.en.e - 0.02) ? loopW.en.e : loopEnd(loopIdx);
+        } else {
+          end = nextWaitPoint(at);
+        }
       }
+      if (end !== null && end <= at + 0.01) end = null;
+
       node.connect(gainNode);
-      node.onended = function () { if (source === node) stop(true); };
+      node.onended = function () { if (source === node) segmentEnded(node); };
+      node._until = end;
       source = node;
       node.start(0, at);
+      if (end !== null) { try { node.stop(ctx.currentTime + (end - at)); } catch (e) {} }
 
       startOffset = at;
       startedAt = ctx.currentTime;
       playing = true;
-      btn.innerHTML = ICON_PAUSE;
-      btn.setAttribute('aria-label', 'Pause');
+      paintBtn();
+      msClaim(ms);
       tick();
+    }
+
+    /* The current node has finished: either the track ran out, or it
+       reached the spot it was told to stop at. */
+    function segmentEnded(node) {
+      var end = node._until;
+      if (typeof end !== 'number') { stop(true); return; }
+      stop(false, end);
+      if (PAIRS && waitMode) {
+        if (loopIdx >= 0 && words[loopIdx] && Math.abs(end - loopEnd(loopIdx)) < 0.01) {
+          play(words[loopIdx].s);
+          return;
+        }
+        for (var i = 0; i < words.length; i++) {
+          if (Math.abs(words[i].en.e - end) < 0.01) { waiting = i; break; }
+        }
+        paintBtn();
+        render();
+      }
     }
 
     function tick() {
@@ -2683,9 +3519,48 @@ document.querySelector('main').innerHTML = `
     function seek(t, keepPlaying) {
       var was = playing;
       if (playing) stop(false);
+      waiting = -1;
       startOffset = Math.max(0, Math.min(buffer ? buffer.duration : 0, t));
-      if (was || keepPlaying) play(startOffset); else render();
+      if (was || keepPlaying) play(startOffset); else { render(); paintBtn(); msUpdate(ms); }
     }
+
+    /* ▶ / ⏸, from the button, the keyboard or the lock screen. */
+    function toggle() {
+      unlockCtx();
+      if (!buffer) {
+        if (loadState === 'missing') return;
+        if (loadState === 'network') { stopOthers(api); retryLoad(); return; }
+        wantPlay = !wantPlay;
+        wantWord = -1;
+        if (wantPlay) { stopOthers(api); load(); }
+        paintLoading();
+        return;
+      }
+      if (playing) { stop(false); return; }
+      if (PAIRS && waiting >= 0 && words[waiting]) { play(words[waiting].th.s); return; }
+      play();
+    }
+
+    /* One word on its own, for the word-list speaker buttons. While Loop
+       word is on, it moves the loop to that word instead. */
+    function playWord(i) {
+      unlockCtx();
+      if (!buffer) {
+        if (loadState === 'missing') return;
+        stopOthers(api);
+        wantWord = i;
+        wantPlay = false;
+        if (loadState === 'network') { loadState = ''; btn.disabled = false; }
+        load();
+        paintLoading();
+        return;
+      }
+      if (!words[i]) return;
+      if (loopIdx >= 0) { loopIdx = i; play(words[i].s); return; }
+      play(words[i].s, loopEnd(i));
+    }
+    api.playWord = playWord;
+    api.isReady = function () { return !!buffer; };
 
     /* ---- word lookup ----
        Three different questions, three different answers — conflating
@@ -2802,20 +3677,22 @@ document.querySelector('main').innerHTML = `
 
       /* Pauses are marked, not boxed: an inset rounded shape at very
          low opacity. Enough to say "wait here", quiet enough to stay
-         in the background. */
-      var prevEnd = 0, k;
+         in the background. In pairs mode the pause the student answers
+         in — after each English prompt — is tinted in the accent. */
+      var prevEnd = 0, prevKind = '', k;
       for (k = 0; k <= items.length; k++) {
         var gs = prevEnd;
         var ge = (k < items.length) ? items[k].s : dur;
         if (ge - gs > 0.35) {
+          var answer = PAIRS && prevKind === 'en';
           g.save();
-          g.globalAlpha = 0.05;
-          g.fillStyle = soft;
+          g.globalAlpha = answer ? 0.11 : 0.05;
+          g.fillStyle = answer ? accent : soft;
           roundRect(g, X(gs), top + boxH * 0.16, X(ge) - X(gs), boxH * 0.68, 5 * dpr);
           g.fill();
           g.restore();
         }
-        if (k < items.length) prevEnd = items[k].e;
+        if (k < items.length) { prevEnd = items[k].e; prevKind = items[k].k || ''; }
       }
 
       /* The word being spoken right now, softly lit. */
@@ -2830,11 +3707,21 @@ document.querySelector('main').innerHTML = `
         g.restore();
       }
 
+      /* Pairs: the English (and the instructions) are drawn quieter, in
+         the secondary ink, so each Thai answer stands out in the accent. */
+      var ki = 0;
       for (var i = 0; i < buckets; i++) {
         var x = i * step;
         var h = Math.max(2 * dpr, peaks[i] * maxH);
-        g.fillStyle = accent;
-        g.globalAlpha = (x + barW / 2 <= playedX) ? 1 : 0.28;
+        var played = (x + barW / 2 <= playedX);
+        var quiet = false;
+        if (PAIRS) {
+          var sec = ((x + barW / 2) / W) * dur;
+          while (ki < items.length && items[ki].e < sec) ki++;
+          quiet = ki < items.length && items[ki].s <= sec && items[ki].k !== 'th';
+        }
+        g.fillStyle = quiet ? soft : accent;
+        g.globalAlpha = quiet ? (played ? 0.7 : 0.22) : (played ? 1 : 0.28);
         g.fillRect(x, mid - h / 2, barW, h);
       }
       g.globalAlpha = 1;
@@ -2868,11 +3755,31 @@ document.querySelector('main').innerHTML = `
       timeEl.textContent = fmt(t) + ' / ' + fmt(dur);
       canvas.setAttribute('aria-valuenow', Math.round((t / dur) * 100));
       sub.textContent = statusText(t, cur);
+
+      /* Tell the word list which row to light up: the word being spoken,
+         or the one whose repeat pause is running. */
+      if (api.onWord) {
+        var m = -1;
+        if (loopIdx >= 0) m = loopIdx;
+        else if (playing && !(lead && items.length && t < items[0].e)) m = wordIndexNear(t);
+        if (m !== lastMark) { lastMark = m; api.onWord(m); }
+      }
     }
 
     function statusText(t, cur) {
       if (!words.length) return 'Click the waveform to jump anywhere';
-      var n = words.length, head = n + ' words · ';
+      var n = words.length, head = n + ' ' + U.many + ' · ';
+      if (PAIRS) {
+        if (waiting >= 0) return head + 'pair ' + (waiting + 1) + ' · your turn — say it in Thai, then tap ▶';
+        if (lead && items.length && t < items[0].e && loopIdx < 0) return head + 'instructions';
+        var p = loopIdx >= 0 ? loopIdx : wordIndexNear(t);
+        if (p < 0) return head + 'ready';
+        var w = words[p], name = (loopIdx >= 0 ? 'looping pair ' : 'pair ') + (p + 1);
+        if (t < w.en.e) return head + name + ' · English';
+        if (t < w.th.s) return head + name + ' · your turn — say it in Thai';
+        if (t <= w.th.e) return head + name + ' · Thai';
+        return head + name;
+      }
       if (loopIdx >= 0) return head + 'looping word ' + (loopIdx + 1);
       if (lead && items.length && t < items[0].e) return head + 'instructions';
       if (cur >= 0) return head + 'word ' + (cur + 1) + ' of ' + n;
@@ -2881,9 +3788,21 @@ document.querySelector('main').innerHTML = `
       return head + 'your turn — repeat word ' + (near + 1);
     }
 
+    function paintBtn() {
+      var key = (wantPlay && !buffer && loadState === 'loading') ? 'load' : (playing ? 'pause' : 'play');
+      if (key !== btnIcon) {
+        btnIcon = key;
+        btn.innerHTML = key === 'load' ? ICON_LOAD : (key === 'pause' ? ICON_PAUSE : ICON_PLAY);
+      }
+      btn.setAttribute('aria-label', key === 'load' ? 'Loading: ' + title : (key === 'pause' ? 'Pause' : 'Play: ' + title));
+      btn.classList.toggle('is-waiting', waiting >= 0 && !playing);
+    }
+
     /* ---- interaction ---- */
-    btn.addEventListener('click', function () {
-      if (playing) stop(false); else play();
+    btn.addEventListener('click', toggle);
+
+    sub.addEventListener('click', function (e) {
+      if (e.target && e.target.closest && e.target.closest('.wave-retry')) { unlockCtx(); stopOthers(api); retryLoad(); }
     });
 
     replay.addEventListener('click', function () {
@@ -2896,7 +3815,7 @@ document.querySelector('main').innerHTML = `
        40 ms into a word and clip its first consonant. Clicking a pause
        still seeks exactly where you pointed. */
     canvas.addEventListener('click', function (e) {
-      if (!buffer) return;
+      if (!buffer) { if (loadState !== 'missing') { unlockCtx(); load(); } return; }
       var r = canvas.getBoundingClientRect();
       var ratio = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
       var t = ratio * buffer.duration;
@@ -2913,7 +3832,7 @@ document.querySelector('main').innerHTML = `
       if (e.key === 'ArrowRight') { seek(pos() + 2); e.preventDefault(); }
       else if (e.key === 'ArrowLeft') { seek(pos() - 2); e.preventDefault(); }
       else if (e.key === ' ' || e.key === 'Enter') {
-        if (playing) stop(false); else play();
+        toggle();
         e.preventDefault();
       }
     });
@@ -2923,6 +3842,7 @@ document.querySelector('main').innerHTML = `
 
     loopB.addEventListener('click', function () {
       var on = loopB.getAttribute('aria-pressed') === 'true';
+      waiting = -1;
       if (on) {
         /* Releasing the loop always continues from just after the word
            that was looping, whether it ran round twice or fifty times.
@@ -2935,7 +3855,7 @@ document.querySelector('main').innerHTML = `
         loopIdx = -1;
         loopB.setAttribute('aria-pressed', 'false');
         if (playing) play(at);
-        else { startOffset = at; render(); }
+        else { startOffset = at; render(); paintBtn(); }
       } else {
         var i = wordIndexNear(pos());
         if (i < 0) i = 0;
@@ -2961,8 +3881,17 @@ document.querySelector('main').innerHTML = `
     });
 
     gapSel.addEventListener('change', function () {
-      rebuild(parseFloat(gapSel.value) || 0);
+      waitMode = PAIRS && gapSel.value === 'wait';
+      rebuild(gapNow());
     });
+
+    /* Repaint on theme change and resize: the waveform once it is in,
+       the loading line before that. */
+    waveRedraws.push(function () { if (buffer) render(); else drawLoading(); });
+
+    whenNear(el, load);
+    if (!nearObserver) load();
+    paintLoading();
   }
 
   /* Waveforms are painted, not styled, so they have to be repainted
@@ -2985,6 +3914,93 @@ document.querySelector('main').innerHTML = `
     if (el.getAttribute('data-waveform') === 'true') buildWavePlayer(el);
     else buildPlayer(el);
   });
+
+  /* =========================================================
+     WORD LIST ↔ VOCABULARY TRACK
+     A waveform player with data-vocab-list="<id>" drives the
+     speaker buttons in that list: button N plays word N of the
+     track, and the row of the word being spoken lights up while
+     the track plays. If the track turns out not to hold exactly
+     one word per row, the buttons are switched off again.
+     ========================================================= */
+  var ICON_RING = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/></svg>';
+
+  function linkVocab(trackEl) {
+    var wave = trackEl._wave;
+    var listEl = document.getElementById(trackEl.getAttribute('data-vocab-list'));
+    if (!wave || !listEl) return;
+    var rows = listEl.querySelectorAll('.vocab-item');
+    if (!rows.length) return;
+    var head = listEl.previousElementSibling;
+    var lit = -1;
+
+    function each(fn) {
+      for (var i = 0; i < rows.length; i++) fn(rows[i], rows[i].querySelector('.vocab-play'), i);
+    }
+    function show(on) {
+      each(function (row, b) {
+        if (b) b.hidden = !on;
+        row.classList.toggle('has-play', on);
+      });
+      if (head && head.classList.contains('vocab-head')) head.classList.toggle('has-audio', on);
+    }
+    /* A turning ring on the button pressed while the track is still on its way. */
+    function spin(i) {
+      each(function (row, b, k) {
+        if (!b) return;
+        var on = k === i;
+        if (on === b.classList.contains('is-loading')) return;
+        b.classList.toggle('is-loading', on);
+        b.innerHTML = on ? ICON_RING : ICON_SPEAKER;
+      });
+    }
+    function mark(i) {
+      if (lit >= 0 && rows[lit]) rows[lit].classList.remove('is-current');
+      lit = (i >= 0 && i < rows.length) ? i : -1;
+      if (lit >= 0) { rows[lit].classList.add('is-current'); spin(-1); }
+    }
+    function unlink() {
+      mark(-1);
+      spin(-1);
+      show(false);
+      wave.onWord = null;
+    }
+
+    wave.onWord = mark;
+    wave.onReady = function (count) {
+      spin(-1);
+      if (count !== rows.length) {
+        if (window.console && console.warn) {
+          console.warn('[vocab] the track has ' + count + ' words but the list has ' + rows.length +
+                       ' rows, so the speaker buttons are switched off.');
+        }
+        unlink();
+      }
+    };
+    wave.onFail = function () { spin(-1); };
+    wave.onGone = unlink;
+
+    each(function (row, b, i) {
+      if (!b) return;
+      b.addEventListener('click', function () {
+        if (!wave.isReady()) spin(i);
+        wave.playWord(i);
+      });
+    });
+    show(true);
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-vocab-list]'), linkVocab);
+
+  /* =========================================================
+     "CLICK" OR "TAP"
+     On touch screens the intro says "Tap the settings icon".
+     ========================================================= */
+  try {
+    if (window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+      Array.prototype.forEach.call(document.querySelectorAll('.js-tap'), function (s) { s.textContent = 'Tap'; });
+    }
+  } catch (e) {}
 
   /* =========================================================
      REVEAL BUTTONS
