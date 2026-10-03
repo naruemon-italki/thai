@@ -4383,6 +4383,131 @@
     .res-item { padding: 0.45rem 0.4rem; }
     .res-th { font-size: 1.02rem; }
   }
+
+  /* ========= RESULTS POPUP — SOLO MEMORY GAME =========
+     endGame() (Solo only) puts .solo-res — the record / landmark pills and
+     the list of this game's words, drawn with the .res-* list classes above —
+     into the shared popup's #record-badge-wrap: the slot every mode fills
+     afresh when its popup opens, and which is emptied again when the popup
+     closes (wireSoloResults). Every rule below applies only while that list is
+     in the popup (.modal:has(.solo-res)), so vs Computer, Multiplayer and the
+     other modes that share the popup are untouched. Same sizes and layout as
+     the Sentence Builder and Connect Pairs results: a tall card on phones,
+     summary on the left and the list on the right on landscape screens. The
+     wrappers in between become display: contents so their children can take
+     part in the grid. Browsers without :has() keep the normal popup, with the
+     list inside its scrolling middle. */
+  .modal:has(.solo-res) {
+    width: min(460px, 100%);
+    max-width: none;
+    height: min(720px, calc(100vh - 2rem));
+    height: min(720px, calc(100dvh - 2rem));
+    max-height: none;
+    padding: 1.35rem 1.25rem 1.2rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
+    grid-template-areas: "head" "badge" "stats" "rank" "list" "actions";
+    overflow: hidden;
+  }
+  .modal:has(.solo-res) .modal-scroll,
+  .modal:has(.solo-res) .modal-cpu-grid,
+  .modal:has(.solo-res) .modal-col-text,
+  .modal:has(.solo-res) #record-badge-wrap,
+  .modal:has(.solo-res) .solo-res { display: contents; }
+  .modal:has(.solo-res) .modal-col-portrait { display: none; }
+  .modal:has(.solo-res) > .modal-header { grid-area: head; }
+  .modal:has(.solo-res) .modal-subtitle.lead { margin-top: 0.45rem; }
+  .modal:has(.solo-res) .modal-thai-sub { margin-bottom: 0.6rem; }
+  .modal:has(.solo-res) .solo-res > .record-badge,
+  .modal:has(.solo-res) .solo-res > .badge-stack { grid-area: badge; justify-self: center; margin: 0.15rem 0 0.7rem; }
+  .modal:has(.solo-res) #win-stats { grid-area: stats; margin: 0.1rem 0 0.6rem; gap: 0.4rem; }
+  .modal:has(.solo-res) #win-stats .stat-value { font-size: 1.3rem; }
+  .modal:has(.solo-res) #win-stats .stat-label { font-size: 0.66rem; letter-spacing: 0.07em; }
+  .modal:has(.solo-res) #solo-end-rank { grid-area: rank; margin: 0 0 0.7rem; }
+  .modal:has(.solo-res) .solo-res > .res-panel { grid-area: list; }
+  .modal:has(.solo-res) > .modal-actions { grid-area: actions; margin-top: 0.9rem; flex-direction: row; }
+  .modal:has(.solo-res) > .modal-actions > button { flex: 1 1 0; min-width: 0; padding-left: 0.6rem; padding-right: 0.6rem; }
+
+  /* Tablets upright: the How to play card's tablet size. */
+  @media (orientation: portrait) and (min-width: 600px) and (min-height: 820px) {
+    .modal:has(.solo-res) {
+      width: min(580px, 100%);
+      height: min(860px, calc(100vh - 3rem));
+      height: min(860px, calc(100dvh - 3rem));
+      padding: 1.8rem 1.8rem 1.5rem;
+    }
+    .modal:has(.solo-res) .res-th { font-size: 1.22rem; }
+  }
+
+  /* Landscape (laptops, desktops, phones held sideways): summary on the
+     left, the word list on the right. */
+  @media (orientation: landscape) and (min-width: 640px),
+         (orientation: landscape) and (min-width: 520px) and (max-height: 520px) {
+    .modal:has(.solo-res) {
+      width: min(860px, 100%);
+      height: min(580px, calc(100vh - 2rem));
+      height: min(580px, calc(100dvh - 2rem));
+      padding: 1.5rem;
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+      grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
+      grid-template-areas:
+        "head    list"
+        "badge   list"
+        "stats   list"
+        "rank    list"
+        ".       list"
+        "actions list";
+      column-gap: 1.5rem;
+    }
+    .modal:has(.solo-res) > .modal-actions { margin-top: 0.6rem; }
+  }
+
+  /* Narrow landscape (small phones held sideways, small windows): a little
+     more room for the summary, so both buttons keep their one-line labels. */
+  @media (orientation: landscape) and (min-width: 640px) and (max-width: 759px),
+         (orientation: landscape) and (min-width: 520px) and (max-width: 759px) and (max-height: 520px) {
+    .modal:has(.solo-res) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+  }
+
+  /* Large desktop screens: the How to play card's large size. */
+  @media (orientation: landscape) and (min-width: 1100px) and (min-height: 760px) {
+    .modal:has(.solo-res) {
+      width: min(960px, 100%);
+      height: min(660px, calc(100vh - 3rem));
+      height: min(660px, calc(100dvh - 3rem));
+      padding: 1.8rem;
+      column-gap: 2rem;
+    }
+    .modal:has(.solo-res) .res-th { font-size: 1.22rem; }
+  }
+
+  /* Phones held sideways: near full-screen, tighter header. The app's general
+     short-landscape popup rule (the whole popup scrolls) does not apply here:
+     the list scrolls inside its own panel instead. */
+  @media (orientation: landscape) and (max-height: 520px) {
+    .modal:has(.solo-res) {
+      height: calc(100vh - 2rem);
+      height: calc(100dvh - 2rem);
+      max-height: none;
+      display: grid;
+      overflow: hidden;
+      padding: 0.85rem 1rem;
+      border-radius: 14px;
+      column-gap: 1rem;
+    }
+    .modal:has(.solo-res) .modal-title { font-size: 1.35rem; }
+    .modal:has(.solo-res) .modal-thai { font-size: 0.95rem; margin-bottom: 0.25rem; }
+    .modal:has(.solo-res) .modal-subtitle.lead { font-size: 1.05rem; margin-top: 0.25rem; margin-bottom: 0.2rem; }
+    .modal:has(.solo-res) #win-stats { margin-bottom: 0.3rem; }
+    .modal:has(.solo-res) .solo-res > .record-badge,
+    .modal:has(.solo-res) .solo-res > .badge-stack { margin-bottom: 0.4rem; }
+    .modal:has(.solo-res) .record-badge { padding: 0.3rem 0.8rem; font-size: 0.75rem; }
+    .modal:has(.solo-res) #solo-end-rank { margin-bottom: 0.3rem; font-size: 0.82rem; }
+    .modal:has(.solo-res) > .modal-actions > button { padding-top: 0.55rem; padding-bottom: 0.55rem; }
+    .modal:has(.solo-res) .res-item { padding: 0.45rem 0.4rem; }
+    .modal:has(.solo-res) .res-th { font-size: 1.02rem; }
+  }
   /* Solo end-modal current-rank line (mirrors Connect's rank line). */
   .solo-end-rank {
     font-size: 0.9rem;
@@ -30363,6 +30488,102 @@ function runEndGameAfterVoice() {
   }
 }
 
+/* ----- Solo results: this game's words -----
+   endGame() (Solo only) lists every word that was on the board — Thai,
+   romanization and English, with the Vocabulary menu's own 🔊 and ☆ buttons —
+   in the order they were dealt. Nothing is marked as a mistake: in a memory
+   game a miss may just be a forgotten position, not a forgotten word. Drawn
+   with the shared .res-* list classes (the Connect Pairs results list). */
+let _soloResWords = [];    // the words in the open list (🔊 / ☆ buttons)
+let _soloResSpoke = false; // a 🔊 in the list was used (stopped when the popup closes)
+
+function soloResultsListHtml() {
+  const cards = Array.isArray(state.cards) ? state.cards : [];
+  const byPair = new Map();
+  cards.forEach(c => { if (c && c.word && !byPair.has(c.pairId)) byPair.set(c.pairId, c.word); });
+  const words = [...byPair.keys()].sort((a, b) => a - b).map(k => byPair.get(k));
+  if (!words.length) return '';
+  const ttsOk = !!tts.supported;
+  const items = words.map((w, n) => {
+    const on = isStarred(w);
+    return `<li class="res-item">
+        <span class="res-num" aria-hidden="true">${n + 1}</span>
+        <div class="res-text">
+          <div class="res-th" lang="th">${escapeHtml(w.th)}</div>
+          ${w.rom ? `<div class="res-rom">${escapeHtml(w.rom)}</div>` : ''}
+          <div class="res-en">${escapeHtml(w.en)}</div>
+        </div>
+        <div class="res-btns">
+          ${ttsOk ? `<button type="button" class="v-speak" data-solo-say="${n}" aria-label="Play pronunciation">🔊</button>` : ''}
+          <button type="button" class="v-star${on ? ' starred' : ''}" data-solo-star="${n}" aria-label="${on ? 'Remove from Starred' : 'Add to Starred'}" aria-pressed="${on ? 'true' : 'false'}">${on ? '★' : '☆'}</button>
+        </div>
+      </li>`;
+  }).join('');
+  const hint = (ttsOk ? 'Tap 🔊 to hear a word again, or ☆ to ' : 'Tap ☆ to ') +
+    'add it to your <strong>⭐ Starred</strong> words.';
+  _soloResWords = words;
+  _soloResSpoke = false;
+  return `<div class="res-panel">
+      <div class="res-head"><span class="res-head-title">Your words</span><span class="res-head-note">${words.length} word${words.length === 1 ? '' : 's'}</span></div>
+      <div class="res-scroll">
+        <p class="res-hint">${hint}</p>
+        <ol class="res-list">${items}</ol>
+      </div>
+    </div>`;
+}
+
+// The list's speaker and star buttons, wired on these buttons only (the
+// classes are the Vocabulary menu's, which carry no page-wide behaviour).
+function wireSoloResults(root) {
+  root.querySelectorAll('[data-solo-say]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const w = _soloResWords[Number(btn.dataset.soloSay)];
+      if (!w) return;
+      _soloResSpoke = true;
+      tts.speak(w.th, btn);
+      haptic(15);
+      if (e.detail > 0 && btn.blur) btn.blur();
+    });
+  });
+  root.querySelectorAll('[data-solo-star]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const w = _soloResWords[Number(btn.dataset.soloStar)];
+      if (!w) return;
+      const on = toggleStar(w);
+      btn.classList.toggle('starred', on);
+      btn.textContent = on ? '★' : '☆';
+      btn.setAttribute('aria-label', on ? 'Remove from Starred' : 'Add to Starred');
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      haptic(15);
+      if (e.detail > 0 && btn.blur) btn.blur();
+    });
+  });
+}
+
+/* When the shared popup closes, empty the slot if it holds the Solo list, so
+   the list can never show in another game's popup (every mode refills the
+   slot when its popup opens anyway), and stop a word from the list that is
+   still playing. Same approach as Sentence Builder's results list. */
+(function clearSoloResultsOnClose() {
+  try {
+    const modal = document.getElementById('win-modal');
+    if (!modal || typeof MutationObserver !== 'function') return;
+    new MutationObserver(() => {
+      if (!modal.classList.contains('hidden')) return;
+      const slot = document.getElementById('record-badge-wrap');
+      if (!slot || !slot.querySelector('.solo-res')) return;
+      slot.innerHTML = '';
+      _soloResWords = [];
+      if (_soloResSpoke) {
+        _soloResSpoke = false;
+        if (tts.supported) { try { tts.cancelCurrent(); } catch (e) {} }
+      }
+    }).observe(modal, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {}
+})();
+
 function endGame() {
   stopTimer();
   /* Same reason as in navigate(): the result modal is about to speak, and a
@@ -30424,6 +30645,16 @@ function endGame() {
     } else {
       badgeWrap.innerHTML = recordPill || landmarkPill;
     }
+    // This game's words, in the results layout (see "RESULTS POPUP — SOLO
+    // MEMORY GAME" in the CSS). The pills above move into the same wrapper.
+    // If anything fails, the popup shows exactly what it always showed.
+    try {
+      const listHtml = soloResultsListHtml();
+      if (listHtml) {
+        badgeWrap.innerHTML = `<div class="solo-res">${badgeWrap.innerHTML}${listHtml}</div>`;
+        wireSoloResults(badgeWrap);
+      }
+    } catch (e) {}
     // Current-rank line (like Connect Pairs): highest landmark + total wins.
     const curBadge = getSoloBadge(soloWins);
     const rankEl = document.getElementById('solo-end-rank');
