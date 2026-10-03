@@ -7356,6 +7356,261 @@
   #view-tone .tone-mic-btn.is-disabled,
   #view-tone .tone-clear-btn.is-disabled { opacity: 0.45; cursor: default; }
 
+  /* ----- Practice screen layout -----
+     Top row (Voice switcher + How to use), then the practice card (graph,
+     result, mic), then the native examples as tone tabs and the Guide Overlay.
+     Two columns on wide screens and on phones held sideways, with the card
+     staying in view while the examples scroll. Everything here is scoped to
+     #view-tone: Tone Challenge and Tongue Twister reuse some tone-* classes
+     and must look exactly as before. These rules come after the trainer's
+     other rules on purpose, so they win at equal specificity. */
+  #view-tone .tone-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
+  }
+  #view-tone .tone-topbar .tone-active-profile {
+    position: relative;     /* anchors the voice list */
+    width: auto;
+    max-width: none;
+    text-align: left;
+  }
+  #view-tone .tone-topbar .bguide-open-btn {
+    margin-top: 0;
+    min-height: 36px;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.88rem;
+  }
+  #view-tone .tone-profile-switch { cursor: pointer; font-family: inherit; }
+  #view-tone .tone-profile-switch:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  /* The voice list (built by openProfileMenu in tone-trainer.js). */
+  #view-tone .tone-voice-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 20;
+    min-width: 220px;
+    max-width: min(300px, calc(100vw - 2rem));
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.4rem;
+    background: var(--panel);
+    border: 1px solid var(--shadow);
+    border-radius: 14px;
+    box-shadow: 0 10px 30px var(--shadow-strong);
+  }
+  #view-tone .tone-voice-menu-title {
+    padding: 0.35rem 0.6rem 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  #view-tone .tone-voice-opt {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.45rem 0.6rem;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+  }
+  #view-tone .tone-voice-opt:hover { background: var(--button-hover); }
+  #view-tone .tone-voice-opt.active { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  /* Same round initial as the profile screen's list (.tone-profile-chip), a size smaller. */
+  #view-tone .tone-voice-opt .tone-chip-avatar {
+    flex: 0 0 auto;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--panel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+  }
+  #view-tone .tone-voice-opt-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #view-tone .tone-voice-opt-check { color: var(--accent); font-weight: 700; }
+  #view-tone .tone-voice-manage {
+    margin-top: 0.2rem;
+    padding: 0.6rem 0.6rem 0.45rem;
+    border: none;
+    border-top: 1px solid var(--shadow);
+    background: transparent;
+    color: var(--accent);
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+  }
+  #view-tone .tone-voice-manage:hover { text-decoration: underline; }
+
+  /* The practice card. */
+  #view-tone .tone-practice-card {
+    padding: 0.7rem;
+    background: var(--panel);
+    border: 1px solid var(--shadow);
+    border-radius: 16px;
+    box-shadow: 0 2px 10px var(--shadow);
+  }
+  #view-tone .tone-practice-card .tone-canvas-wrap { box-shadow: none; }
+  #view-tone .tone-practice-card .tone-detected { margin-top: 0.45rem; font-size: 1.4rem; }
+  #view-tone .tone-practice-card .tone-status { margin-top: 0.2rem; }
+  #view-tone .tone-practice-card .tone-controls { margin: 0.55rem 0 0.15rem; gap: 0.5rem; }
+  #view-tone .tone-sub-btns {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+  #view-tone .tone-sub-btns:not(:has(> :not([hidden]))) { display: none; }
+  #view-tone .tone-sub-btns .tone-clear-btn { padding: 0.45rem 0.95rem; font-size: 0.85rem; }
+
+  /* Native examples: tone tabs, one tone at a time. */
+  #view-tone .tone-side { margin-top: 1.1rem; }
+  #view-tone .tone-ex-intro { margin-bottom: 0.65rem; font-size: 0.84rem; }
+  #view-tone .tone-ex-tabs {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.25rem;
+    padding: 0.25rem;
+    margin-bottom: 0.65rem;
+    background: var(--panel);
+    border: 1px solid var(--shadow);
+    border-radius: 12px;
+  }
+  #view-tone .tone-ex-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.05rem;
+    min-width: 0;
+    padding: 0.45rem 0.15rem;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--ink-soft);
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.15;
+    cursor: pointer;
+    transition: background-color 0.18s ease, color 0.18s ease;
+  }
+  #view-tone .tone-ex-tab:hover { background: var(--button-hover); color: var(--ink); }
+  #view-tone .tone-ex-tab-th { font-size: 0.72rem; font-weight: 500; }
+  #view-tone .tone-ex-tab.active { background: var(--accent); color: var(--panel); }
+  [data-theme="dark"] #view-tone .tone-ex-tab.active,
+  [data-theme="nord"] #view-tone .tone-ex-tab.active,
+  [data-theme="sepia"] #view-tone .tone-ex-tab.active { color: var(--bg); }
+  #view-tone .tone-ex-tab:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+  #view-tone .tone-ex-group { margin: 0; }
+  #view-tone .tone-ex-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+  #view-tone .tone-ex-row[data-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  #view-tone .tone-ex-row .tone-ex-btn { min-width: 0; }
+
+  /* "More to try": listen-only chips under each tone's words. */
+  #view-tone .tone-more {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.4rem;
+    margin-top: 0.65rem;
+  }
+  #view-tone .tone-more-label { font-size: 0.78rem; font-weight: 600; color: var(--ink-soft); margin-right: 0.1rem; }
+  #view-tone .tone-more-chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.3rem;
+    padding: 0.3rem 0.7rem;
+    border: 1px dashed var(--card-face-border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background-color 0.18s ease, border-color 0.18s ease;
+  }
+  #view-tone .tone-more-chip:hover { background: var(--button-hover); border-color: var(--accent); border-style: solid; }
+  #view-tone .tone-more-icon { font-size: 0.75rem; }
+  #view-tone .tone-more-thai { font-size: 0.95rem; font-weight: 700; }
+  #view-tone .tone-more-rom { font-weight: 600; color: var(--accent); }
+  #view-tone .tone-more-gloss { font-size: 0.76rem; color: var(--ink-soft); }
+  #view-tone .tone-more-chip.speaking { background: var(--accent); border-color: var(--accent); border-style: solid; color: var(--panel); }
+  #view-tone .tone-more-chip.speaking .tone-more-rom,
+  #view-tone .tone-more-chip.speaking .tone-more-gloss { color: var(--panel); }
+
+  #view-tone .tone-side .tone-guide-section { margin: 1.1rem 0 0; }
+
+  /* Tablets upright: a little more room for the graph. */
+  @media (min-width: 600px) {
+    #view-tone.tone-mode-trainer .tone-trainer { max-width: 560px; }
+  }
+
+  /* Wide screens: the card on the left (it stays in view), examples on the right. */
+  @media (min-width: 860px) {
+    #view-tone.tone-mode-trainer .tone-trainer {
+      max-width: 1080px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      column-gap: 1.75rem;
+      align-items: start;
+    }
+    #view-tone .tone-topbar { grid-column: 1 / -1; grid-row: 1; }
+    #view-tone .tone-practice-card { grid-column: 1; grid-row: 2; position: sticky; top: 0.75rem; }
+    #view-tone .tone-side { grid-column: 2; grid-row: 2; margin-top: 0; }
+    #view-tone.tone-mode-trainer .tone-canvas-wrap { aspect-ratio: 16 / 10; }
+    /* In the right column the Guide Overlay's ⓘ popup opens leftwards, so it
+       never runs off the screen edge. */
+    #view-tone .tone-side .info-popup { left: auto; right: -4px; }
+    #view-tone .tone-side .info-popup::before { left: auto; right: 8px; }
+  }
+
+  /* Phones held sideways (and other short landscape screens): the same two
+     columns, sized so the whole card fits the height. The top row moves over
+     the examples, so the card can start at the very top. */
+  @media (orientation: landscape) and (max-height: 520px) and (min-width: 560px) {
+    #view-tone.tone-mode-trainer .tone-trainer {
+      max-width: 940px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      column-gap: 1rem;
+      align-items: start;
+    }
+    #view-tone .tone-topbar { grid-column: 2; grid-row: 1; margin-bottom: 0.6rem; }
+    #view-tone .tone-practice-card { grid-column: 1; grid-row: 1 / span 2; position: sticky; top: 0; padding: 0.5rem; }
+    #view-tone .tone-side { grid-column: 2; grid-row: 2; margin-top: 0; }
+    #view-tone.tone-mode-trainer { padding-top: 0.6rem; }
+    #view-tone.tone-mode-trainer .tone-canvas-wrap { aspect-ratio: 2.4 / 1; }
+    #view-tone .tone-practice-card .tone-detected { margin-top: 0.3rem; font-size: 1.15rem; }
+    #view-tone .tone-practice-card .tone-controls { margin-top: 0.35rem; }
+    #view-tone .tone-practice-card .tone-mic-btn { padding: 0.7rem 1.5rem; }
+    #view-tone .tone-side .info-popup { left: auto; right: -4px; }
+    #view-tone .tone-side .info-popup::before { left: auto; right: 8px; }
+  }
+
   /* =========================================================
      TONE CHALLENGE  (#view-tone-challenge)
      Mirrors the Tone Trainer's setup/trainer split: two sub-screens inside one
@@ -16954,148 +17209,171 @@
       </div>
     </div>
 
-    <!-- ===== TRAINER sub-screen: the live pitch contour ===== -->
+    <!-- ===== TRAINER sub-screen: the live pitch contour =====
+         A top row (Voice switcher + How to use), the practice card (graph,
+         result, mic) and the native examples + Guide Overlay: beside the card
+         on wide screens and phones held sideways, below it on phones. Every
+         element id tone-trainer.js uses is unchanged. -->
     <div class="tone-trainer">
-      <div class="menu-section tone-active-profile">
-        <div class="tone-info-box" id="tone-profile-switch">
-          Voice: <strong id="tone-active-name">—</strong>
+      <div class="tone-topbar">
+        <div class="menu-section tone-active-profile">
+          <!-- Opens the in-game voice profile switcher (tone-trainer.js). -->
+          <button type="button" class="tone-profile-switch" id="tone-profile-switch" aria-haspopup="true" aria-expanded="false">
+            Voice: <strong id="tone-active-name">—</strong><span class="tone-switch-caret" aria-hidden="true">▾</span>
+          </button>
         </div>
+        <button type="button" class="bguide-open-btn tone-howto-trainer-btn" id="tone-howto-btn-trainer"><span aria-hidden="true">❓</span> How to use</button>
       </div>
 
-      <div class="menu-group-label">Guide</div>
+      <!-- HIDDEN: the "How to use" and "Useful words to practise" boxes. The
+           "❓ How to use" guide and the native examples (with their "More to
+           try" words) took their place. Kept intact: remove `hidden` from this
+           wrapper to bring both back exactly as they were. -->
+      <div class="tone-legacy-guides" hidden>
+        <div class="menu-group-label">Guide</div>
 
-      <section class="tone-howto-section howto-section" data-howto-id="guide-howto">
-        <button type="button" class="howto-header">
-          <span class="h-icon">📖</span>
-          <span class="h-title">How to use</span>
-          <span class="h-chev">▾</span>
-        </button>
-        <div class="howto-body">
-          <ol class="tone-howto-list">
-            <li>Find a <strong>quiet room</strong>.</li>
-            <li>Click <strong>“Tap to speak”</strong> and say any single Thai word. There's no need to tap the button again—the recording will stop automatically when you finish speaking. See <strong>Useful words to practice</strong> below for suggestions.</li>
-            <li>You’ll see your pitch shape, and the app will tell you which <strong>tone</strong> it heard.</li>
-            <li>Optionally turn on a <strong>Guide Overlay</strong> for a visual hint of the tone you're trying to pronounce.</li>
+        <section class="tone-howto-section howto-section" data-howto-id="guide-howto">
+          <button type="button" class="howto-header">
+            <span class="h-icon">📖</span>
+            <span class="h-title">How to use</span>
+            <span class="h-chev">▾</span>
+          </button>
+          <div class="howto-body">
+            <ol class="tone-howto-list">
+              <li>Find a <strong>quiet room</strong>.</li>
+              <li>Click <strong>“Tap to speak”</strong> and say any single Thai word. There's no need to tap the button again—the recording will stop automatically when you finish speaking. See <strong>Useful words to practice</strong> below for suggestions.</li>
+              <li>You’ll see your pitch shape, and the app will tell you which <strong>tone</strong> it heard.</li>
+              <li>Optionally turn on a <strong>Guide Overlay</strong> for a visual hint of the tone you're trying to pronounce.</li>
 			<li>Once you're comfortable with free practice, head back to the main menu and try the <strong>Tone Challenge</strong> game to test your skills.</li>
-          </ol>
-          <p class="tone-disclaimer">⚠️ Detecting tones from pitch is <strong>not foolproof</strong> — the app can make mistakes. Don’t fully trust its result. Use it as <strong>guidance</strong> to point you in the right direction, but always double-check with a native speaker that your tones are understandable.</p>
-        </div>
-      </section>
+            </ol>
+            <p class="tone-disclaimer">⚠️ Detecting tones from pitch is <strong>not foolproof</strong> — the app can make mistakes. Don’t fully trust its result. Use it as <strong>guidance</strong> to point you in the right direction, but always double-check with a native speaker that your tones are understandable.</p>
+          </div>
+        </section>
 
-      <section class="tone-howto-section howto-section" data-howto-id="guide-words">
-        <button type="button" class="howto-header">
-          <span class="h-icon">🗣️</span>
-          <span class="h-title">Useful words to practise</span>
-          <span class="h-chev">▾</span>
-        </button>
-        <div class="howto-body">
-          <p class="tone-words-intro">Tap any Thai word to hear it. Try saying it, and see if the app detects the right tone.</p>
-          <div class="tone-words-group">
-            <div class="tone-words-tone">💡 The classic trio:</div>
-            <ul class="tone-words-list">
-              <li><span class="th">มา maa</span> — to come (mid tone)</li>
-              <li><span class="th">หมา măa</span> — dog (rising tone)</li>
-              <li><span class="th">ม้า máa</span> — horse (high tone)</li>
-            </ul>
-          </div>
-          <div class="tone-words-group">
-            <div class="tone-words-tone">Mid <span class="tone-words-th">เสียงสามัญ sĭang săa-man</span></div>
-            <ul class="tone-words-list">
-              <li><span class="th">ไป bpai</span> — to go</li>
-              <li><span class="th">นม nom</span> — milk</li>
-              <li><span class="th">กิน gin</span> — to eat</li>
-            </ul>
-          </div>
-          <div class="tone-words-group">
-            <div class="tone-words-tone">Low <span class="tone-words-th">เสียงเอก sĭang èk</span></div>
-            <ul class="tone-words-list">
-              <li><span class="th">ไก่ gài</span> — chicken</li>
+        <section class="tone-howto-section howto-section" data-howto-id="guide-words">
+          <button type="button" class="howto-header">
+            <span class="h-icon">🗣️</span>
+            <span class="h-title">Useful words to practise</span>
+            <span class="h-chev">▾</span>
+          </button>
+          <div class="howto-body">
+            <p class="tone-words-intro">Tap any Thai word to hear it. Try saying it, and see if the app detects the right tone.</p>
+            <div class="tone-words-group">
+              <div class="tone-words-tone">💡 The classic trio:</div>
+              <ul class="tone-words-list">
+                <li><span class="th">มา maa</span> — to come (mid tone)</li>
+                <li><span class="th">หมา măa</span> — dog (rising tone)</li>
+                <li><span class="th">ม้า máa</span> — horse (high tone)</li>
+              </ul>
+            </div>
+            <div class="tone-words-group">
+              <div class="tone-words-tone">Mid <span class="tone-words-th">เสียงสามัญ sĭang săa-man</span></div>
+              <ul class="tone-words-list">
+                <li><span class="th">ไป bpai</span> — to go</li>
+                <li><span class="th">นม nom</span> — milk</li>
+                <li><span class="th">กิน gin</span> — to eat</li>
+              </ul>
+            </div>
+            <div class="tone-words-group">
+              <div class="tone-words-tone">Low <span class="tone-words-th">เสียงเอก sĭang èk</span></div>
+              <ul class="tone-words-list">
+                <li><span class="th">ไก่ gài</span> — chicken</li>
 			  <li><span class="th">ถูก tòok</span> — cheap</li>
 			  <li><span class="th">ใหญ่ yài</span> — big</li>
-            </ul>
-          </div>
-          <div class="tone-words-group">
-            <div class="tone-words-tone">Falling <span class="tone-words-th">เสียงโท sĭang toh</span></div>
-            <ul class="tone-words-list">
-              <li><span class="th">บ้าน bâan</span> — home; house</li>
+              </ul>
+            </div>
+            <div class="tone-words-group">
+              <div class="tone-words-tone">Falling <span class="tone-words-th">เสียงโท sĭang toh</span></div>
+              <ul class="tone-words-list">
+                <li><span class="th">บ้าน bâan</span> — home; house</li>
 			  <li><span class="th">ได้ dâai</span> — can</li>
-              <li><span class="th">ห้า hâa</span> — five (5)</li>
-            </ul>
-          </div>
-          <div class="tone-words-group">
-            <div class="tone-words-tone">High <span class="tone-words-th">เสียงตรี sĭang dtree</span></div>
-            <ul class="tone-words-list">
-              <li><span class="th">รถ rót</span> — car; vehicle</li>
+                <li><span class="th">ห้า hâa</span> — five (5)</li>
+              </ul>
+            </div>
+            <div class="tone-words-group">
+              <div class="tone-words-tone">High <span class="tone-words-th">เสียงตรี sĭang dtree</span></div>
+              <ul class="tone-words-list">
+                <li><span class="th">รถ rót</span> — car; vehicle</li>
 			  <li><span class="th">รัก rák</span> — to love</li>
-              <li><span class="th">น้ำ náam</span> — water</li>
-            </ul>
-          </div>
-          <div class="tone-words-group">
-            <div class="tone-words-tone">Rising <span class="tone-words-th">เสียงจัตวา sĭang jàt-dtà-waa</span></div>
-            <ul class="tone-words-list">
-              <li><span class="th">ผม pŏm</span> — I (male)</li>
+                <li><span class="th">น้ำ náam</span> — water</li>
+              </ul>
+            </div>
+            <div class="tone-words-group">
+              <div class="tone-words-tone">Rising <span class="tone-words-th">เสียงจัตวา sĭang jàt-dtà-waa</span></div>
+              <ul class="tone-words-list">
+                <li><span class="th">ผม pŏm</span> — I (male)</li>
 			  <li><span class="th">สวย sŭay</span> — beautiful</li>
-              <li><span class="th">หิว hĭw</span> — to be hungry</li>
-            </ul>
+                <li><span class="th">หิว hĭw</span> — to be hungry</li>
+              </ul>
+            </div>
           </div>
-        </div>
-      </section>
-
-      <div class="menu-group-label">Native examples</div>
-
-      <div class="menu-section tone-ex-section">
-        <p class="tone-ex-intro">
-          Tap a word to hear a <strong>native speaker</strong> say it and see its pitch
-          shape drawn on the graph below — exactly as the app would draw your own
-          attempt. Listen, watch the shape, then try saying it yourself.
-        </p>
-        <!-- Buttons are built by buildWordsBox() in tone-trainer.js from the
-             TONE_WORDS table, so the words, their contours and their centres all
-             live in one place. -->
-        <div class="tone-ex-box" id="tone-words-box"></div>
+        </section>
       </div>
 
-      <div class="menu-section">
-        <div class="tone-canvas-wrap">
-          <canvas id="tone-canvas"></canvas>
-          <div class="tone-canvas-hint" id="tone-canvas-hint">
-            Tap the mic and say a Thai word.<br>Your pitch shape will appear here.
+      <div class="tone-practice-card">
+        <div class="menu-section">
+          <div class="tone-canvas-wrap">
+            <canvas id="tone-canvas"></canvas>
+            <div class="tone-canvas-hint" id="tone-canvas-hint">
+              Tap the mic and say a Thai word.<br>Your pitch shape will appear here.
+            </div>
           </div>
+          <div class="tone-detected" id="tone-detected"></div>
+          <div class="tone-status" id="tone-status">Ready</div>
         </div>
-        <div class="tone-detected" id="tone-detected"></div>
-        <div class="tone-status" id="tone-status">Ready</div>
+
+        <div class="menu-section tone-controls">
+          <button type="button" class="tone-mic-btn" id="tone-mic-btn" aria-label="Start recording">
+            <span class="tone-mic-icon">🎤</span>
+            <span class="tone-mic-label">Tap to speak</span>
+          </button>
+          <!-- tone-trainer.js adds "Hear it back" and "Save attempt" beside Clear. -->
+          <div class="tone-sub-btns">
+            <button type="button" class="tone-clear-btn" id="tone-clear-btn" hidden>Clear</button>
+          </div>
+          <!-- HIDDEN (now in the "How to use" guide). Remove `hidden` to bring it back. -->
+          <p class="tone-speak-hint" hidden>💡 Tap the button once and say a single Thai word (not a full sentence). The recording will stop automatically when you finish speaking and your detected tone will be shown.</p>
+        </div>
       </div>
 
-      <div class="menu-section tone-controls">
-        <button type="button" class="tone-mic-btn" id="tone-mic-btn" aria-label="Start recording">
-          <span class="tone-mic-icon">🎤</span>
-          <span class="tone-mic-label">Tap to speak</span>
-        </button>
-        <button type="button" class="tone-clear-btn" id="tone-clear-btn" hidden>Clear</button>
-        <p class="tone-speak-hint">💡 Tap the button once and say a single Thai word (not a full sentence). The recording will stop automatically when you finish speaking and your detected tone will be shown.</p>
-      </div>
+      <div class="tone-side">
+        <div class="menu-group-label">Native examples</div>
 
-      <div class="menu-section tone-guide-section">
-        <div class="menu-section-label">
-          Guide Overlay (optional)
-          <span class="info-wrap" data-info>
-            <button type="button" class="info-icon" aria-label="What does this setting do?">i</button>
-            <span class="info-popup" role="tooltip">
-              This only changes the faint dashed shape drawn behind your pitch line — a visual reference for what each Thai tone should look like. It’s purely cosmetic and does not affect tone detection. Choose “Off” for a clean graph, or pick a tone to overlay its ideal shape while you practise.
+        <div class="menu-section tone-ex-section">
+          <p class="tone-ex-intro">
+            Tap a word to hear a <strong>native speaker</strong> say it and see its pitch
+            shape on the graph — exactly as the app draws your own attempt. Then try it yourself.
+          </p>
+          <!-- The tone tabs and word buttons are built by buildWordsBox() in
+               tone-trainer.js from the TONE_WORDS table, so the words, their
+               contours and their centres all live in one place. -->
+          <div class="tone-ex-box" id="tone-words-box"></div>
+        </div>
+
+        <div class="menu-section tone-guide-section">
+          <div class="menu-section-label">
+            Guide Overlay (optional)
+            <span class="info-wrap" data-info>
+              <button type="button" class="info-icon" aria-label="What does this setting do?">i</button>
+              <span class="info-popup" role="tooltip">
+                This only changes the faint dashed shape drawn behind your pitch line — a visual reference for what each Thai tone should look like. It’s purely cosmetic and does not affect tone detection. Choose “Off” for a clean graph, or pick a tone to overlay its ideal shape while you practise.
+              </span>
             </span>
-          </span>
+          </div>
+          <div class="tone-ref-toggle" id="tone-ref-toggle"></div>
+          <p class="tone-guide-note">Cosmetic only — shows the ideal shape behind your line. Detection is automatic.</p>
         </div>
-        <div class="tone-ref-toggle" id="tone-ref-toggle"></div>
-        <p class="tone-guide-note">Cosmetic only — shows the ideal shape behind your line. Detection above is automatic.</p>
-      </div>
 
-      <div class="menu-section">
-        <p class="tone-note">
-          The graph shows the <strong>shape</strong> of your pitch (up, down, flat) and where it
-          sits in <em>your</em> range — high tones above the line, low tones below.
-          Works best in a quiet room.
-          <span class="tone-recal-hint">If the centre line feels off for your voice, tap “Back” to return to the profile screen and recalibrate.</span>
-        </p>
+        <!-- HIDDEN (the "How to use" guide and the Voice switcher cover it).
+             Remove `hidden` to bring it back. -->
+        <div class="menu-section" hidden>
+          <p class="tone-note">
+            The graph shows the <strong>shape</strong> of your pitch (up, down, flat) and where it
+            sits in <em>your</em> range — high tones above the line, low tones below.
+            Works best in a quiet room.
+            <span class="tone-recal-hint">If the centre line feels off for your voice, tap “Back” to return to the profile screen and recalibrate.</span>
+          </p>
+        </div>
       </div>
 
       <div class="menu-section tone-debug-section">
@@ -27438,12 +27716,16 @@ function maybeShowToneGuide() {
    it (toneQuietForGuide in tone-trainer.js); if that hook is missing there is
    nothing to stop, and the guide opens anyway. */
 (function bindToneGuideButton() {
-  const btn = document.getElementById('tone-howto-btn');
-  if (!btn) return;
-  btn.addEventListener('click', () => {
-    try { if (typeof window.toneQuietForGuide === 'function') window.toneQuietForGuide(); } catch (e) {}
-    try { if (openToneGuide('review')) playSound('snd-menu-click'); }
-    catch (e) { try { hideBingoGuide(); } catch (e2) {} }
+  // The same button twice: under the title on the profile screen, and in the
+  // top row of the practice screen (#tone-howto-btn-trainer).
+  ['tone-howto-btn', 'tone-howto-btn-trainer'].forEach(function (id) {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      try { if (typeof window.toneQuietForGuide === 'function') window.toneQuietForGuide(); } catch (e) {}
+      try { if (openToneGuide('review')) playSound('snd-menu-click'); }
+      catch (e) { try { hideBingoGuide(); } catch (e2) {} }
+    });
   });
 })();
 

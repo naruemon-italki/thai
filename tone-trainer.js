@@ -617,6 +617,7 @@ import { PitchDetector } from './pitchy.js';
     buildRefToggle();
     elMicBtn.addEventListener('click', onMicTap);
     buildWordsBox();
+    wireProfileSwitch();
 
     elClearBtn.addEventListener('click', () => clearCapture());
 
@@ -894,8 +895,10 @@ import { PitchDetector } from './pitchy.js';
   }
 
   // Read a CSS variable from the themed root so canvas matches light/dark/sepia.
+  // The theme lives on <body> (data-theme), so read it there; <html> only
+  // ever holds the light defaults.
   function cssVar(name, fallback) {
-    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    const v = getComputedStyle(document.body || document.documentElement).getPropertyValue(name).trim();
     return v || fallback;
   }
 
@@ -991,21 +994,75 @@ import { PitchDetector } from './pitchy.js';
     try { return TONE_WORDS.map(refAudioUrl); } catch (e) { return []; }
   };
 
+  /* "More to try": words from the old "Useful words to practise" list that are
+     not native examples above. They have real recordings (the vocabulary's,
+     played through tts.speak like everywhere else) but no measured contour, so
+     they are listen-only: a tap plays the word and leaves the graph alone. */
+  const TONE_MORE_WORDS = {
+    mid:     [{ thai: 'มา',   rom: 'maa',  gloss: 'to come' }],
+    low:     [{ thai: 'ถูก',  rom: 'tòok', gloss: 'cheap' },
+              { thai: 'ใหญ่', rom: 'yài',  gloss: 'big' }],
+    falling: [{ thai: 'ได้',  rom: 'dâai', gloss: 'can' }],
+    high:    [{ thai: 'น้ำ',  rom: 'náam', gloss: 'water' }],
+    rising:  [{ thai: 'ผม',   rom: 'pŏm',  gloss: 'I (male)' },
+              { thai: 'หิว',  rom: 'hĭw',  gloss: 'to be hungry' }]
+  };
+
+  function playMoreWord(w, btn) {
+    if (running || starting) return;            // never over a live recording
+    stopRefPlayback();                           // a native example, if one is playing
+    try { if (capture) capture.stopPlayback(); } catch (e) {}
+    setPlayState(false);
+    try { if (window.tts) window.tts.speak(w.thai, btn); } catch (e) {}
+  }
+
+  /* The native examples as five tone tabs: one tone's description and words at
+     a time, so the whole box fits beside (or just under) the graph. The open
+     tab is remembered for the session. */
+  let exTab = TONE_ORDER[0];
+  function selectExTab(key) {
+    if (!elWordsBox) return;
+    exTab = key;
+    elWordsBox.querySelectorAll('.tone-ex-tab').forEach(function (t) {
+      var on = t.dataset.tone === key;
+      t.classList.toggle('active', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    elWordsBox.querySelectorAll('.tone-ex-group').forEach(function (g) {
+      g.hidden = g.dataset.tone !== key;
+    });
+  }
+
   function buildWordsBox() {
     if (!elWordsBox) return;
     elWordsBox.innerHTML = '';
+    var tabs = document.createElement('div');
+    tabs.className = 'tone-ex-tabs';
+    tabs.setAttribute('role', 'tablist');
+    tabs.setAttribute('aria-label', 'Tones');
+    elWordsBox.appendChild(tabs);
     TONE_ORDER.forEach(function (key) {
       var words = TONE_WORDS.filter(function (w) { return w.tone === key; });
       if (!words.length) return;
       var ref = TONE_REFS[key];
 
+      var tab = document.createElement('button');
+      tab.type = 'button';
+      tab.className = 'tone-ex-tab';
+      tab.id = 'tone-ex-tab-' + key;
+      tab.dataset.tone = key;
+      tab.setAttribute('role', 'tab');
+      tab.innerHTML = '<span class="tone-ex-tab-en"></span><span class="tone-ex-tab-th"></span>';
+      tab.querySelector('.tone-ex-tab-en').textContent = ref.label;
+      tab.querySelector('.tone-ex-tab-th').textContent = ref.th;
+      tab.addEventListener('click', function () { selectExTab(key); });
+      tabs.appendChild(tab);
+
       var group = document.createElement('div');
       group.className = 'tone-ex-group';
-
-      var head = document.createElement('div');
-      head.className = 'tone-ex-tone';
-      head.textContent = ref.label + ' tone (' + ref.th + ')';
-      group.appendChild(head);
+      group.dataset.tone = key;
+      group.setAttribute('role', 'tabpanel');
+      group.setAttribute('aria-labelledby', tab.id);
 
       var desc = document.createElement('p');
       desc.className = 'tone-ex-desc';
@@ -1014,6 +1071,7 @@ import { PitchDetector } from './pitchy.js';
 
       var row = document.createElement('div');
       row.className = 'tone-ex-row';
+      row.dataset.count = String(words.length);
       words.forEach(function (w) {
         var btn = document.createElement('button');
         btn.type = 'button';
@@ -1033,12 +1091,41 @@ import { PitchDetector } from './pitchy.js';
         row.appendChild(btn);
       });
       group.appendChild(row);
+
+      var more = TONE_MORE_WORDS[key] || [];
+      if (more.length) {
+        var moreRow = document.createElement('div');
+        moreRow.className = 'tone-more';
+        var lbl = document.createElement('span');
+        lbl.className = 'tone-more-label';
+        lbl.textContent = 'More to try:';
+        moreRow.appendChild(lbl);
+        more.forEach(function (m) {
+          var chip = document.createElement('button');
+          chip.type = 'button';
+          // Like the example buttons, deliberately NOT class "th" (see above).
+          chip.className = 'tone-more-chip';
+          chip.innerHTML = '<span class="tone-more-icon" aria-hidden="true">🔊</span>' +
+                           '<span class="tone-more-thai"></span>' +
+                           '<span class="tone-more-rom"></span>' +
+                           '<span class="tone-more-gloss"></span>';
+          chip.querySelector('.tone-more-thai').textContent = m.thai;
+          chip.querySelector('.tone-more-rom').textContent = m.rom;
+          chip.querySelector('.tone-more-gloss').textContent = m.gloss;
+          chip.setAttribute('aria-label', 'Hear ' + m.rom + ', ' + m.gloss);
+          chip.addEventListener('click', function () { playMoreWord(m, chip); });
+          moreRow.appendChild(chip);
+        });
+        group.appendChild(moreRow);
+      }
       elWordsBox.appendChild(group);
     });
+    selectExTab(exTab);
   }
 
-  /* The example buttons sit ABOVE the graph, so on a phone the contour we just
-     drew can be off-screen when a word is tapped. Scroll it into view — but only
+  /* On a phone the example buttons sit below the graph, so after scrolling down
+     to them the contour we just drew can be off-screen when a word is tapped
+     (wide screens keep the graph in view beside them). Scroll it into view — but only
      when it is actually out of view, because scrolling a graph the learner can
      already see is just the page jumping under their thumb. "In view" means the
      whole canvas box, not a sliver of it. */
@@ -3686,6 +3773,7 @@ import { PitchDetector } from './pitchy.js';
   }
 
   function startTrainer() {
+    closeProfileMenu();
     const profiles = getProfiles();
     activeProfile = profiles.find(p => p.id === selectedProfileId) || null;
     if (!activeProfile) { refreshStart(); return; }
@@ -3718,10 +3806,90 @@ import { PitchDetector } from './pitchy.js';
   }
 
   function backToSetup() {
+    closeProfileMenu();
     // If recording, stop first.
     if (running) { window.teardownTone(); }
     setMode('setup');
     renderProfileList();
+  }
+
+  // ---- In-game voice switcher ---------------------------------------------
+  /* "Voice: X ▾" at the top of the practice screen opens a short list of the
+     saved profiles. Choosing one does exactly what choosing it on the profile
+     screen and pressing Start does (selectedProfileId, then startTrainer), so
+     detection cannot tell the difference. "Manage profiles" is the Back
+     button's route to that screen (add, recalibrate, delete). It does nothing
+     while a recording is live. */
+  let elVoiceMenu = null;
+  function closeProfileMenu() {
+    if (elVoiceMenu) { try { elVoiceMenu.remove(); } catch (e) {} elVoiceMenu = null; }
+    const btn = $('tone-profile-switch');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+  function openProfileMenu() {
+    const btn = $('tone-profile-switch');
+    if (!btn || !btn.parentNode || running || starting) return;
+    closeProfileMenu();
+    const menu = document.createElement('div');
+    menu.className = 'tone-voice-menu';
+    menu.setAttribute('role', 'menu');
+    const title = document.createElement('div');
+    title.className = 'tone-voice-menu-title';
+    title.textContent = 'Voice profile';
+    menu.appendChild(title);
+    getProfiles().forEach(p => {
+      const on = !!(activeProfile && activeProfile.id === p.id);
+      const opt = document.createElement('button');
+      opt.type = 'button';
+      opt.className = 'tone-voice-opt' + (on ? ' active' : '');
+      opt.setAttribute('role', 'menuitemradio');
+      opt.setAttribute('aria-checked', on ? 'true' : 'false');
+      opt.innerHTML = '<span class="tone-chip-avatar"></span><span class="tone-voice-opt-name"></span>' +
+                      '<span class="tone-voice-opt-check" aria-hidden="true"></span>';
+      opt.querySelector('.tone-chip-avatar').textContent = p.name.charAt(0) || '?';
+      opt.querySelector('.tone-voice-opt-name').textContent = p.name;
+      opt.querySelector('.tone-voice-opt-check').textContent = on ? '✓' : '';
+      opt.addEventListener('click', () => switchProfile(p.id));
+      menu.appendChild(opt);
+    });
+    const manage = document.createElement('button');
+    manage.type = 'button';
+    manage.className = 'tone-voice-manage';
+    manage.setAttribute('role', 'menuitem');
+    manage.textContent = 'Manage profiles…';
+    manage.addEventListener('click', () => { closeProfileMenu(); backToSetup(); });
+    menu.appendChild(manage);
+    btn.parentNode.appendChild(menu);
+    elVoiceMenu = menu;
+    btn.setAttribute('aria-expanded', 'true');
+  }
+  function switchProfile(id) {
+    closeProfileMenu();
+    if (running || starting) return;
+    if (activeProfile && activeProfile.id === id) return;
+    if (!getProfiles().some(p => p.id === id)) return;
+    selectedProfileId = id;
+    startTrainer();
+  }
+  function wireProfileSwitch() {
+    const btn = $('tone-profile-switch');
+    if (!btn) return;
+    btn.addEventListener('click', () => { if (elVoiceMenu) closeProfileMenu(); else openProfileMenu(); });
+    // A tap anywhere else closes it.
+    document.addEventListener('click', (e) => {
+      if (!elVoiceMenu) return;
+      const t = e.target;
+      if (t && (elVoiceMenu.contains(t) || btn.contains(t))) return;
+      closeProfileMenu();
+    });
+    // Esc closes just the list (captured first, so it is not also taken as "Back").
+    document.addEventListener('keydown', (e) => {
+      if (!elVoiceMenu || e.key !== 'Escape') return;
+      e.preventDefault();
+      e.stopPropagation();
+      closeProfileMenu();
+      try { btn.focus(); } catch (err) {}
+    }, true);
   }
   // Exposed so the app's footer "Back" button can return to the setup/calibration
   // screen when the trainer is in its live sub-screen (see index.html).

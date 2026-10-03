@@ -565,8 +565,9 @@
     var w = Math.round(rect.width * dpr), h = Math.round(rect.height * dpr);
     if (elCanvas.width !== w || elCanvas.height !== h) { elCanvas.width = w; elCanvas.height = h; }
   }
+  // The theme lives on <body> (data-theme), so its colours are read there.
   function cssVar(name, fallback) {
-    var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    var v = getComputedStyle(document.body || document.documentElement).getPropertyValue(name).trim();
     return v || fallback;
   }
   var drawSpan = 18;

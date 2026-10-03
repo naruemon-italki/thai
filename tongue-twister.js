@@ -2920,9 +2920,10 @@
   var graphData = null;       // { centre, results, twister } or null
   var graphHitZones = [];     // [{x0,x1,index}] for tap-to-play
 
+  // The theme lives on <body> (data-theme), so its colours are read there.
   function cssVar(name, fallback) {
     try {
-      var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+      var v = getComputedStyle(document.body || document.documentElement).getPropertyValue(name);
       return (v && v.trim()) || fallback;
     } catch (e) { return fallback; }
   }
