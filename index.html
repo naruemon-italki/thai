@@ -32329,7 +32329,7 @@ function makeConnectCard(side, item, matched, selected, isThai, removeMode) {
   btn.disabled = matched && !hearable;
   if (hearable) {
     btn.classList.add('cc-hearable');
-    if (_connectHear.idx === item.idx) btn.classList.add('cc-hear');
+    if (_connectHear.idx === item.idx && !_connectHear.lineOnly) btn.classList.add('cc-hear');
   }
 
   if (!isThai) {
@@ -32428,6 +32428,8 @@ function onConnectTap(side, idx, el) {
       // victory fanfare/modal never collide. A safety timeout guarantees the
       // modal still appears if a TTS engine never reports completion.
       const pair = s.pairs[a];
+      // The green line between the two cards, as when a matched pair is tapped.
+      const lineDone = connectShowMatchLine(a, removeMode);
       if (isLast) {
         let winFired = false;
         const fireWin = () => {
@@ -32441,7 +32443,7 @@ function onConnectTap(side, idx, el) {
         // Hard fallback: never let the modal hang waiting on speech.
         setTimeout(fireWin, CONNECT_WIN_SPEECH_SAFETY_MS);
       } else {
-        setTimeout(() => speakConnectMatch(pair), 300);
+        setTimeout(() => speakConnectMatch(pair, lineDone), 300);
       }
 
       // Let the pop animation play, then settle: re-render (keep = dimmed,
@@ -32528,7 +32530,7 @@ function speakConnectMatch(pair, onAllDone) {
    earlier tap's callbacks from clearing a later tap's highlight. */
 const CONNECT_HEAR_MIN_MS = 900;    // floor, so a one-syllable word still registers
 const CONNECT_HEAR_MAX_MS = 4000;   // ceiling, so a stalled file cannot strand the glow
-const _connectHear = { idx: null, token: 0, timers: [] };
+const _connectHear = { idx: null, token: 0, timers: [], lineOnly: false };   // lineOnly: a fresh match's line (connectShowMatchLine), no card glow
 
 /* Drop the highlight, the line and every timer behind them. `fade` lets the
    line fade out instead of vanishing. Safe to call at any time. */
@@ -32537,6 +32539,7 @@ function connectClearHear(fade) {
     _connectHear.timers.forEach(t => { try { clearTimeout(t); } catch (e) {} });
     _connectHear.timers = [];
     _connectHear.idx = null;
+    _connectHear.lineOnly = false;
     document.querySelectorAll('#connect-grid .cc-hear').forEach(el => el.classList.remove('cc-hear'));
     const line = document.querySelector('#connect-grid .cc-hear-line');
     if (line) {
@@ -32619,6 +32622,36 @@ function connectHearPair(idx) {
       maybeClear();
     }
   } catch (e) { /* hearing a word again is an extra — never let it reach the game */ }
+}
+
+/* The same green line when a pair is first matched: drawn in the same way,
+   held by the same rule as connectHearPair (at least CONNECT_HEAR_MIN_MS, and
+   until the pair has been read aloud, at most CONNECT_HEAR_MAX_MS), and gone
+   as soon as play goes on. Line only: the cards keep their own match
+   animation. In "Remove cards" mode it fades with the cards, after
+   CONNECT_MATCH_HOLD_MS. Returns the function to call once the pair's speech
+   has finished; it is safe to never call it. */
+function connectShowMatchLine(idx, removeMode) {
+  try {
+    connectClearHear(false);
+    const token = ++_connectHear.token;
+    _connectHear.idx = idx;
+    _connectHear.lineOnly = true;
+    connectDrawHearLine(idx, true);
+
+    let floorDone = false;
+    let audioDone = false;
+    const maybeClear = () => {
+      if (token !== _connectHear.token) return;   // a later line owns the board now
+      if (!floorDone || !audioDone) return;
+      connectClearHear(true);
+    };
+    _connectHear.timers.push(setTimeout(() => { floorDone = true; maybeClear(); }, CONNECT_HEAR_MIN_MS));
+    _connectHear.timers.push(setTimeout(() => {
+      if (token === _connectHear.token) connectClearHear(true);
+    }, removeMode ? CONNECT_MATCH_HOLD_MS : CONNECT_HEAR_MAX_MS));
+    return () => { try { audioDone = true; maybeClear(); } catch (e) {} };
+  } catch (e) { return () => {}; }
 }
 
 // Keep the line on its cards when the board changes size (window resized or
