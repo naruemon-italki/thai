@@ -1153,23 +1153,135 @@
   }
 
   /* ===== Connect Pairs ===== */
-  .connect-pairs-grid {
-    display: flex;
-    flex-wrap: wrap;
+  /* Pairs slider on the setup screen (8–20). A large readout, a thick track
+     with a big thumb, and − / + buttons for exact one-step changes, so it is
+     comfortable with a finger on a phone. The accent fill left of the thumb is
+     the --cps-pct variable, set by renderConnectPairsSlider(). Tick labels sit
+     in a box inset by half the thumb's width, which is exactly the distance
+     the thumb's centre travels, so 8 / 12 / 16 / 20 line up under it. */
+  .connect-pairs-slider {
+    --cps-thumb: 30px;
     background: var(--panel);
     border: 1px solid var(--shadow);
-    border-radius: 10px;
-    padding: 0.25rem;
-    gap: 0.25rem;
-    max-width: 280px;
+    border-radius: 14px;
+    padding: 0.7rem 0.75rem 0.55rem;
   }
-  .connect-pairs-opt {
-    flex: 1 1 auto;
-    min-width: 44px;
-    padding: 0.45rem 0.5rem;
-    font-size: 0.85rem;
+  .cps-readout {
     text-align: center;
+    line-height: 1.1;
+    color: var(--ink-soft);
+    margin-bottom: 0.15rem;
+  }
+  .cps-num {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--accent);
     font-variant-numeric: tabular-nums;
+  }
+  .cps-unit {
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .cps-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+  }
+  .cps-step {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid var(--shadow);
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 1.45rem;
+    font-weight: 600;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
+  }
+  .cps-step:hover { border-color: var(--accent); background: var(--button-hover); }
+  .cps-step:active { transform: scale(0.92); }
+  .cps-step:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .cps-step:disabled { opacity: 0.35; cursor: default; transform: none; }
+  .cps-step:disabled:hover { border-color: var(--shadow); background: var(--bg); }
+  .cps-track-wrap {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .cps-range {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    height: 44px;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cps-range:focus { outline: none; }
+  .cps-range::-webkit-slider-runnable-track {
+    height: 10px;
+    border-radius: 999px;
+    background: linear-gradient(to right,
+      var(--accent) 0, var(--accent) var(--cps-pct, 16.667%),
+      color-mix(in srgb, var(--ink) 13%, var(--panel)) var(--cps-pct, 16.667%));
+  }
+  .cps-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: var(--cps-thumb);
+    height: var(--cps-thumb);
+    margin-top: calc((10px - var(--cps-thumb)) / 2);
+    border-radius: 50%;
+    background: var(--panel);
+    border: 4px solid var(--accent);
+    box-shadow: 0 1px 4px var(--shadow);
+    transition: transform 0.1s ease;
+  }
+  .cps-range:active::-webkit-slider-thumb { transform: scale(1.1); }
+  .cps-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 35%, transparent); }
+  .cps-range::-moz-range-track {
+    height: 10px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--ink) 13%, var(--panel));
+  }
+  .cps-range::-moz-range-progress {
+    height: 10px;
+    border-radius: 999px;
+    background: var(--accent);
+  }
+  .cps-range::-moz-range-thumb {
+    box-sizing: border-box;
+    width: var(--cps-thumb);
+    height: var(--cps-thumb);
+    border-radius: 50%;
+    background: var(--panel);
+    border: 4px solid var(--accent);
+    box-shadow: 0 1px 4px var(--shadow);
+  }
+  .cps-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 35%, transparent); }
+  .cps-ticks {
+    position: relative;
+    height: 1.1rem;
+    margin: -0.3rem calc(var(--cps-thumb) / 2) 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .cps-ticks span {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
   }
   /* ----- Connect Pairs game view ----- */
   .connect-game-view {
@@ -1344,12 +1456,62 @@
     transform: scale(0.85);
     transition: opacity 0.28s ease, transform 0.28s ease;
   }
+  /* "Keep visible" mode: a matched pair can be tapped to hear it again
+     (connectHearPair). At rest it looks exactly like any matched card; it only
+     takes taps again, and lifts slightly under a mouse. */
+  .connect-card.matched.cc-hearable { pointer-events: auto; cursor: pointer; }
+  @media (hover: hover) {
+    .connect-card.matched.cc-hearable:not(.cc-hear):hover { opacity: 0.6; }
+  }
+  /* While the pair is heard: both cards wake up and glow green. Box-shadow
+     and colour only, so nothing on the board moves. */
+  .connect-card.matched.cc-hear {
+    opacity: 1;
+    border-color: var(--ok, #5aa84a);
+    background: color-mix(in srgb, var(--ok, #5aa84a) 14%, var(--panel));
+    box-shadow: 0 0 0 2px var(--ok, #5aa84a), 0 0 16px 1px color-mix(in srgb, var(--ok, #5aa84a) 45%, transparent);
+    animation: connectHearGlow 1.1s ease-in-out infinite;
+    z-index: 2;
+  }
+  @keyframes connectHearGlow {
+    0%, 100% { box-shadow: 0 0 0 2px var(--ok, #5aa84a), 0 0 16px 1px color-mix(in srgb, var(--ok, #5aa84a) 45%, transparent); }
+    50%      { box-shadow: 0 0 0 2px var(--ok, #5aa84a), 0 0 22px 4px color-mix(in srgb, var(--ok, #5aa84a) 60%, transparent); }
+  }
+  /* The green line between the two cards (an SVG drawn over the grid). */
+  .cc-hear-line {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 3;
+    transition: opacity 0.25s ease;
+  }
+  .cc-hear-line path {
+    fill: none;
+    stroke: var(--ok, #5aa84a);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+  .cc-hear-line circle { fill: var(--ok, #5aa84a); }
+  .cc-hear-line.cc-draw path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: connectHearDraw 0.38s ease-out forwards;
+  }
+  @keyframes connectHearDraw { to { stroke-dashoffset: 0; } }
+  .cc-hear-line.cc-out { opacity: 0; }
   @media (prefers-reduced-motion: reduce) {
     .connect-card.shake,
     .connect-card.just-matched { animation: none; }
     /* The pulse is the only signal that audio is playing, so it is dimmed to a
        static state rather than removed outright. */
     .connect-card.speaking .cc-audio { animation: none; opacity: 0.72; }
+    /* Hear-again: a steady glow, and the line appears whole. */
+    .connect-card.matched.cc-hear { animation: none; }
+    .cc-hear-line.cc-draw path { animation: none; stroke-dashoffset: 0; }
   }
   /* Narrow phones: keep two columns but tighten spacing/sizes. */
   @media (max-width: 380px) {
@@ -4004,6 +4166,222 @@
     font-size: 0.9rem;
     color: var(--ink-soft);
     margin-top: 0.5rem;
+  }
+
+  /* ========= RESULTS POPUP (reusable end-of-round layout) =========
+     First used by Connect Pairs (openConnectEndModal), and built to be
+     shared: any mode's popup opts in by giving its .modal box the class
+     .res-modal and filling its .modal-scroll with
+       .res-summary  subtitle, landmark pill, .stats-row.res-stats, rank line
+       .res-panel    .res-head + .res-scroll (.res-hint + ol.res-list > li.res-item)
+     Same sizes and breakpoints as Sentence Builder's results popup, so the
+     two look alike: a tall card on phones, summary on the left and the list
+     on the right on landscape screens, near full-screen on phones held
+     sideways. Only the list scrolls; the title, stats and buttons stay put.
+     The .modal-scroll wrapper becomes display: contents so its children can
+     take part in the grid. Nothing here touches a popup without .res-modal. */
+  .modal.res-modal {
+    width: min(460px, 100%);
+    max-width: none;
+    height: min(720px, calc(100vh - 2rem));
+    height: min(720px, calc(100dvh - 2rem));
+    max-height: none;
+    padding: 1.35rem 1.25rem 1.2rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    grid-template-areas: "head" "summary" "list" "actions";
+    overflow: hidden;
+  }
+  .modal.res-modal > .modal-scroll { display: contents; }
+  .modal.res-modal > .modal-header { grid-area: head; }
+  .modal.res-modal > .modal-actions { grid-area: actions; margin-top: 0.9rem; flex-direction: row; }
+  .modal.res-modal > .modal-actions > button { flex: 1 1 0; min-width: 0; padding-left: 0.6rem; padding-right: 0.6rem; }
+  /* The emoji moves into the title ("🎉 Great job!"), as in Sentence Builder's popup. */
+  #connect-end-modal .res-modal .end-emoji { display: none; }
+  .res-summary { grid-area: summary; min-width: 0; text-align: center; }
+  .res-summary .record-badge { margin: 0.15rem 0 0.7rem; }
+  #connect-end-body .res-summary .connect-end-rank { margin: 0 0 0.7rem; }
+  .stats-row.res-stats { margin: 0.1rem 0 0.6rem; gap: 0.4rem; }
+  .res-stats .stat-value { font-size: 1.3rem; }
+  .res-stats .stat-label { font-size: 0.66rem; letter-spacing: 0.07em; }
+
+  /* The word list. */
+  .res-panel {
+    grid-area: list;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    background: color-mix(in srgb, var(--ink) 4%, var(--panel));
+    border: 1px solid var(--shadow);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .res-head {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.6rem 0.9rem 0.5rem;
+    border-bottom: 1px solid var(--shadow);
+  }
+  .res-head-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .res-head-note { font-size: 0.82rem; font-weight: 600; color: color-mix(in srgb, var(--accent) 62%, var(--ink)); white-space: nowrap; }
+  .res-head-note.res-good { color: color-mix(in srgb, var(--success) 72%, var(--ink)); }
+  .res-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.3rem 0.45rem 0.5rem;
+  }
+  .res-hint {
+    margin: 0.25rem 0.45rem 0.35rem;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--ink-soft);
+  }
+  .res-list { margin: 0; padding: 0; list-style: none; }
+  .res-item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    column-gap: 0.7rem;
+    align-items: start;
+    padding: 0.6rem 0.45rem;
+    border-radius: 10px;
+  }
+  .res-item + .res-item { border-top: 1px solid color-mix(in srgb, var(--ink) 8%, transparent); }
+  .res-item.res-miss { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+  .res-num {
+    width: 1.65rem;
+    height: 1.65rem;
+    margin-top: 0.12rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    background: color-mix(in srgb, var(--success) 16%, transparent);
+    color: color-mix(in srgb, var(--success) 75%, var(--ink));
+  }
+  .res-miss .res-num { background: color-mix(in srgb, var(--accent) 22%, transparent); color: color-mix(in srgb, var(--accent) 62%, var(--ink)); }
+  .res-text { min-width: 0; }
+  .res-th { font-size: 1.12rem; font-weight: 600; line-height: 1.45; color: var(--ink); overflow-wrap: anywhere; }
+  .res-rom { font-size: 0.9rem; font-weight: 500; line-height: 1.35; color: var(--rom, var(--ink-soft)); }
+  .res-en { margin-top: 0.1rem; font-size: 0.9rem; line-height: 1.35; color: var(--ink-soft); overflow-wrap: anywhere; }
+  .res-tag {
+    display: inline-block;
+    margin-top: 0.35rem;
+    padding: 0.14rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    color: color-mix(in srgb, var(--accent) 60%, var(--ink));
+  }
+  .res-note {
+    margin-top: 0.3rem;
+    font-size: 0.8rem;
+    line-height: 1.35;
+    color: var(--ink-soft);
+  }
+  .res-mix { font-weight: 600; color: var(--ink); }
+  .res-btns {
+    align-self: center;
+    display: flex;
+    gap: 0.4rem;
+  }
+  /* Phones: the two buttons stack, leaving the words more width. */
+  @media (max-width: 480px) {
+    .res-btns { flex-direction: column; }
+  }
+
+  /* Tablets upright: the How to play card's tablet size. */
+  @media (orientation: portrait) and (min-width: 600px) and (min-height: 820px) {
+    .modal.res-modal {
+      width: min(580px, 100%);
+      height: min(860px, calc(100vh - 3rem));
+      height: min(860px, calc(100dvh - 3rem));
+      padding: 1.8rem 1.8rem 1.5rem;
+    }
+    .res-th { font-size: 1.22rem; }
+  }
+
+  /* Landscape (laptops, desktops, phones held sideways): summary on the
+     left, the word list on the right. */
+  @media (orientation: landscape) and (min-width: 640px),
+         (orientation: landscape) and (min-width: 520px) and (max-height: 520px) {
+    .modal.res-modal {
+      width: min(860px, 100%);
+      height: min(580px, calc(100vh - 2rem));
+      height: min(580px, calc(100dvh - 2rem));
+      padding: 1.5rem;
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      grid-template-areas:
+        "head    list"
+        "summary list"
+        ".       list"
+        "actions list";
+      column-gap: 1.5rem;
+    }
+    .modal.res-modal > .modal-actions { margin-top: 0.6rem; }
+  }
+
+  /* Narrow landscape (small phones held sideways, small windows): a little
+     more room for the summary, so both buttons keep their one-line labels. */
+  @media (orientation: landscape) and (min-width: 640px) and (max-width: 759px),
+         (orientation: landscape) and (min-width: 520px) and (max-width: 759px) and (max-height: 520px) {
+    .modal.res-modal { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+  }
+
+  /* Large desktop screens: the How to play card's large size. */
+  @media (orientation: landscape) and (min-width: 1100px) and (min-height: 760px) {
+    .modal.res-modal {
+      width: min(960px, 100%);
+      height: min(660px, calc(100vh - 3rem));
+      height: min(660px, calc(100dvh - 3rem));
+      padding: 1.8rem;
+      column-gap: 2rem;
+    }
+    .res-th { font-size: 1.22rem; }
+  }
+
+  /* Phones held sideways: near full-screen, tighter header. The app's general
+     short-landscape popup rule (the whole popup scrolls) does not apply here:
+     the list scrolls inside its own panel instead. */
+  @media (orientation: landscape) and (max-height: 520px) {
+    .modal.res-modal {
+      height: calc(100vh - 2rem);
+      height: calc(100dvh - 2rem);
+      max-height: none;
+      display: grid;
+      overflow: hidden;
+      padding: 0.85rem 1rem;
+      border-radius: 14px;
+      column-gap: 1rem;
+    }
+    .modal.res-modal .modal-title { font-size: 1.35rem; }
+    .modal.res-modal .modal-thai { font-size: 0.95rem; margin-bottom: 0.25rem; }
+    .modal.res-modal .modal-subtitle { font-size: 0.9rem; margin-bottom: 0.3rem; }
+    .stats-row.res-stats { margin-bottom: 0.3rem; }
+    .res-summary .record-badge { margin-bottom: 0.4rem; padding: 0.3rem 0.8rem; font-size: 0.75rem; }
+    #connect-end-body .res-summary .connect-end-rank { margin-bottom: 0.3rem; font-size: 0.82rem; }
+    .modal.res-modal > .modal-actions > button { padding-top: 0.55rem; padding-bottom: 0.55rem; }
+    .res-item { padding: 0.45rem 0.4rem; }
+    .res-th { font-size: 1.02rem; }
   }
   /* Solo end-modal current-rank line (mirrors Connect's rank line). */
   .solo-end-rank {
@@ -12562,9 +12940,10 @@
   @keyframes cpgS2C3 { 0%, 55% { opacity: 0; } 59%, 93% { opacity: 1; } 97%, 100% { opacity: 0; } }
 
   /* ----- Slide 3: the settings (loop 9s) -----
-     Copies of the setup screen's Pairs and Speech Mode toggles, and of the
+     Copies of the setup screen's Speech Mode toggle and Pairs slider (range
+     8–20, so 10 sits at 16.667% of the track and 14 at 50%), and of the
      in-game 𝐀 Text slider (range 80–160%, so 100% sits at 25% of the track
-     and 130% at 62.5%). Tap 12 (16%), then drag the slider up (46–66%). */
+     and 130% at 62.5%). Drag Pairs up (8–26%), then drag Text up (46–66%). */
   /* padding-bottom is room for the finger that drags the slider: it hangs
      below the thumb, and would otherwise reach into the text underneath. */
   .cpg-s3 { --cpg3-dur: 9s; --cpg-on-ink: var(--panel); padding-bottom: 1.2em; }
@@ -12608,10 +12987,7 @@
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
   }
-  .cpg-opt.is-on,
-  .cpg-o8 { background: var(--accent); color: var(--cpg-on-ink); }
-  .cpg-o12 { position: relative; z-index: 2; }
-  .cpg-f12 { left: 30%; top: 55%; }
+  .cpg-opt.is-on { background: var(--accent); color: var(--cpg-on-ink); }
   .cpg-slider {
     display: flex;
     align-items: center;
@@ -12647,37 +13023,47 @@
     background: var(--accent);
     z-index: 2;
   }
-  .cpg-fs { left: -0.3em; top: 0.45em; }
+  .cpg-fs, .cpg-fp { left: -0.3em; top: 0.45em; }
   .cpg-val { display: inline-grid; min-width: 2.9em; text-align: right; font-variant-numeric: tabular-nums; }
   .cpg-val > span { grid-area: 1 / 1; }
   .cpg-v2 { opacity: 0; }
+  /* The Pairs slider: starts at 10 of 8–20. */
+  .cpg-pairs .cpg-sl-lbl { font-size: 0.85em; font-variant-numeric: tabular-nums; }
+  .cpg-pairs .cpg-val { min-width: 4.3em; white-space: nowrap; font-weight: 600; color: var(--accent); }
+  .cpg-pairs .cpg-fill { width: 16.667%; }
+  .cpg-pairs .cpg-thumb { left: 16.667%; }
 
-  .cpg-s3 .cpg-o8   { animation: cpgS3O8  var(--cpg3-dur) ease-in-out infinite; }
-  .cpg-s3 .cpg-o12  { animation: cpgS3O12 var(--cpg3-dur) ease-in-out infinite; }
-  .cpg-s3 .cpg-f12  { animation: cpgS3F12 var(--cpg3-dur) ease-in-out infinite; }
+  .cpg-s3 .cpg-pairs .cpg-thumb { animation: cpgS3PThumb var(--cpg3-dur) ease-in-out infinite; }
+  .cpg-s3 .cpg-pairs .cpg-fill  { animation: cpgS3PFill  var(--cpg3-dur) ease-in-out infinite; }
+  .cpg-s3 .cpg-fp               { animation: cpgS3FP     var(--cpg3-dur) ease-in-out infinite; }
+  .cpg-s3 .cpg-pairs .cpg-v1    { animation: cpgS3PV1    var(--cpg3-dur) linear infinite; }
+  .cpg-s3 .cpg-pairs .cpg-v2    { animation: cpgS3PV2    var(--cpg3-dur) linear infinite; }
   .cpg-s3 .cpg-thumb { animation: cpgS3Thumb var(--cpg3-dur) ease-in-out infinite; }
   .cpg-s3 .cpg-fill { animation: cpgS3Fill var(--cpg3-dur) ease-in-out infinite; }
   .cpg-s3 .cpg-fs   { animation: cpgS3FS  var(--cpg3-dur) ease-in-out infinite; }
   .cpg-s3 .cpg-v1   { animation: cpgS3V1  var(--cpg3-dur) linear infinite; }
   .cpg-s3 .cpg-v2   { animation: cpgS3V2  var(--cpg3-dur) linear infinite; }
 
-  @keyframes cpgS3O8 {
-    0%, 15.5% { background-color: var(--accent); color: var(--cpg-on-ink); }
-    17%, 95%  { background-color: transparent;   color: var(--ink-soft); }
-    98%, 100% { background-color: var(--accent); color: var(--cpg-on-ink); }
+  @keyframes cpgS3PThumb {
+    0%, 8%    { left: 16.667%; }
+    26%, 92%  { left: 50%; }
+    98%, 100% { left: 16.667%; }
   }
-  @keyframes cpgS3O12 {
-    0%, 15.5% { background-color: transparent;   color: var(--ink-soft); }
-    17%, 95%  { background-color: var(--accent); color: var(--cpg-on-ink); }
-    98%, 100% { background-color: transparent;   color: var(--ink-soft); }
+  @keyframes cpgS3PFill {
+    0%, 8%    { width: 16.667%; }
+    26%, 92%  { width: 50%; }
+    98%, 100% { width: 16.667%; }
   }
-  @keyframes cpgS3F12 {
-    0%, 7%    { opacity: 0; transform: translateY(0.9em) scale(1); }
-    12%, 15%  { opacity: 1; transform: translateY(0) scale(1); }
-    16%       { opacity: 1; transform: translateY(0.18em) scale(0.88); }
-    18%, 22%  { opacity: 1; transform: translateY(0) scale(1); }
-    28%, 100% { opacity: 0; transform: translateY(0.9em) scale(1); }
+  /* This finger rides on the Pairs thumb, like .cpg-fs on the Text thumb. */
+  @keyframes cpgS3FP {
+    0%, 2%    { opacity: 0; transform: translateY(0.9em) scale(1); }
+    5%, 6%    { opacity: 1; transform: translateY(0) scale(1); }
+    8%, 26%   { opacity: 1; transform: translateY(0.18em) scale(0.88); }
+    29%, 30%  { opacity: 1; transform: translateY(0) scale(1); }
+    35%, 100% { opacity: 0; transform: translateY(0.9em) scale(1); }
   }
+  @keyframes cpgS3PV1 { 0%, 16.5% { opacity: 1; } 17%, 94.5% { opacity: 0; } 95%, 100% { opacity: 1; } }
+  @keyframes cpgS3PV2 { 0%, 16.5% { opacity: 0; } 17%, 94.5% { opacity: 1; } 95%, 100% { opacity: 0; } }
   @keyframes cpgS3Thumb {
     0%, 46%   { left: 25%; }
     66%, 92%  { left: 62.5%; }
@@ -12716,11 +13102,11 @@
     /* 2: the Thai already revealed in place of the speaker. */
     .cpg-s2 .cpg-t .cpg-au { opacity: 0; }
     .cpg-s2 .cpg-t .cpg-rv { opacity: 1; }
-    /* 3: 12 pairs chosen, text slider moved up to 130%. */
-    .cpg-s3 .cpg-o8  { background-color: transparent; color: var(--ink-soft); }
-    .cpg-s3 .cpg-o12 { background-color: var(--accent); color: var(--cpg-on-ink); }
+    /* 3: Pairs slid up to 14, text slider moved up to 130%. */
     .cpg-s3 .cpg-thumb { left: 62.5%; }
     .cpg-s3 .cpg-fill  { width: 62.5%; }
+    .cpg-s3 .cpg-pairs .cpg-thumb { left: 50%; }
+    .cpg-s3 .cpg-pairs .cpg-fill  { width: 50%; }
     .cpg-s3 .cpg-v1 { opacity: 0; }
     .cpg-s3 .cpg-v2 { opacity: 1; }
   }
@@ -16412,19 +16798,6 @@
 
     <div class="menu-section">
       <div class="menu-section-label">
-        Pairs
-        <span class="info-wrap" data-info>
-          <button type="button" class="info-icon" aria-label="What does this setting do?">i</button>
-          <span class="info-popup" role="tooltip">
-            How many word pairs to match in one round. More pairs make a longer game. Cards always appear in two columns &mdash; the Thai word on one side (shown or heard, depending on <strong>Prompt Mode</strong>), English on the other.
-          </span>
-        </span>
-      </div>
-      <div class="connect-pairs-grid" id="connect-pairs-grid"></div>
-    </div>
-
-    <div class="menu-section">
-      <div class="menu-section-label">
         Speech Mode
         <span class="info-wrap" data-info>
           <button type="button" class="info-icon" aria-label="What does this setting do?">i</button>
@@ -16438,6 +16811,35 @@
         </span>
       </div>
       <div class="vocab-filter-toggle" id="connect-speech-toggle"></div>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-label">
+        Pairs
+        <span class="info-wrap" data-info>
+          <button type="button" class="info-icon" aria-label="What does this setting do?">i</button>
+          <span class="info-popup" role="tooltip">
+            How many word pairs to match in one round, from 8 to 20. Drag the slider, or tap <strong>&minus;</strong> and <strong>+</strong> to change it one at a time. More pairs make a longer game. Cards always appear in two columns &mdash; the Thai word on one side (shown or heard, depending on <strong>Prompt Mode</strong>), English on the other.
+          </span>
+        </span>
+      </div>
+      <!-- Pairs slider (8–20). Values are set by renderConnectPairsSlider(). -->
+      <div class="connect-pairs-slider" id="connect-pairs-slider">
+        <div class="cps-readout" aria-hidden="true"><strong class="cps-num" id="connect-pairs-num">10</strong> <span class="cps-unit">pairs</span></div>
+        <div class="cps-row">
+          <button type="button" class="cps-step" id="connect-pairs-minus" aria-label="Fewer pairs">&minus;</button>
+          <div class="cps-track-wrap">
+            <input type="range" class="cps-range" id="connect-pairs-range" min="8" max="20" step="1" value="10" aria-label="Number of pairs">
+            <div class="cps-ticks" aria-hidden="true">
+              <span style="left: 0%;">8</span>
+              <span style="left: 33.333%;">12</span>
+              <span style="left: 66.667%;">16</span>
+              <span style="left: 100%;">20</span>
+            </div>
+          </div>
+          <button type="button" class="cps-step" id="connect-pairs-plus" aria-label="More pairs">+</button>
+        </div>
+      </div>
     </div>
 
     <div class="menu-section">
@@ -20578,7 +20980,12 @@ const state = {
   lessonsConnect: null,
   extraCatsConnect: null,
   vocabFilterModeConnect: 'lessons',
-  connectPairs: 8,            // number of pairs per round (6/8/10/12/15)
+  /* Number of pairs per round, chosen on a slider (8–20). Saved under the key
+     'connectPairCount', NOT the old 'connectPairs' (which held 6/8/10/12/15
+     from the old buttons). The old key is simply never read again, so every
+     existing student starts once at this default of 10 and from then on keeps
+     whatever they slide to. */
+  connectPairs: 10,
   /* What the LEFT column shows: 'audio' (a tap-to-hear button — listening
      practice) or 'text' (the Thai word written out — reading practice). The
      right column is English text either way.
@@ -20877,7 +21284,7 @@ function loadStorage() {
     if (data.wcHideHelp === true) state.wcHideHelp = true;
     if (typeof data.wcGuideSeen === 'boolean') state.wcGuideSeen = data.wcGuideSeen;
     { const n = parseInt(data.wcWins, 10); if (Number.isFinite(n) && n >= 0) state.wcWins = n; }
-    if ([6, 8, 10, 12, 15].includes(data.connectPairs)) state.connectPairs = data.connectPairs;
+    { const n = Number(data.connectPairCount); if (Number.isInteger(n) && n >= 8 && n <= 20) state.connectPairs = n; }
     if (data.connectPrompt === 'audio' || data.connectPrompt === 'text') state.connectPrompt = data.connectPrompt;
     if (data.connectSpeechMode === 'pair' || data.connectSpeechMode === 'thai' || data.connectSpeechMode === 'off') {
       state.connectSpeechMode = data.connectSpeechMode;
@@ -21242,7 +21649,7 @@ function saveStorage(opts) {
       lessonsConnect: state.lessonsConnect,
       extraCatsConnect: state.extraCatsConnect,
       vocabFilterModeConnect: state.vocabFilterModeConnect,
-      connectPairs: state.connectPairs,
+      connectPairCount: state.connectPairs,
       connectPrompt: state.connectPrompt,
       connectSpeechMode: state.connectSpeechMode,
       connectTextScale: state.connectTextScale,
@@ -25802,19 +26209,18 @@ const CONNECT_GUIDE_SLIDES = [
     <div class="bguide-body">
       <div class="bguide-stage cpg-s3" aria-hidden="true">
         <div class="cpg-set">
-          <div class="cpg-lbl">Pairs</div>
-          <div class="cpg-seg">
-            <span class="cpg-opt">6</span>
-            <span class="cpg-opt cpg-o8">8</span>
-            <span class="cpg-opt">10</span>
-            <span class="cpg-opt cpg-o12">12${cpgFinger('cpg-f12')}</span>
-            <span class="cpg-opt">15</span>
-          </div>
           <div class="cpg-lbl">Speech Mode</div>
           <div class="cpg-seg">
             <span class="cpg-opt is-on">Pair</span>
             <span class="cpg-opt">Thai</span>
             <span class="cpg-opt">Off</span>
+          </div>
+          <div class="cpg-lbl">Pairs</div>
+          <div class="cpg-slider cpg-pairs">
+            <span class="cpg-sl-lbl">8</span>
+            <span class="cpg-track"><span class="cpg-fill"></span><span class="cpg-thumb">${cpgFinger('cpg-fp')}</span></span>
+            <span class="cpg-sl-lbl">20</span>
+            <span class="cpg-val"><span class="cpg-v1">10 pairs</span><span class="cpg-v2">14 pairs</span></span>
           </div>
           <div class="cpg-lbl">During a round</div>
           <div class="cpg-slider">
@@ -25825,7 +26231,7 @@ const CONNECT_GUIDE_SLIDES = [
         </div>
       </div>
       <div class="bguide-text">
-        <p>Choose <strong>how many pairs</strong> you want: 6 for a quick review, up to 15 for a longer session.</p>
+        <p>Slide to choose <strong>how many pairs</strong> you want: 8 for a quick review, up to 20 for a longer session.</p>
         <p>In Thai → English, <strong>Speech Mode</strong> reads each match aloud: Thai then English (Pair), or just the Thai. During a round, the <strong>𝐀 Text</strong> slider at the top makes the cards bigger or smaller.</p>
         <p class="bguide-note">Every round you finish counts toward your <strong>Connection Landmarks</strong> in <strong>🏆 Progress</strong>.</p>
       </div>
@@ -31467,7 +31873,10 @@ function buildFlashDeckNew(prevDeck) {
    memory game, bingo, or flashcard logic.
    ========================================================= */
 
-const CONNECT_PAIRS_OPTIONS = [6, 8, 10, 12, 15];
+// Pairs slider range (setup screen). loadStorage() checks a saved value
+// against the same two numbers, written there literally — keep them in step.
+const CONNECT_PAIRS_MIN = 8;
+const CONNECT_PAIRS_MAX = 20;
 
 /* ----- Prompt mode (left column: heard or read) -----
 
@@ -31515,7 +31924,7 @@ function renderConnectMenu() {
   renderVocabFilterToggle('connect');
   renderCategoryChips('connect');
   renderConnectPromptToggle();
-  renderConnectPairsGrid();
+  renderConnectPairsSlider();
   renderConnectSpeechToggle();
   refreshConnectStart();
 }
@@ -31559,25 +31968,39 @@ function renderConnectPromptToggle() {
   });
 }
 
-function renderConnectPairsGrid() {
-  const root = document.getElementById('connect-pairs-grid');
-  if (!root) return;
-  root.innerHTML = '';
-  CONNECT_PAIRS_OPTIONS.forEach(n => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'connect-pairs-opt toggle-opt' + (state.connectPairs === n ? ' active' : '');
-    btn.dataset.connectPairs = String(n);
-    btn.textContent = n;
-    btn.addEventListener('click', () => {
-      if (state.connectPairs === n) return;
-      state.connectPairs = n;
-      saveStorage();
-      renderConnectPairsGrid();
-      refreshConnectStart();
-    });
-    root.appendChild(btn);
-  });
+/* The Pairs slider. Its markup is static (in #view-connect); this syncs the
+   readout, the range input, the accent fill and the − / + buttons to
+   state.connectPairs, and wires the three controls once. */
+function renderConnectPairsSlider() {
+  const range = document.getElementById('connect-pairs-range');
+  if (!range) return;
+  const n = Math.min(CONNECT_PAIRS_MAX, Math.max(CONNECT_PAIRS_MIN, state.connectPairs || 10));
+  range.value = String(n);
+  const num = document.getElementById('connect-pairs-num');
+  if (num) num.textContent = String(n);
+  range.setAttribute('aria-valuetext', n + ' pairs');
+  const pct = ((n - CONNECT_PAIRS_MIN) / (CONNECT_PAIRS_MAX - CONNECT_PAIRS_MIN)) * 100;
+  const box = document.getElementById('connect-pairs-slider');
+  if (box) box.style.setProperty('--cps-pct', pct.toFixed(3) + '%');
+  const minus = document.getElementById('connect-pairs-minus');
+  const plus = document.getElementById('connect-pairs-plus');
+  if (minus) minus.disabled = (n <= CONNECT_PAIRS_MIN);
+  if (plus) plus.disabled = (n >= CONNECT_PAIRS_MAX);
+
+  if (range.dataset.wired) return;
+  range.dataset.wired = '1';
+  const setPairs = (v) => {
+    const next = Math.min(CONNECT_PAIRS_MAX, Math.max(CONNECT_PAIRS_MIN, Math.round(Number(v))));
+    if (!Number.isFinite(next)) return;
+    if (next === state.connectPairs) { renderConnectPairsSlider(); return; }
+    state.connectPairs = next;
+    saveStorage();
+    renderConnectPairsSlider();
+    refreshConnectStart();
+  };
+  range.addEventListener('input', () => setPairs(range.value));
+  if (minus) minus.addEventListener('click', () => { setPairs(state.connectPairs - 1); haptic(10); });
+  if (plus) plus.addEventListener('click', () => { setPairs(state.connectPairs + 1); haptic(10); });
 }
 
 function renderConnectSpeechToggle() {
@@ -31635,11 +32058,47 @@ function refreshConnectStart() {
   const need = state.connectPairs;
   if (poolSize < need) {
     btn.disabled = true;
-    msg.textContent = `Not enough words in pool. ${need} pairs need ${need} words, you have ${poolSize}. Add more, or pick fewer pairs.`;
+    msg.textContent = (poolSize < CONNECT_PAIRS_MIN)
+      ? `Not enough words in pool. A round needs at least ${CONNECT_PAIRS_MIN} words, you have ${poolSize}. Add more words to play.`
+      : `Not enough words in pool. ${need} pairs need ${need} words, you have ${poolSize}. Add more, or pick fewer pairs.`;
   } else {
     btn.disabled = false;
     msg.textContent = '';
   }
+}
+
+/* Deal `need` words for one board, never two that look or sound the same.
+
+   The Extra and ⭐ pools can hold separate entries that are identical on a
+   card: ไก่ "chicken" in both Animals and Common Foods, น้ำตาล as both
+   "brown" and "sugar", the homophones แพะ / แพ้ (both "páe"). With both on
+   one board, linking a card to its identical twin counts as a mistake. So a
+   word is skipped when its Thai, romanization or English (case-insensitive)
+   is already on the board. The Lessons / Categories pools have no such pairs,
+   so for them this deals exactly what it always did.
+
+   If skipping would leave the board short (a small pool full of look-alikes),
+   the skipped words top it up, which is the old behaviour. Any failure falls
+   back to the original one-liner. */
+function pickConnectWords(pool, need) {
+  const order = shuffled(pool);
+  try {
+    const norm = (s) => String(s == null ? '' : s).trim().toLowerCase();
+    const seen = new Set();
+    const picked = [];
+    const skipped = [];
+    for (let i = 0; i < order.length && picked.length < need; i++) {
+      const w = order[i];
+      const keys = ['th:' + norm(w.th), 'en:' + norm(w.en)];
+      if (norm(w.rom)) keys.push('rom:' + norm(w.rom));
+      if (keys.some(k => seen.has(k))) { skipped.push(w); continue; }
+      keys.forEach(k => seen.add(k));
+      picked.push(w);
+    }
+    for (let i = 0; picked.length < need && i < skipped.length; i++) picked.push(skipped[i]);
+    if (picked.length === need) return picked;
+  } catch (e) {}
+  return order.slice(0, need);
 }
 
 // ----- Game session -----
@@ -31651,7 +32110,7 @@ function startConnectGame() {
   const need = state.connectPairs;
   if (pool.length < need) return;
 
-  const chosen = shuffled(pool).slice(0, need);
+  const chosen = pickConnectWords(pool, need);
   // Left column = Thai cards, right column = English cards, independently shuffled.
   const left = shuffled(chosen.map((w, i) => ({ idx: i, w })));
   const right = shuffled(chosen.map((w, i) => ({ idx: i, w })));
@@ -31679,11 +32138,20 @@ function startConnectGame() {
     selLeft: null,   // idx of selected left card (the pair index)
     selRight: null,
     matched: new Set(),
-    busy: false
+    busy: false,
+    // For the results popup only (see connectResultsHtml); nothing in the
+    // game reads these. Indexed by pair index, like `matched`.
+    mistakes: 0,
+    streak: 0,
+    bestStreak: 0,
+    missCount: chosen.map(() => 0),
+    mixedWith: chosen.map(() => []),   // pair indexes this one was confused with
+    matchOrder: []
   };
 
   state.gameMode = 'connect';
   currentView = 'connect-game';
+  connectClearHear(false);
   applyTimerVisibility(); // timer icon is hidden for this view anyway (see below)
   applyConnectTextScale();
   applyTopbarVisibility(); // sync collapse state (so the font bar matches a hidden topbar)
@@ -31831,6 +32299,10 @@ function renderConnectBoard() {
       grid.appendChild(makeConnectSpacer());
     }
   }
+
+  // A pair being heard again keeps its line through a re-render (the cards
+  // above already got their highlight back in makeConnectCard).
+  if (_connectHear.idx !== null) connectDrawHearLine(_connectHear.idx, false);
 }
 
 function makeConnectSpacer() {
@@ -31850,7 +32322,15 @@ function makeConnectCard(side, item, matched, selected, isThai, removeMode) {
     + (selected ? ' selected' : '');
   btn.dataset.side = side;
   btn.dataset.idx = String(item.idx);
-  btn.disabled = matched;
+  /* In "Keep visible" mode a matched card stays tappable, to hear the pair
+     again (connectHearPair) — it never reaches onConnectTap. In "Remove
+     cards" mode it is gone, and disabled exactly as before. */
+  const hearable = matched && !removeMode;
+  btn.disabled = matched && !hearable;
+  if (hearable) {
+    btn.classList.add('cc-hearable');
+    if (_connectHear.idx === item.idx) btn.classList.add('cc-hear');
+  }
 
   if (!isThai) {
     btn.innerHTML = `<span class="cc-en">${escapeHtml(item.w.en)}</span>`;
@@ -31874,13 +32354,20 @@ function makeConnectCard(side, item, matched, selected, isThai, removeMode) {
     }
   }
 
-  btn.addEventListener('click', () => onConnectTap(side, item.idx, btn));
+  if (hearable) {
+    btn.setAttribute('aria-label', (isThai ? item.w.th : item.w.en) + ' (matched). Tap to hear it again.');
+    btn.addEventListener('click', () => connectHearPair(item.idx));
+  } else {
+    btn.addEventListener('click', () => onConnectTap(side, item.idx, btn));
+  }
   return btn;
 }
 
 function onConnectTap(side, idx, el) {
   const s = state.connectSession;
   if (!s || s.busy) return;
+  // Playing on ends a "hear it again" highlight (the word itself may finish).
+  if (_connectHear.idx !== null) connectClearHear(true);
   if (s.matched.has(idx) && side === 'left' && s.selLeft === idx) { /* allow deselect below */ }
 
   /* Audio prompt mode: a tap on the left column PLAYS the word, every time —
@@ -31920,6 +32407,7 @@ function onConnectTap(side, idx, el) {
       s.matched.add(a);
       s.selLeft = null;
       s.selRight = null;
+      connectNoteResult(s, a, b, true);
       playSound('snd-bingo-correct');
       haptic(25);
 
@@ -31986,6 +32474,7 @@ function onConnectTap(side, idx, el) {
     } else {
       // Mismatch — brief shake, then clear selection.
       s.busy = true;
+      connectNoteResult(s, a, b, false);
       playSound('snd-fail');
       if (lc) lc.classList.add('shake');
       if (rc) rc.classList.add('shake');
@@ -32026,6 +32515,126 @@ function speakConnectMatch(pair, onAllDone) {
   }
 }
 
+/* ----- Hear a matched pair again -----
+   In "Keep visible" mode, tapping either card of a matched pair plays the
+   Thai again (recording first, speech-synthesis fallback, like the
+   Vocabulary list), lights up both cards and draws a green line between
+   them for a moment. Modelled on the Memory Game's hearMatchedPair.
+
+   It cannot disturb the round: matched cards never reach onConnectTap (see
+   makeConnectCard), and this touches no game state (not busy, not the
+   selection, not the matched set). tts.speak() cancels whatever it was
+   already playing, so repeated taps replace each other. The token stops an
+   earlier tap's callbacks from clearing a later tap's highlight. */
+const CONNECT_HEAR_MIN_MS = 900;    // floor, so a one-syllable word still registers
+const CONNECT_HEAR_MAX_MS = 4000;   // ceiling, so a stalled file cannot strand the glow
+const _connectHear = { idx: null, token: 0, timers: [] };
+
+/* Drop the highlight, the line and every timer behind them. `fade` lets the
+   line fade out instead of vanishing. Safe to call at any time. */
+function connectClearHear(fade) {
+  try {
+    _connectHear.timers.forEach(t => { try { clearTimeout(t); } catch (e) {} });
+    _connectHear.timers = [];
+    _connectHear.idx = null;
+    document.querySelectorAll('#connect-grid .cc-hear').forEach(el => el.classList.remove('cc-hear'));
+    const line = document.querySelector('#connect-grid .cc-hear-line');
+    if (line) {
+      if (fade) { line.classList.add('cc-out'); setTimeout(() => { try { line.remove(); } catch (e) {} }, 260); }
+      else line.remove();
+    }
+  } catch (e) {}
+}
+
+/* The green line from the Thai card's right edge to the English card's left
+   edge: an SVG laid over the grid, which taps pass straight through. Uses
+   offsetLeft/offsetTop (relative to the grid, which is position: relative),
+   so the cards' own animations cannot shift its ends. */
+function connectDrawHearLine(idx, animate) {
+  try {
+    const grid = document.getElementById('connect-grid');
+    if (!grid) return;
+    const old = grid.querySelector('.cc-hear-line');
+    if (old) old.remove();
+    const lc = grid.querySelector(`.connect-card-th[data-idx="${idx}"]`);
+    const rc = grid.querySelector(`.connect-card-en[data-idx="${idx}"]`);
+    if (!lc || !rc || lc.offsetParent !== grid || rc.offsetParent !== grid) return;
+    const x1 = lc.offsetLeft + lc.offsetWidth, y1 = lc.offsetTop + lc.offsetHeight / 2;
+    const x2 = rc.offsetLeft, y2 = rc.offsetTop + rc.offsetHeight / 2;
+    if (!(x2 > x1)) return;
+    const dx = (x2 - x1) / 2;
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('class', 'cc-hear-line' + (animate ? ' cc-draw' : ''));
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    const path = document.createElementNS(NS, 'path');
+    path.setAttribute('d', `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`);
+    path.setAttribute('pathLength', '1');
+    svg.appendChild(path);
+    [[x1, y1], [x2, y2]].forEach(([cx, cy]) => {
+      const dot = document.createElementNS(NS, 'circle');
+      dot.setAttribute('cx', String(cx));
+      dot.setAttribute('cy', String(cy));
+      dot.setAttribute('r', '4.5');
+      svg.appendChild(dot);
+    });
+    grid.appendChild(svg);
+  } catch (e) {}
+}
+
+function connectHearPair(idx) {
+  try {
+    const s = state.connectSession;
+    if (!s || !s.matched.has(idx) || state.matchBehavior === 'remove') return;
+    if (s.matched.size >= s.total) return;   // the round is over; its results are coming
+    const pair = s.pairs[idx];
+    if (!pair || !pair.th) return;
+
+    connectClearHear(false);
+    const token = ++_connectHear.token;
+    _connectHear.idx = idx;
+    document.querySelectorAll(`#connect-grid .connect-card.cc-hearable[data-idx="${idx}"]`)
+      .forEach(el => el.classList.add('cc-hear'));
+    connectDrawHearLine(idx, true);
+
+    let floorDone = false;
+    let audioDone = false;
+    const maybeClear = () => {
+      if (token !== _connectHear.token) return;   // a later tap owns the highlight now
+      if (!floorDone || !audioDone) return;
+      connectClearHear(true);
+    };
+    _connectHear.timers.push(setTimeout(() => { floorDone = true; maybeClear(); }, CONNECT_HEAR_MIN_MS));
+    _connectHear.timers.push(setTimeout(() => {
+      if (token === _connectHear.token) connectClearHear(true);
+    }, CONNECT_HEAR_MAX_MS));
+
+    try { haptic(15); } catch (e) {}
+    if (!tts.supported) { audioDone = true; return; }
+    try {
+      tts.speak(pair.th, null, { onDone: () => { audioDone = true; maybeClear(); } });
+    } catch (e) {
+      audioDone = true;
+      maybeClear();
+    }
+  } catch (e) { /* hearing a word again is an extra — never let it reach the game */ }
+}
+
+// Keep the line on its cards when the board changes size (window resized or
+// rotated, or the 𝐀 Text slider moved). Wired once on the static grid element.
+(function wireConnectHearResize() {
+  try {
+    const grid = document.getElementById('connect-grid');
+    if (!grid) return;
+    const redraw = () => {
+      try { if (_connectHear.idx !== null) connectDrawHearLine(_connectHear.idx, false); } catch (e) {}
+    };
+    if (typeof ResizeObserver === 'function') new ResizeObserver(redraw).observe(grid);
+    else window.addEventListener('resize', redraw);
+  } catch (e) {}
+})();
+
 function finishConnectGame() {
   const s = state.connectSession;
   if (!s) return;
@@ -32061,23 +32670,196 @@ function openConnectEndModal(unlockedBadge) {
   const rankLine = curBadge
     ? `<p class="connect-end-rank">Current rank: <strong>${escapeHtml(curBadge.label)}</strong> · ${state.connectWins} win${state.connectWins === 1 ? '' : 's'} completed</p>`
     : '';
-  body.innerHTML = `
-    <p class="modal-subtitle">You matched all ${total} pairs.</p>
+  const subtitle = `<p class="modal-subtitle">You matched all ${total} pairs.</p>`;
+
+  /* The full results (stats + this round's words) in the reusable results
+     layout (.res-modal, see "RESULTS POPUP" in the CSS). If building it fails
+     for any reason, the popup shows exactly what it always showed. */
+  const box = document.getElementById('connect-end-box');
+  let results = '';
+  try { results = s ? connectResultsHtml(s, subtitle + badgeLine, rankLine) : ''; } catch (e) { results = ''; }
+  if (results) {
+    body.innerHTML = results;
+    if (box) box.classList.add('res-modal');
+    try { wireConnectResults(body); } catch (e) {}
+  } else {
+    _connectResWords = [];
+    if (box) box.classList.remove('res-modal');
+    body.innerHTML = `
+    ${subtitle}
     ${badgeLine}
     ${rankLine}
   `;
+  }
+  // A round with no mistakes gets its own title.
+  try {
+    const perfect = !!(results && s && !s.mistakes);
+    const emoji = modal.querySelector('.end-emoji');
+    const title = modal.querySelector('.modal-title');
+    if (emoji) emoji.textContent = perfect ? '🌟' : '🎉';
+    if (title) {
+      // In the results layout the emoji sits in the title; the big one above is hidden by CSS.
+      const text = perfect ? 'Perfect round!' : 'Great job!';
+      title.textContent = results ? ((perfect ? '🌟 ' : '🎉 ') + text) : text;
+    }
+  } catch (e) {}
   modal.classList.remove('hidden');
 }
 
 function closeConnectEndModal() {
   const modal = document.getElementById('connect-end-modal');
   if (modal) modal.classList.add('hidden');
+  // A word from the results list must not carry on into the next screen.
+  if (_connectResWords.length) {
+    _connectResWords = [];
+    if (tts.supported) { try { tts.cancelCurrent(); } catch (e) {} }
+  }
 }
 
 // Play again with the same settings.
 function connectPlayAgain() {
   closeConnectEndModal();
+  /* Un-starring words in the results list can shrink a ⭐ pool below this
+     round's size, and startConnectGame() then quietly does nothing — which
+     would leave the student on the finished board. Go to the setup screen
+     instead, where the pool counter and message explain what changed. */
+  if (!connectStartWouldRun()) {
+    state.connectSession = null;
+    state.gameMode = null;
+    navigate('connect');
+    return;
+  }
   startConnectGame();
+}
+
+/* ----- Results (end-of-round popup) -----
+   onConnectTap() notes every attempt here: a match extends the streak; a
+   mistake marks BOTH words involved (the Thai card's word and the English
+   card's word), since the student was unsure of each, and remembers which
+   word each was mixed up with. openConnectEndModal() then lists every word of
+   the round, tricky ones first, with the Vocabulary menu's own 🔊 and ☆
+   buttons. None of this is read by the game itself. */
+let _connectResWords = [];   // the words in the open results list (🔊 / ☆ buttons)
+
+function connectNoteResult(s, a, b, correct) {
+  try {
+    if (correct) {
+      s.streak = (s.streak || 0) + 1;
+      if (s.streak > (s.bestStreak || 0)) s.bestStreak = s.streak;
+      if (Array.isArray(s.matchOrder) && s.matchOrder.indexOf(a) === -1) s.matchOrder.push(a);
+      return;
+    }
+    s.mistakes = (s.mistakes || 0) + 1;
+    s.streak = 0;
+    [[a, b], [b, a]].forEach(([x, y]) => {
+      if (Array.isArray(s.missCount) && typeof s.missCount[x] === 'number') s.missCount[x]++;
+      const list = Array.isArray(s.mixedWith) ? s.mixedWith[x] : null;
+      if (Array.isArray(list) && x !== y && list.indexOf(y) === -1) list.push(y);
+    });
+  } catch (e) {}
+}
+
+function connectResultsHtml(s, summaryTop, rankLine) {
+  const pairs = Array.isArray(s.pairs) ? s.pairs : [];
+  if (!pairs.length) return '';
+  const total = s.total || pairs.length;
+  const mistakes = s.mistakes || 0;
+  const missCount = Array.isArray(s.missCount) ? s.missCount : [];
+  const mixedWith = Array.isArray(s.mixedWith) ? s.mixedWith : [];
+  const accuracy = Math.round((total / (total + mistakes)) * 100);
+
+  // Tricky words first (most mistakes first, then in the order matched), then
+  // the rest in the order they were matched.
+  const order = [];
+  (Array.isArray(s.matchOrder) ? s.matchOrder : []).forEach(i => { if (pairs[i] && order.indexOf(i) === -1) order.push(i); });
+  pairs.forEach((w, i) => { if (order.indexOf(i) === -1) order.push(i); });
+  const misses = (i) => missCount[i] || 0;
+  const tricky = order.filter(i => misses(i) > 0)
+    .sort((x, y) => (misses(y) - misses(x)) || (order.indexOf(x) - order.indexOf(y)));
+  const rows = tricky.concat(order.filter(i => !misses(i)));
+
+  const stat = (value, label) =>
+    `<div class="stat-box"><div class="stat-value">${escapeHtml(String(value))}</div><div class="stat-label">${label}</div></div>`;
+  const statsHtml = `<div class="stats-row res-stats">` +
+      stat(accuracy + '%', 'Accuracy') +
+      stat(mistakes, mistakes === 1 ? 'Mistake' : 'Mistakes') +
+      stat(s.bestStreak || 0, 'Best streak') +
+      stat(total, 'Pairs') +
+    `</div>`;
+
+  const ttsOk = !!tts.supported;
+  const words = [];
+  const items = rows.map((i, n) => {
+    const w = pairs[i];
+    words.push(w);
+    const miss = misses(i);
+    const on = isStarred(w);
+    const mixed = (mixedWith[i] || []).map(j => pairs[j] && pairs[j].en).filter(Boolean);
+    return `<li class="res-item${miss ? ' res-miss' : ''}">
+        <span class="res-num" aria-hidden="true">${n + 1}</span>
+        <div class="res-text">
+          <div class="res-th" lang="th">${escapeHtml(w.th)}</div>
+          ${w.rom ? `<div class="res-rom">${escapeHtml(w.rom)}</div>` : ''}
+          <div class="res-en">${escapeHtml(w.en)}</div>
+          ${miss ? `<span class="res-tag">Needs practice · ${miss} ${miss === 1 ? 'mistake' : 'mistakes'}</span>` : ''}
+          ${mixed.length ? `<div class="res-note">Mixed up with: ${mixed.map(t => `<span class="res-mix">“${escapeHtml(t)}”</span>`).join(', ')}</div>` : ''}
+        </div>
+        <div class="res-btns">
+          ${ttsOk ? `<button type="button" class="v-speak" data-res-speak="${n}" aria-label="Play pronunciation">🔊</button>` : ''}
+          <button type="button" class="v-star${on ? ' starred' : ''}" data-res-star="${n}" aria-label="${on ? 'Remove from Starred' : 'Add to Starred'}" aria-pressed="${on ? 'true' : 'false'}">${on ? '★' : '☆'}</button>
+        </div>
+      </li>`;
+  }).join('');
+
+  const note = tricky.length
+    ? `<span class="res-head-note">${tricky.length} to practise</span>`
+    : `<span class="res-head-note res-good">All right first time!</span>`;
+  const hint = (ttsOk ? 'Tap 🔊 to hear a word again, or ☆ to ' : 'Tap ☆ to ') +
+    'add it to your <strong>⭐ Starred</strong> words.';
+
+  _connectResWords = words;
+  return `
+    <div class="res-summary">
+      ${summaryTop}
+      ${statsHtml}
+      ${rankLine}
+    </div>
+    <div class="res-panel">
+      <div class="res-head"><span class="res-head-title">Your words</span>${note}</div>
+      <div class="res-scroll">
+        <p class="res-hint">${hint}</p>
+        <ol class="res-list">${items}</ol>
+      </div>
+    </div>`;
+}
+
+// The list's speaker and star buttons. Wired on these buttons only; the
+// classes are the Vocabulary menu's, which carry no page-wide behaviour.
+function wireConnectResults(root) {
+  root.querySelectorAll('[data-res-speak]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const w = _connectResWords[Number(btn.dataset.resSpeak)];
+      if (!w) return;
+      tts.speak(w.th, btn);
+      haptic(15);
+      if (e.detail > 0 && btn.blur) btn.blur();
+    });
+  });
+  root.querySelectorAll('[data-res-star]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const w = _connectResWords[Number(btn.dataset.resStar)];
+      if (!w) return;
+      const on = toggleStar(w);
+      btn.classList.toggle('starred', on);
+      btn.textContent = on ? '★' : '☆';
+      btn.setAttribute('aria-label', on ? 'Remove from Starred' : 'Add to Starred');
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      haptic(15);
+      if (e.detail > 0 && btn.blur) btn.blur();
+    });
+  });
 }
 
 // Exit to the main menu (consistent with quitting and the other modes).
@@ -36097,6 +36879,8 @@ function renderHowto() {
         <p><strong>Connect Pairs</strong> is a relaxing study mode. You're shown two columns of cards — Thai words on one side, their English meanings on the other — and your job is simply to link each Thai word to its correct English match.</p>
         <p>There's <strong>no timer and no way to lose</strong> — take all the time you want. It's a calm, satisfying way to review vocabulary and check whether you really know which meaning goes with which word.</p>
         <p><strong>How to play:</strong> tap a card in one column, then tap its match in the other. Correct pairs lock in place; if they don't match, just try again. Clear the whole board to finish the round.</p>
+        <p><strong>Hear it again.</strong> Tap any matched pair to hear the Thai again: both cards light up, joined by a green line. This works when <em>After Matching a Pair</em> (Main Menu &rarr; Settings) is set to <em>Keep visible</em>.</p>
+        <p><strong>Results.</strong> When you finish, you see your accuracy and every word from the round. Words you mixed up come first, marked <em>Needs practice</em>, with what you mixed them up with. Tap 🔊 to hear a word, or ☆ to add it to your Starred words.</p>
         <p><strong>Vocabulary Pool.</strong> Choose your words the same way as the other modes — by <strong>Lessons</strong>, by <strong>Categories</strong>, from the <strong>Extra</strong> set of bonus vocabulary, or from your <strong>⭐ Starred</strong> words.</p>
         <p><strong>Prompt Mode.</strong> This decides what the left column shows. In <strong>🔊 Audio → English</strong> the left cards are buttons that play the Thai word instead of showing it: tap one to hear it, then find its English meaning. It trains your <em>ear</em> rather than your reading, and when you match a pair the Thai spelling is revealed — so you hear the word first, then see how it's written. In <strong>ไทย Thai → English</strong> the left cards show the Thai word as text, which is the classic reading practice.</p>
         <p>In Audio mode the <strong>Speech Mode</strong> setting is switched off automatically, since you've already heard each word by the time you match it.</p>
